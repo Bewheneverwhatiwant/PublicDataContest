@@ -17,13 +17,33 @@ class HomeAppBar extends StatelessWidget implements PreferredSizeWidget {
     return AppBar(
       backgroundColor: Colors.white,
       leading: Padding(
-        padding: const EdgeInsets.all(8.0), // 로고 위치
+        padding: const EdgeInsets.all(8.0),
         child: Image.asset(
           logoPath,
           width: logoWidth,
           height: logoHeight,
-        ), // 로고 이미지
+        ),
       ),
+      actions: [
+        TextButton(
+          onPressed: () {
+            Navigator.pushNamed(context, '/login');
+          },
+          style: TextButton.styleFrom(
+            side: const BorderSide(color: Colors.grey, width: 2),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8.0),
+            ),
+          ),
+          child: const Text(
+            '로그인',
+            style: TextStyle(
+              color: Colors.black,
+              fontSize: 16,
+            ),
+          ),
+        ),
+      ],
     );
   }
 

@@ -56,58 +56,63 @@ class HomeReview extends StatelessWidget {
             itemBuilder: (context, index) {
               final review = reviewData[index];
               final int stars = review['별수'] as int;
-              return Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Container(
-                  width: 200,
-                  padding: const EdgeInsets.all(16.0),
-                  decoration: BoxDecoration(
-                    color: Colors.orange[50],
-                    borderRadius: BorderRadius.circular(12.0),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.grey.withOpacity(0.5),
-                        spreadRadius: 2,
-                        blurRadius: 5,
-                        offset: const Offset(0, 3),
-                      ),
-                    ],
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        '멘토이름: ${review['멘토이름']}',
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
+              return GestureDetector(
+                onTap: () {
+                  Navigator.pushNamed(context, '/reviewdetail');
+                },
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Container(
+                    width: 200,
+                    padding: const EdgeInsets.all(16.0),
+                    decoration: BoxDecoration(
+                      color: Colors.orange[50],
+                      borderRadius: BorderRadius.circular(12.0),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.grey.withOpacity(0.5),
+                          spreadRadius: 2,
+                          blurRadius: 5,
+                          offset: const Offset(0, 3),
                         ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        '수업명: ${review['수업명']}',
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
+                      ],
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          '멘토이름: ${review['멘토이름']}',
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
-                      ),
-                      const SizedBox(height: 8),
-                      Row(
-                        children: List.generate(stars, (index) {
-                          return const Icon(
-                            Icons.star,
-                            color: Colors.yellow,
-                          );
-                        }),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        review['설명'] as String,
-                        style: const TextStyle(
-                          fontSize: 14,
+                        const SizedBox(height: 4),
+                        Text(
+                          '수업명: ${review['수업명']}',
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
-                      ),
-                    ],
+                        const SizedBox(height: 8),
+                        Row(
+                          children: List.generate(stars, (index) {
+                            return const Icon(
+                              Icons.star,
+                              color: Colors.yellow,
+                            );
+                          }),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          review['설명'] as String,
+                          style: const TextStyle(
+                            fontSize: 14,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               );

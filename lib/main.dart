@@ -22,6 +22,11 @@ import 'mypage/mypage.dart';
 import 'mypage/profile_mento.dart';
 import 'mypage/profile_menti.dart';
 import 'mypage/mento_myclass.dart';
+import 'mainpage/categories/mentoring_detail.dart';
+import 'mainpage/maincarousel_detail/home_review_detail.dart';
+import 'mainpage/maincarousel_detail/hireintern_detail.dart';
+import 'appbar/login.dart';
+import 'appbar/signup.dart';
 
 void main() {
   runApp(const MyApp());
@@ -56,6 +61,11 @@ class MyApp extends StatelessWidget {
         '/profilemento': (context) => const ProfileMentoPage(),
         '/profilementi': (context) => const ProfileMentiPage(),
         '/mentomyclass': (context) => const MentoMyClassPage(),
+        '/mentoringdetail': (context) => const MentoringDetailPage(),
+        '/reviewdetail': (context) => const HomeReviewDetailPage(),
+        '/hireinterndetail': (context) => const HireInternDetailPage(),
+        '/login': (context) => const LoginPage(),
+        '/signup': (context) => const SignupPage(),
       },
     );
   }
