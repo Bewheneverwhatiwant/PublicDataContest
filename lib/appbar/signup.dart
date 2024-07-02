@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'signup2.dart';
 
 class SignupPage extends StatefulWidget {
   const SignupPage({super.key});
@@ -8,8 +10,17 @@ class SignupPage extends StatefulWidget {
 }
 
 class _SignupPageState extends State<SignupPage> {
-  int _currentStep = 1;
-  bool _isAdConsentChecked = false;
+  bool _isEmailChecked = false;
+  bool _isEmailValid = false;
+  bool _isPhoneValid = false;
+  bool _isDobValid = false;
+  bool _isRoleValid = false;
+  bool _isGenderValid = false;
+  bool _isNameValid = false;
+  bool _isDobStarted = false;
+  bool _isEmailStarted = false;
+  bool _isPhoneStarted = false;
+  bool _isAddressStarted = false;
 
   final _formKey = GlobalKey<FormState>();
 
@@ -19,89 +30,133 @@ class _SignupPageState extends State<SignupPage> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _phoneController = TextEditingController();
   final TextEditingController _addressController = TextEditingController();
-  final TextEditingController _usernameController = TextEditingController();
-  final TextEditingController _passwordController = TextEditingController();
-  final TextEditingController _confirmPasswordController =
-      TextEditingController();
+
+  // 포커스 노드
+  final FocusNode _dobFocusNode = FocusNode();
+  final FocusNode _emailFocusNode = FocusNode();
+  final FocusNode _phoneFocusNode = FocusNode();
+  final FocusNode _addressFocusNode = FocusNode();
 
   // 라디오 버튼 선택 값
   String? _role;
   String? _gender;
 
-  void _showBottomSheet() {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      builder: (BuildContext context) {
-        return Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: StatefulBuilder(
-            builder: (BuildContext context, StateSetter setState) {
-              return Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Text(
-                    '약관 전체동의',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                  ),
-                  const Divider(),
-                  CheckboxListTile(
-                    title: const Text('이용약관 동의 (필수)'),
-                    value: true,
-                    onChanged: (bool? value) {},
-                  ),
-                  CheckboxListTile(
-                    title: const Text('개인정보 수집 및 이용동의 (필수)'),
-                    value: true,
-                    onChanged: (bool? value) {},
-                  ),
-                  CheckboxListTile(
-                    title: const Text('E-mail 및 SMS 광고성 정보 수신 동의'),
-                    value: _isAdConsentChecked,
-                    onChanged: (bool? value) {
-                      setState(() {
-                        _isAdConsentChecked = value!;
-                      });
-                    },
-                  ),
-                  const SizedBox(height: 16),
-                  ElevatedButton(
-                    onPressed: () {
-                      Navigator.pop(context);
-                      showDialog(
-                        context: context,
-                        builder: (BuildContext context) {
-                          return AlertDialog(
-                            title: const Text('회원가입되었습니다!'),
-                            actions: [
-                              TextButton(
-                                onPressed: () {
-                                  Navigator.pushNamedAndRemoveUntil(
-                                      context, '/', (route) => false);
-                                },
-                                child: const Text('확인'),
-                              ),
-                            ],
-                          );
-                        },
-                      );
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.grey,
-                      minimumSize: const Size(double.infinity, 50),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8.0),
-                      ),
-                    ),
-                    child: const Text('회원가입'),
-                  ),
-                ],
-              );
-            },
-          ),
-        );
-      },
+  @override
+  void initState() {
+    super.initState();
+
+    _dobFocusNode.addListener(() {
+      if (_dobFocusNode.hasFocus) {
+        setState(() {
+          _isDobStarted = true;
+        });
+      }
+    });
+
+    _emailFocusNode.addListener(() {
+      if (_emailFocusNode.hasFocus) {
+        setState(() {
+          _isEmailStarted = true;
+        });
+      }
+    });
+
+    _phoneFocusNode.addListener(() {
+      if (_phoneFocusNode.hasFocus) {
+        setState(() {
+          _isPhoneStarted = true;
+        });
+      }
+    });
+
+    _addressFocusNode.addListener(() {
+      if (_addressFocusNode.hasFocus) {
+        setState(() {
+          _isAddressStarted = true;
+        });
+      }
+    });
+  }
+
+  InputDecoration _inputDecoration(String label, String hint) {
+    return InputDecoration(
+      labelText: label,
+      hintText: hint,
+      enabledBorder: OutlineInputBorder(
+        borderSide: const BorderSide(color: Colors.grey, width: 2.0),
+        borderRadius: BorderRadius.circular(20.0),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderSide: const BorderSide(color: Colors.grey, width: 2.0),
+        borderRadius: BorderRadius.circular(20.0),
+      ),
+      errorBorder: OutlineInputBorder(
+        borderSide: const BorderSide(color: Colors.red, width: 2.0),
+        borderRadius: BorderRadius.circular(20.0),
+      ),
+      focusedErrorBorder: OutlineInputBorder(
+        borderSide: const BorderSide(color: Colors.red, width: 2.0),
+        borderRadius: BorderRadius.circular(20.0),
+      ),
+      errorStyle: const TextStyle(color: Colors.red),
     );
+  }
+
+  bool _validateEmail(String email) {
+    final emailRegex = RegExp(r'^[^@]+@[^@]+\.[^@]+');
+    return emailRegex.hasMatch(email);
+  }
+
+  bool _validatePhoneNumber(String phone) {
+    final phoneRegex = RegExp(r'^\d{11}$');
+    return phoneRegex.hasMatch(phone);
+  }
+
+  bool _validateDob(String dob) {
+    final dobRegex = RegExp(r'^\d{6}$');
+    return dobRegex.hasMatch(dob);
+  }
+
+  bool _isStep1Valid() {
+    return _isNameValid &&
+        _isEmailValid &&
+        _isEmailChecked &&
+        _isPhoneValid &&
+        _isDobValid &&
+        _role != null &&
+        _gender != null &&
+        _addressController.text.isNotEmpty;
+  }
+
+  void _goToStep2() {
+    if (_isStep1Valid()) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => const SignupStep2(),
+        ),
+      );
+    }
+  }
+
+  void _validateAllFields() {
+    setState(() {
+      _isNameValid = _nameController.text.isNotEmpty;
+      _isEmailValid = _validateEmail(_emailController.text);
+      _isPhoneValid = _validatePhoneNumber(_phoneController.text);
+      _isDobValid = _validateDob(_dobController.text);
+      _isRoleValid = _role != null;
+      _isGenderValid = _gender != null;
+    });
+  }
+
+  @override
+  void dispose() {
+    _dobFocusNode.dispose();
+    _emailFocusNode.dispose();
+    _phoneFocusNode.dispose();
+    _addressFocusNode.dispose();
+    super.dispose();
   }
 
   @override
@@ -129,198 +184,247 @@ class _SignupPageState extends State<SignupPage> {
                   style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 16),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
+                const Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
                   children: [
                     CircleAvatar(
                       radius: 20,
-                      backgroundColor:
-                          _currentStep == 1 ? Colors.blue : Colors.grey,
-                      child: const Text('1',
-                          style: TextStyle(color: Colors.white)),
+                      backgroundColor: Colors.blue,
+                      child: Text('1', style: TextStyle(color: Colors.white)),
                     ),
-                    const SizedBox(width: 8),
+                    SizedBox(width: 8),
                     CircleAvatar(
                       radius: 20,
-                      backgroundColor:
-                          _currentStep == 2 ? Colors.blue : Colors.grey,
-                      child: const Text('2',
-                          style: TextStyle(color: Colors.white)),
+                      backgroundColor: Colors.grey,
+                      child: Text('2', style: TextStyle(color: Colors.white)),
                     ),
                   ],
                 ),
                 const SizedBox(height: 16),
-                if (_currentStep == 1) ...[
-                  const Text(
-                    '프로필',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                const Text(
+                  '프로필',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 8),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    Expanded(
+                      child: RadioListTile<String>(
+                        title: const Text('멘토'),
+                        value: '멘토',
+                        groupValue: _role,
+                        onChanged: (value) {
+                          setState(() {
+                            _role = value;
+                            _isRoleValid = true;
+                            _validateAllFields();
+                          });
+                        },
+                      ),
+                    ),
+                    Expanded(
+                      child: RadioListTile<String>(
+                        title: const Text('멘티'),
+                        value: '멘티',
+                        groupValue: _role,
+                        onChanged: (value) {
+                          setState(() {
+                            _role = value;
+                            _isRoleValid = true;
+                            _validateAllFields();
+                          });
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+                if (_isRoleValid && _role == null)
+                  const Padding(
+                    padding: EdgeInsets.only(left: 16.0),
+                    child: Text(
+                      '가입 선택을 해주세요.',
+                      style: TextStyle(color: Colors.red),
+                    ),
                   ),
-                  const SizedBox(height: 8),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: RadioListTile<String>(
-                          title: const Text('멘토'),
-                          value: '멘토',
-                          groupValue: _role,
-                          onChanged: (value) {
-                            setState(() {
-                              _role = value;
-                            });
-                          },
+                TextFormField(
+                  controller: _nameController,
+                  decoration: _inputDecoration('이름', '본명을 알려주세요.'),
+                  onChanged: (value) {
+                    setState(() {
+                      _isNameValid = value.isNotEmpty;
+                      _validateAllFields();
+                    });
+                  },
+                ),
+                const SizedBox(height: 8),
+                Row(
+                  children: [
+                    Expanded(
+                      child: RadioListTile<String>(
+                        title: const Text('남'),
+                        value: '남',
+                        groupValue: _gender,
+                        onChanged: (value) {
+                          setState(() {
+                            _gender = value;
+                            _isGenderValid = true;
+                            _validateAllFields();
+                          });
+                        },
+                      ),
+                    ),
+                    Expanded(
+                      child: RadioListTile<String>(
+                        title: const Text('여'),
+                        value: '여',
+                        groupValue: _gender,
+                        onChanged: (value) {
+                          setState(() {
+                            _gender = value;
+                            _isGenderValid = true;
+                            _validateAllFields();
+                          });
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+                if (_isGenderValid && _gender == null)
+                  const Padding(
+                    padding: EdgeInsets.only(left: 16.0),
+                    child: Text(
+                      '성별을 선택해주세요.',
+                      style: TextStyle(color: Colors.red),
+                    ),
+                  ),
+                TextFormField(
+                  controller: _dobController,
+                  focusNode: _dobFocusNode,
+                  decoration: _inputDecoration('생년월일', '6자리 숫자로 입력해주세요.'),
+                  keyboardType: TextInputType.number,
+                  inputFormatters: [
+                    FilteringTextInputFormatter.digitsOnly,
+                    LengthLimitingTextInputFormatter(6),
+                  ],
+                  onChanged: (value) {
+                    setState(() {
+                      _isDobValid = _validateDob(value);
+                      _validateAllFields();
+                    });
+                  },
+                ),
+                if (_isDobStarted && !_isDobValid)
+                  const Padding(
+                    padding: EdgeInsets.only(left: 16.0),
+                    child: Text(
+                      '유효한 생년월일을 입력해주세요.',
+                      style: TextStyle(color: Colors.red),
+                    ),
+                  ),
+                const SizedBox(height: 8),
+                TextFormField(
+                  controller: _emailController,
+                  focusNode: _emailFocusNode,
+                  decoration:
+                      _inputDecoration('이메일', '사용하실 이메일을 입력해주세요.').copyWith(
+                    suffixIcon: TextButton(
+                      onPressed: () {
+                        if (_validateEmail(_emailController.text)) {
+                          setState(() {
+                            _isEmailChecked = true;
+                            _isEmailValid = true;
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('사용 가능한 이메일입니다!'),
+                                backgroundColor: Colors.green,
+                              ),
+                            );
+                          });
+                        } else {
+                          setState(() {
+                            _isEmailChecked = false;
+                            _isEmailValid = false;
+                          });
+                        }
+                        _validateAllFields();
+                      },
+                      child: Text(
+                        '중복검사',
+                        style: TextStyle(
+                          color: _isEmailChecked ? Colors.blue : Colors.grey,
                         ),
                       ),
-                      Expanded(
-                        child: RadioListTile<String>(
-                          title: const Text('멘티'),
-                          value: '멘티',
-                          groupValue: _role,
-                          onChanged: (value) {
-                            setState(() {
-                              _role = value;
-                            });
-                          },
-                        ),
-                      ),
-                    ],
-                  ),
-                  TextFormField(
-                    controller: _nameController,
-                    decoration: const InputDecoration(
-                      labelText: '이름',
-                      hintText: '본명을 알려주세요.',
                     ),
                   ),
-                  const SizedBox(height: 8),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: RadioListTile<String>(
-                          title: const Text('남'),
-                          value: '남',
-                          groupValue: _gender,
-                          onChanged: (value) {
-                            setState(() {
-                              _gender = value;
-                            });
-                          },
-                        ),
-                      ),
-                      Expanded(
-                        child: RadioListTile<String>(
-                          title: const Text('여'),
-                          value: '여',
-                          groupValue: _gender,
-                          onChanged: (value) {
-                            setState(() {
-                              _gender = value;
-                            });
-                          },
-                        ),
-                      ),
-                    ],
-                  ),
-                  TextFormField(
-                    controller: _dobController,
-                    decoration: const InputDecoration(
-                      labelText: '생년월일',
-                      hintText: 'DD / MM / YYYY',
+                  onChanged: (value) {
+                    setState(() {
+                      _isEmailValid = _validateEmail(value);
+                      _isEmailChecked = false;
+                      _validateAllFields();
+                    });
+                  },
+                ),
+                if (_isEmailStarted && !_isEmailValid)
+                  const Padding(
+                    padding: EdgeInsets.only(left: 16.0),
+                    child: Text(
+                      '유효한 이메일을 입력해주세요.',
+                      style: TextStyle(color: Colors.red),
                     ),
                   ),
-                  const SizedBox(height: 8),
-                  TextFormField(
-                    controller: _emailController,
-                    decoration: const InputDecoration(
-                      labelText: '이메일',
-                      hintText: '사용하실 이메일을 입력해주세요.',
-                      suffixIcon: TextButton(
-                        onPressed: null,
-                        child: Text('중복검사'),
-                      ),
+                const SizedBox(height: 8),
+                TextFormField(
+                  controller: _phoneController,
+                  focusNode: _phoneFocusNode,
+                  decoration: _inputDecoration('전화번호', '11자리 숫자로 입력해주세요.'),
+                  keyboardType: TextInputType.number,
+                  inputFormatters: [
+                    FilteringTextInputFormatter.digitsOnly,
+                    LengthLimitingTextInputFormatter(11),
+                  ],
+                  onChanged: (value) {
+                    setState(() {
+                      _isPhoneValid = _validatePhoneNumber(value);
+                      _validateAllFields();
+                    });
+                  },
+                ),
+                if (_isPhoneStarted && !_isPhoneValid)
+                  const Padding(
+                    padding: EdgeInsets.only(left: 16.0),
+                    child: Text(
+                      '유효한 전화번호를 입력해주세요.',
+                      style: TextStyle(color: Colors.red),
                     ),
                   ),
-                  const SizedBox(height: 8),
-                  TextFormField(
-                    controller: _phoneController,
-                    decoration: const InputDecoration(
-                      labelText: '전화번호',
-                      hintText: '010 - XXXX - XXXX',
+                const SizedBox(height: 8),
+                TextFormField(
+                  controller: _addressController,
+                  focusNode: _addressFocusNode,
+                  decoration: _inputDecoration('거주지역', '거주지역을 알려주세요.'),
+                  inputFormatters: [
+                    FilteringTextInputFormatter.allow(RegExp(r'[^\d]')),
+                  ],
+                  onChanged: (value) {
+                    setState(() {
+                      _validateAllFields();
+                    });
+                  },
+                ),
+                const SizedBox(height: 32),
+                ElevatedButton(
+                  onPressed: _isStep1Valid() ? _goToStep2 : null,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor:
+                        _isStep1Valid() ? Colors.blue : Colors.grey,
+                    minimumSize: const Size(double.infinity, 50),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8.0),
                     ),
                   ),
-                  const SizedBox(height: 8),
-                  TextFormField(
-                    controller: _addressController,
-                    decoration: const InputDecoration(
-                      labelText: '거주지역',
-                      hintText: '거주지역을 알려주세요.',
-                    ),
-                  ),
-                  const SizedBox(height: 32),
-                  ElevatedButton(
-                    onPressed: () {
-                      setState(() {
-                        _currentStep = 2;
-                      });
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.grey,
-                      minimumSize: const Size(double.infinity, 50),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8.0),
-                      ),
-                    ),
-                    child: const Text('다음'),
-                  ),
-                ] else if (_currentStep == 2) ...[
-                  const Text(
-                    '로그인 정보',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 8),
-                  TextFormField(
-                    controller: _usernameController,
-                    decoration: const InputDecoration(
-                      labelText: '아이디',
-                      hintText: '사용하실 아이디를 입력해주세요.',
-                      suffixIcon: TextButton(
-                        onPressed: null,
-                        child: Text('중복검사'),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  TextFormField(
-                    controller: _passwordController,
-                    obscureText: true,
-                    decoration: const InputDecoration(
-                      labelText: '비밀번호',
-                      hintText: '비밀번호를 입력해주세요.',
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  TextFormField(
-                    controller: _confirmPasswordController,
-                    obscureText: true,
-                    decoration: const InputDecoration(
-                      labelText: '비밀번호 확인',
-                      hintText: '비밀번호를 다시 입력해주세요.',
-                    ),
-                  ),
-                  const SizedBox(height: 32),
-                  ElevatedButton(
-                    onPressed: () {
-                      _showBottomSheet();
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.grey,
-                      minimumSize: const Size(double.infinity, 50),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8.0),
-                      ),
-                    ),
-                    child: const Text('입력 완료'),
-                  ),
-                ],
+                  child: const Text('다음'),
+                ),
               ],
             ),
           ),
