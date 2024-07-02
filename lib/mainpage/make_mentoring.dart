@@ -12,6 +12,85 @@ class _MakeMentoringState extends State<MakeMentoring> {
   final TextEditingController _hourController = TextEditingController();
   final TextEditingController _minuteController = TextEditingController();
   final TextEditingController _priceController = TextEditingController();
+  final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _locationController = TextEditingController();
+  final TextEditingController _descriptionController = TextEditingController();
+
+  bool _isHourValid = true;
+  bool _isMinuteValid = true;
+  bool _isPriceValid = true;
+  bool _isNameValid = true;
+  bool _isLocationValid = true;
+  bool _isDescriptionValid = true;
+
+  bool _isHourTouched = false;
+  bool _isMinuteTouched = false;
+  bool _isPriceTouched = false;
+  bool _isNameTouched = false;
+  bool _isLocationTouched = false;
+  bool _isDescriptionTouched = false;
+
+  bool get _isFormValid {
+    return _isHourValid &&
+        _isMinuteValid &&
+        _isPriceValid &&
+        _isNameValid &&
+        _isLocationValid &&
+        _isDescriptionValid &&
+        _hourController.text.isNotEmpty &&
+        _minuteController.text.isNotEmpty &&
+        _priceController.text.isNotEmpty &&
+        _nameController.text.isNotEmpty &&
+        _locationController.text.isNotEmpty &&
+        _descriptionController.text.isNotEmpty;
+  }
+
+  void _validateHour(String value) {
+    setState(() {
+      _isHourValid = value.isNotEmpty &&
+          int.tryParse(value) != null &&
+          int.parse(value) >= 0 &&
+          int.parse(value) <= 12;
+    });
+  }
+
+  void _validateMinute(String value) {
+    setState(() {
+      _isMinuteValid = value.isNotEmpty &&
+          int.tryParse(value) != null &&
+          int.parse(value) >= 0 &&
+          int.parse(value) < 60;
+    });
+  }
+
+  void _validatePrice(String value) {
+    setState(() {
+      _isPriceValid = value.isNotEmpty &&
+          int.tryParse(value) != null &&
+          int.parse(value) >= 0 &&
+          int.parse(value) <= 1000000;
+    });
+  }
+
+  void _validateName(String value) {
+    setState(() {
+      _isNameValid =
+          value.isNotEmpty && RegExp(r'^[a-zA-Z가-힣\s]+$').hasMatch(value);
+    });
+  }
+
+  void _validateLocation(String value) {
+    setState(() {
+      _isLocationValid =
+          value.isNotEmpty && RegExp(r'^[a-zA-Z가-힣\s]+$').hasMatch(value);
+    });
+  }
+
+  void _validateDescription(String value) {
+    setState(() {
+      _isDescriptionValid = value.isNotEmpty;
+    });
+  }
 
   void _submitForm() {
     if (_formKey.currentState!.validate()) {
@@ -31,6 +110,16 @@ class _MakeMentoringState extends State<MakeMentoring> {
         ),
       );
     }
+  }
+
+  InputDecoration _inputDecoration(String label, String hintText, bool isValid,
+      bool isTouched, String errorText) {
+    return InputDecoration(
+      labelText: label,
+      hintText: hintText,
+      errorText: !isValid && isTouched ? errorText : null,
+      border: const OutlineInputBorder(),
+    );
   }
 
   @override
@@ -80,14 +169,14 @@ class _MakeMentoringState extends State<MakeMentoring> {
               ),
               const SizedBox(height: 8),
               TextFormField(
-                decoration: const InputDecoration(
-                  border: OutlineInputBorder(),
-                ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return '멘토링 이름을 입력하세요.';
-                  }
-                  return null;
+                controller: _nameController,
+                decoration: _inputDecoration('멘토링 이름', '멘토링 이름을 입력하세요.',
+                    _isNameValid, _isNameTouched, '문자만 작성 가능합니다'),
+                onChanged: (value) {
+                  _validateName(value);
+                  setState(() {
+                    _isNameTouched = true;
+                  });
                 },
               ),
               const SizedBox(height: 16),
@@ -97,9 +186,15 @@ class _MakeMentoringState extends State<MakeMentoring> {
               ),
               const SizedBox(height: 8),
               TextFormField(
-                decoration: const InputDecoration(
-                  border: OutlineInputBorder(),
-                ),
+                controller: _locationController,
+                decoration: _inputDecoration('멘토링 희망 지역', '멘토링 희망 지역을 입력하세요.',
+                    _isLocationValid, _isLocationTouched, '문자만 작성 가능합니다'),
+                onChanged: (value) {
+                  _validateLocation(value);
+                  setState(() {
+                    _isLocationTouched = true;
+                  });
+                },
               ),
               const SizedBox(height: 16),
               const Text(
@@ -112,20 +207,14 @@ class _MakeMentoringState extends State<MakeMentoring> {
                   Expanded(
                     child: TextFormField(
                       controller: _hourController,
-                      decoration: const InputDecoration(
-                        labelText: '시간',
-                        border: OutlineInputBorder(),
-                      ),
+                      decoration: _inputDecoration('시간', '시간을 입력하세요.',
+                          _isHourValid, _isHourTouched, '숫자만 입력 가능합니다'),
                       keyboardType: TextInputType.number,
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return '시간을 입력하세요.';
-                        }
-                        final intValue = int.tryParse(value);
-                        if (intValue == null || intValue < 0 || intValue > 12) {
-                          return '0 이상 12 이하의 숫자를 입력하세요.';
-                        }
-                        return null;
+                      onChanged: (value) {
+                        _validateHour(value);
+                        setState(() {
+                          _isHourTouched = true;
+                        });
                       },
                     ),
                   ),
@@ -133,22 +222,14 @@ class _MakeMentoringState extends State<MakeMentoring> {
                   Expanded(
                     child: TextFormField(
                       controller: _minuteController,
-                      decoration: const InputDecoration(
-                        labelText: '분',
-                        border: OutlineInputBorder(),
-                      ),
+                      decoration: _inputDecoration('분', '분을 입력하세요.',
+                          _isMinuteValid, _isMinuteTouched, '숫자만 입력 가능합니다'),
                       keyboardType: TextInputType.number,
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return '분을 입력하세요.';
-                        }
-                        final intValue = int.tryParse(value);
-                        if (intValue == null ||
-                            intValue < 0 ||
-                            intValue >= 60) {
-                          return '0 이상 60 이하의 숫자를 입력하세요.';
-                        }
-                        return null;
+                      onChanged: (value) {
+                        _validateMinute(value);
+                        setState(() {
+                          _isMinuteTouched = true;
+                        });
                       },
                     ),
                   ),
@@ -165,22 +246,14 @@ class _MakeMentoringState extends State<MakeMentoring> {
                   Expanded(
                     child: TextFormField(
                       controller: _priceController,
-                      decoration: const InputDecoration(
-                        labelText: '원',
-                        border: OutlineInputBorder(),
-                      ),
+                      decoration: _inputDecoration('원', '가격을 입력하세요.',
+                          _isPriceValid, _isPriceTouched, '숫자만 입력 가능합니다'),
                       keyboardType: TextInputType.number,
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return '가격을 입력하세요.';
-                        }
-                        final intValue = int.tryParse(value);
-                        if (intValue == null ||
-                            intValue < 0 ||
-                            intValue > 1000000) {
-                          return '0 이상 1000000 이하의 숫자를 입력하세요.';
-                        }
-                        return null;
+                      onChanged: (value) {
+                        _validatePrice(value);
+                        setState(() {
+                          _isPriceTouched = true;
+                        });
                       },
                     ),
                   ),
@@ -198,15 +271,15 @@ class _MakeMentoringState extends State<MakeMentoring> {
               ),
               const SizedBox(height: 8),
               TextFormField(
-                decoration: const InputDecoration(
-                  border: OutlineInputBorder(),
-                ),
+                controller: _descriptionController,
+                decoration: _inputDecoration('멘토링 설명', '멘토링 설명을 입력하세요.',
+                    _isDescriptionValid, _isDescriptionTouched, '문자만 작성 가능합니다'),
                 maxLines: 5,
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return '멘토링 설명을 입력하세요.';
-                  }
-                  return null;
+                onChanged: (value) {
+                  _validateDescription(value);
+                  setState(() {
+                    _isDescriptionTouched = true;
+                  });
                 },
               ),
               const SizedBox(height: 16),
@@ -220,11 +293,11 @@ class _MakeMentoringState extends State<MakeMentoring> {
                   width: double.infinity,
                   child: ElevatedButton(
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.blue,
+                      backgroundColor: _isFormValid ? Colors.blue : Colors.grey,
                       foregroundColor: Colors.white,
                       padding: const EdgeInsets.symmetric(vertical: 16.0),
                     ),
-                    onPressed: _submitForm,
+                    onPressed: _isFormValid ? _submitForm : null,
                     child: const Text('멘토링 개설하기'),
                   ),
                 ),
