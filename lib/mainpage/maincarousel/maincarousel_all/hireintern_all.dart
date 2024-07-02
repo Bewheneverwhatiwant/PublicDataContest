@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../appbar/new_appbar.dart';
+import '../../../appbar/new_appbar.dart';
 
 class HireInternAll extends StatefulWidget {
   const HireInternAll({super.key});

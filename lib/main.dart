@@ -1,32 +1,34 @@
 import 'package:flutter/material.dart';
 import 'package:publicdatacontest/appbar/home_appbar.dart';
-import 'package:publicdatacontest/mainpage/maincarousel_all/hone_review_all.dart';
-import 'package:publicdatacontest/mypage/profile_menti.dart';
+import 'package:publicdatacontest/mainpage/maincarousel/maincarousel_all/hone_review_all.dart';
+import 'package:publicdatacontest/mypage/menti/profile_menti.dart';
 import 'mainpage/mainpage.dart';
 import 'bottomnavi.dart';
-import 'mainpage/categories/thinking.dart';
-import 'mainpage/categories/photo.dart';
-import 'mainpage/categories/other.dart';
-import 'mainpage/categories/music.dart';
-import 'mainpage/categories/money.dart';
-import 'mainpage/categories/language.dart';
-import 'mainpage/categories/it.dart';
-import 'mainpage/categories/design.dart';
-import 'mainpage/categories/beauty.dart';
-import 'mainpage/categories/all.dart';
-import 'mainpage/maincarousel_all/hireintern_all.dart';
-import 'mainpage/maincarousel_all/hone_review_all.dart';
+import 'mainpage/banner_gridbuttons/categories/thinking.dart';
+import 'mainpage/banner_gridbuttons/categories/photo.dart';
+import 'mainpage/banner_gridbuttons/categories/other.dart';
+import 'mainpage/banner_gridbuttons/categories/music.dart';
+import 'mainpage/banner_gridbuttons/categories/money.dart';
+import 'mainpage/banner_gridbuttons/categories/language.dart';
+import 'mainpage/banner_gridbuttons/categories/it.dart';
+import 'mainpage/banner_gridbuttons/categories/design.dart';
+import 'mainpage/banner_gridbuttons/categories/beauty.dart';
+import 'mainpage/banner_gridbuttons/categories/all.dart';
+import 'mainpage/maincarousel/maincarousel_all/hireintern_all.dart';
+import 'mainpage/maincarousel/maincarousel_all/hone_review_all.dart';
 import 'mainpage/make_mentoring.dart';
 import 'chatingpage/mychatlist.dart';
 import 'mypage/mypage.dart';
-import 'mypage/profile_mento.dart';
-import 'mypage/profile_menti.dart';
-import 'mypage/mento_myclass.dart';
-import 'mainpage/categories/mentoring_detail.dart';
-import 'mainpage/maincarousel_detail/home_review_detail.dart';
-import 'mainpage/maincarousel_detail/hireintern_detail.dart';
+import 'mypage/mento/profile_mento.dart';
+import 'mypage/menti/profile_menti.dart';
+import 'mypage/mento/mento_myclass.dart';
+import 'mainpage/banner_gridbuttons/categories/mentoring/mentoring_detail.dart';
+import 'mainpage/maincarousel/maincarousel_detail/home_review_detail.dart';
+import 'mainpage/maincarousel/maincarousel_detail/hireintern_detail.dart';
 import 'appbar/login.dart';
 import 'appbar/signup.dart';
+import 'mainpage/banner_gridbuttons/categories/mentoring/reviewlist.dart';
+import 'mainpage/banner_gridbuttons/categories/mentoring/classchat.dart';
 
 void main() {
   runApp(const MyApp());
@@ -66,6 +68,8 @@ class MyApp extends StatelessWidget {
         '/hireinterndetail': (context) => const HireInternDetailPage(),
         '/login': (context) => const LoginPage(),
         '/signup': (context) => const SignupPage(),
+        '/reviewlist': (context) => const ReviewListPage(),
+        '/classchat': (context) => const ClassChatPage(),
       },
     );
   }

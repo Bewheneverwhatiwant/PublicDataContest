@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'buttons.dart';
-import 'hireintern.dart';
-import 'home_review.dart';
+import '../mainpage/banner_gridbuttons/buttons.dart';
+import 'maincarousel/hireintern.dart';
+import 'maincarousel/home_review.dart';
 
 class MainPage extends StatelessWidget {
   const MainPage({super.key});

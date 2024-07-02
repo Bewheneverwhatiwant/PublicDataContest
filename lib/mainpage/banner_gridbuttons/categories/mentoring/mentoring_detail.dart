@@ -22,9 +22,9 @@ class MentoringDetailPage extends StatelessWidget {
           children: [
             _buildCategorySection(),
             const SizedBox(height: 16),
-            _buildMentoringInfo(),
+            _buildMentoringInfo(context),
             const SizedBox(height: 16),
-            _buildLikeAndChat(),
+            _buildLikeAndChat(context),
           ],
         ),
       ),
@@ -47,7 +47,7 @@ class MentoringDetailPage extends StatelessWidget {
     );
   }
 
-  Widget _buildMentoringInfo() {
+  Widget _buildMentoringInfo(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(16.0),
       color: Colors.grey[200],
@@ -59,17 +59,36 @@ class MentoringDetailPage extends StatelessWidget {
             style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 8),
-          const Row(
+          Row(
             children: [
-              Icon(Icons.person, color: Colors.yellow),
-              SizedBox(width: 4),
-              Text('강대명 멘토'),
-              SizedBox(width: 8),
-              Icon(Icons.star, color: Colors.yellow),
-              SizedBox(width: 4),
-              Text('4.5/5'),
-              SizedBox(width: 8),
-              Text('리뷰(32)'),
+              ElevatedButton.icon(
+                onPressed: () {
+                  Navigator.pushNamed(context, '/profilemento');
+                },
+                icon: const Icon(Icons.person, color: Colors.yellow),
+                label: const Text('강대명 멘토'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.transparent,
+                  shadowColor: Colors.transparent,
+                ),
+              ),
+              const SizedBox(width: 8),
+              const Icon(Icons.star, color: Colors.yellow),
+              const SizedBox(width: 4),
+              const Text('4.5/5'),
+              const SizedBox(width: 8),
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.pushNamed(context, '/reviewlist');
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.blue,
+                ),
+                child: const Text(
+                  '리뷰(32)',
+                  style: TextStyle(color: Colors.white),
+                ),
+              ),
             ],
           ),
           const SizedBox(height: 8),
@@ -100,23 +119,31 @@ class MentoringDetailPage extends StatelessWidget {
     );
   }
 
-  Widget _buildLikeAndChat() {
-    return const Row(
+  Widget _buildLikeAndChat(BuildContext context) {
+    return Row(
       mainAxisAlignment: MainAxisAlignment.spaceAround,
       children: [
         Row(
           children: [
-            Icon(Icons.thumb_up_alt_outlined, color: Colors.blue),
-            SizedBox(width: 4),
-            Text('멘토링 좋아요 2개'),
+            IconButton(
+              icon: const Icon(Icons.thumb_up_alt_outlined, color: Colors.blue),
+              onPressed: () {
+                // 좋아요 버튼 클릭 시 동작 추가
+              },
+            ),
+            const Text('좋아요 2개'),
           ],
         ),
-        Row(
-          children: [
-            Icon(Icons.chat_bubble_outline, color: Colors.blue),
-            SizedBox(width: 4),
-            Text('멘토와의 채팅'),
-          ],
+        ElevatedButton.icon(
+          onPressed: () {
+            Navigator.pushNamed(context, '/classchat');
+          },
+          icon: const Icon(Icons.chat_bubble_outline),
+          label: const Text('멘토와의 채팅'),
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.blue,
+            foregroundColor: Colors.white,
+          ),
         ),
       ],
     );
