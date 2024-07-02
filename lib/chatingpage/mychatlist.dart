@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../appbar/new_appbar.dart';
 
 class MyChatList extends StatelessWidget {
   final List<Map<String, String>> chatList = const [

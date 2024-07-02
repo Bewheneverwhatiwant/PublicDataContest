@@ -1,8 +1,61 @@
 import 'package:flutter/material.dart';
 import 'new_appbar.dart';
 
-class LoginPage extends StatelessWidget {
+class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
+
+  @override
+  _LoginPageState createState() => _LoginPageState();
+}
+
+class _LoginPageState extends State<LoginPage> {
+  final TextEditingController _usernameController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+
+  bool _isLoginEnabled = false;
+
+  void _validateInputs() {
+    setState(() {
+      _isLoginEnabled = _usernameController.text.isNotEmpty &&
+          _passwordController.text.isNotEmpty;
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _usernameController.addListener(_validateInputs);
+    _passwordController.addListener(_validateInputs);
+  }
+
+  @override
+  void dispose() {
+    _usernameController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
+
+  void _login() {
+    if (_isLoginEnabled) {
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: const Text('로그인되었습니다!'),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.pushNamedAndRemoveUntil(
+                      context, '/', (route) => false);
+                },
+                child: const Text('확인'),
+              ),
+            ],
+          );
+        },
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -21,6 +74,7 @@ class LoginPage extends StatelessWidget {
               ),
               const SizedBox(height: 32),
               TextField(
+                controller: _usernameController,
                 decoration: InputDecoration(
                   hintText: '아이디를 입력해주세요.',
                   border: OutlineInputBorder(
@@ -30,6 +84,7 @@ class LoginPage extends StatelessWidget {
               ),
               const SizedBox(height: 16),
               TextField(
+                controller: _passwordController,
                 obscureText: true,
                 decoration: InputDecoration(
                   hintText: '비밀번호를 입력해주세요.',
@@ -40,11 +95,9 @@ class LoginPage extends StatelessWidget {
               ),
               const SizedBox(height: 32),
               ElevatedButton(
-                onPressed: () {
-                  // 로그인 버튼 클릭 시 동작 추가
-                },
+                onPressed: _isLoginEnabled ? _login : null,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.grey,
+                  backgroundColor: _isLoginEnabled ? Colors.blue : Colors.grey,
                   minimumSize: const Size(double.infinity, 50),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8.0),
