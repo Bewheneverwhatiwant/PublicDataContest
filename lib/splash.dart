@@ -55,7 +55,7 @@ class _SplashPageState extends State<SplashPage>
             mainAxisSize: MainAxisSize.min,
             children: [
               Image.asset(
-                'assets/images/logo.png', // logo.png의 경로를 설정하세요
+                'assets/images/logo.png',
                 width: 150,
                 height: 150,
               ),
