@@ -29,6 +29,7 @@ import 'appbar/login.dart';
 import 'appbar/signup.dart';
 import 'mainpage/banner_gridbuttons/categories/mentoring/reviewlist.dart';
 import 'mainpage/banner_gridbuttons/categories/mentoring/classchat.dart';
+import 'mypage/mento/all_review_mento.dart';
 
 void main() {
   runApp(const MyApp());
@@ -70,6 +71,7 @@ class MyApp extends StatelessWidget {
         '/signup': (context) => const SignupPage(),
         '/reviewlist': (context) => const ReviewListPage(),
         '/classchat': (context) => const ClassChatPage(),
+        '/allmentoreview': (context) => const AllMentorReviewPage(),
       },
     );
   }

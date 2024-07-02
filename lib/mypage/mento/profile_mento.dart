@@ -138,7 +138,7 @@ class ProfileMentoPage extends StatelessWidget {
           minimumSize: const Size(double.infinity, 50),
         ),
         onPressed: () {
-          // 클릭 시 이동하기
+          Navigator.pushNamed(context, '/allmentoreview');
         },
         child: const Text('이 멘토에 대한 리뷰 보기'),
       ),
