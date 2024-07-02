@@ -30,6 +30,7 @@ import 'appbar/signup.dart';
 import 'mainpage/banner_gridbuttons/categories/mentoring/reviewlist.dart';
 import 'mainpage/banner_gridbuttons/categories/mentoring/classchat.dart';
 import 'mypage/mento/all_review_mento.dart';
+import 'splash.dart';
 
 void main() {
   runApp(const MyApp());
@@ -46,8 +47,10 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.white),
         useMaterial3: true,
       ),
-      home: const MyHomePage(),
+      //home: const MyHomePage(),
+      home: const SplashPage(),
       routes: {
+        '/main': (context) => const MyHomePage(),
         '/thinking': (context) => const ThinkingPage(),
         '/photo': (context) => const PhotoPage(),
         '/other': (context) => const OtherPage(),
