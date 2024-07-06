@@ -92,8 +92,16 @@ class _GisulChangupCenterPageState extends State<GisulChangupCenterPage> {
         final lat = item['위도'];
         final lng = item['경도'];
         final title = item['중장년 기술창업센터명'];
-        _webViewController?.runJavascript('addMarker($lat, $lng, "$title")');
+        if (lat != 0.0 && lng != 0.0) {
+          _webViewController?.runJavascript('addMarker($lat, $lng, "$title")');
+        }
       }
+    }
+  }
+
+  void _focusOnMarker(double lat, double lng) {
+    if (_isWebViewControllerInitialized) {
+      _webViewController?.runJavascript('focusOnMarker($lat, $lng)');
     }
   }
 
@@ -157,6 +165,11 @@ class _GisulChangupCenterPageState extends State<GisulChangupCenterPage> {
                               marker.setMap(window.map); // 전역 변수 map에 마커를 추가
                               console.log('Marker added at ' + lat + ', ' + lng + ' with title ' + title);
                             }
+
+                            function focusOnMarker(lat, lng) {
+                              var moveLatLon = new kakao.maps.LatLng(lat, lng);
+                              window.map.setCenter(moveLatLon);
+                            }
                           </script>
                         </head>
                         <body>
@@ -190,6 +203,9 @@ class _GisulChangupCenterPageState extends State<GisulChangupCenterPage> {
                               Text('경도: ${item['경도']}'),
                             ],
                           ),
+                          onTap: () {
+                            _focusOnMarker(item['위도'], item['경도']);
+                          },
                         );
                       }).toList(),
                     ),
