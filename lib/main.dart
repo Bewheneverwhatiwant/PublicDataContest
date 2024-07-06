@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:publicdatacontest/appbar/home_appbar.dart';
 import 'package:publicdatacontest/mainpage/maincarousel/maincarousel_all/hone_review_all.dart';
 import 'package:publicdatacontest/mypage/menti/profile_menti.dart';
@@ -32,7 +33,22 @@ import 'mainpage/banner_gridbuttons/categories/mentoring/classchat.dart';
 import 'mypage/mento/all_review_mento.dart';
 import 'splash.dart';
 
-void main() {
+void main() async {
+  // 환경 변수 로드
+  try {
+    await dotenv.load(fileName: ".env");
+    print('API_KEY_ENCODING: ${dotenv.env['API_KEY_ENCODING']}');
+    print('API_KEY_DECODING: ${dotenv.env['API_KEY_DECODING']}');
+
+    if (dotenv.isEveryDefined(['API_KEY_ENCODING', 'API_KEY_DECODING'])) {
+      print('환경변수 로딩 성공');
+    } else {
+      print('환경변수 로딩 실패');
+    }
+  } catch (e) {
+    print('환경변수 로딩 중 오류 발생: $e');
+  }
+
   runApp(const MyApp());
 }
 
