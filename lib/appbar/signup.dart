@@ -133,7 +133,15 @@ class _SignupPageState extends State<SignupPage> {
       Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (context) => const SignupStep2(),
+          builder: (context) => SignupStep2(
+            name: _nameController.text,
+            dob: _dobController.text,
+            email: _emailController.text,
+            phone: _phoneController.text,
+            address: _addressController.text,
+            role: _role!,
+            gender: _gender!,
+          ),
         ),
       );
     }

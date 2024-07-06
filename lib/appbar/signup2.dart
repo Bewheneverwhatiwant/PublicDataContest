@@ -1,7 +1,27 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 class SignupStep2 extends StatefulWidget {
-  const SignupStep2({super.key});
+  final String name;
+  final String dob;
+  final String email;
+  final String phone;
+  final String address;
+  final String role;
+  final String gender;
+
+  const SignupStep2({
+    super.key,
+    required this.name,
+    required this.dob,
+    required this.email,
+    required this.phone,
+    required this.address,
+    required this.role,
+    required this.gender,
+  });
 
   @override
   _SignupStep2State createState() => _SignupStep2State();
@@ -112,6 +132,65 @@ class _SignupStep2State extends State<SignupStep2> {
       _isPasswordMatched =
           _passwordController.text == _confirmPasswordController.text;
     });
+  }
+
+  Future<void> _signup() async {
+    final url =
+        '${dotenv.env['API_SERVER']}/api/auth/signup/${widget.role == '멘토' ? 'mentor' : 'mentee'}';
+    final response = await http.post(
+      Uri.parse(url),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({
+        "userId": _usernameController.text,
+        "password": _passwordController.text,
+        "name": widget.name,
+        "gender": widget.gender,
+        "birth": widget.dob,
+        "email": widget.email,
+        "phoneNumber": widget.phone,
+        "address": widget.address,
+        "employmentIdea": true,
+        "isEmailAlarmAgreed": _isAdConsentChecked,
+      }),
+    );
+
+    if (response.statusCode == 200) {
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: const Text('회원가입되었습니다!'),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.pushNamedAndRemoveUntil(
+                      context, '/', (route) => false);
+                },
+                child: const Text('확인'),
+              ),
+            ],
+          );
+        },
+      );
+    } else {
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: const Text('회원가입 실패'),
+            content: Text('에러: ${response.reasonPhrase}'),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+                child: const Text('확인'),
+              ),
+            ],
+          );
+        },
+      );
+    }
   }
 
   @override
@@ -339,23 +418,7 @@ class _SignupStep2State extends State<SignupStep2> {
                     onPressed: _isTermsChecked && _isPrivacyChecked
                         ? () {
                             Navigator.pop(context);
-                            showDialog(
-                              context: context,
-                              builder: (BuildContext context) {
-                                return AlertDialog(
-                                  title: const Text('회원가입되었습니다!'),
-                                  actions: [
-                                    TextButton(
-                                      onPressed: () {
-                                        Navigator.pushNamedAndRemoveUntil(
-                                            context, '/', (route) => false);
-                                      },
-                                      child: const Text('확인'),
-                                    ),
-                                  ],
-                                );
-                              },
-                            );
+                            _signup();
                           }
                         : null,
                     style: ElevatedButton.styleFrom(
