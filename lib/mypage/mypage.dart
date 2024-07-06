@@ -290,38 +290,85 @@ class _MyPageState extends State<MyPage> with SingleTickerProviderStateMixin {
         Center(
           child: Column(
             children: [
-              Container(color: Colors.grey[300], width: 50, height: 50),
-              const SizedBox(width: 5),
-              Text('Lv.1'),
+              Container(
+                width: 80,
+                height: 80,
+                decoration: BoxDecoration(
+                  color: Colors.blue[100],
+                  shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.grey.withOpacity(0.5),
+                      spreadRadius: 2,
+                      blurRadius: 5,
+                      offset: Offset(0, 3),
+                    ),
+                  ],
+                ),
+                child: Center(
+                  child: Text(
+                    'Lv.1',
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                      color: GlobalColors.mainColor,
+                    ),
+                  ),
+                ),
+              ),
+              SizedBox(height: 8),
+              Text(
+                '초보 멘토',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: GlobalColors.mainColor,
+                ),
+              ),
             ],
           ),
         ),
         const SizedBox(height: 16),
-        Text(
-          '내 멘토링 역사',
-          style: TextStyle(
-            color: GlobalColors.mainColor,
-            fontWeight: FontWeight.bold,
-            fontSize: 16,
+        Card(
+          elevation: 2,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
           ),
-        ),
-        Row(
-          children: [
-            Text('멘토링 별점: '),
-            Text(mentoringRating),
-          ],
-        ),
-        Row(
-          children: [
-            Text('누적 멘티 수: '),
-            Text(accumulatedMenteeCount),
-          ],
-        ),
-        Row(
-          children: [
-            Text('누적 멘토링 수: '),
-            Text(accumulatedMentoringCount),
-          ],
+          child: Padding(
+            padding: EdgeInsets.all(16),
+            child: Column(
+              children: [
+                Row(
+                  children: [
+                    Icon(Icons.star, color: Colors.amber),
+                    SizedBox(width: 8),
+                    Text('멘토링 별점 : '),
+                    Text(mentoringRating,
+                        style: TextStyle(fontWeight: FontWeight.bold)),
+                  ],
+                ),
+                SizedBox(height: 8),
+                Row(
+                  children: [
+                    Icon(Icons.people, color: GlobalColors.mainColor),
+                    SizedBox(width: 8),
+                    Text('누적 멘티 수: '),
+                    Text(accumulatedMenteeCount,
+                        style: TextStyle(fontWeight: FontWeight.bold)),
+                  ],
+                ),
+                Row(
+                  children: [
+                    Icon(Icons.people, color: GlobalColors.mainColor),
+                    SizedBox(width: 8),
+                    Text('누적 멘토링 수: '),
+                    Text(accumulatedMentoringCount,
+                        style: TextStyle(fontWeight: FontWeight.bold)),
+                  ],
+                ),
+              ],
+            ),
+          ),
         ),
       ],
     );
@@ -495,62 +542,63 @@ class _MyPageState extends State<MyPage> with SingleTickerProviderStateMixin {
   }
 
 // 멘티 - 두 번째 탭 <내 히스토리>
-  Widget _buildMentoringHistory() {
-    String mentoringRating = '별점이 아직 없어요';
-    String accumulatedMentoringCount = '0';
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          '내 멘티 배지',
-          style: TextStyle(
-            color: GlobalColors.mainColor,
-            fontWeight: FontWeight.bold,
-            fontSize: 16,
-          ),
-        ),
-        Center(
-          child: Column(
-            children: [
-              Container(color: Colors.grey[300], width: 50, height: 50),
-              const SizedBox(width: 5),
-              Text('Lv.1'),
-            ],
-          ),
-        ),
-        const SizedBox(height: 16),
-        Text(
-          '내 멘토링 히스토리',
-          style: TextStyle(
-            color: GlobalColors.mainColor,
-            fontWeight: FontWeight.bold,
-            fontSize: 16,
-          ),
-        ),
-        Row(
+  Widget _buildHistoryItem(
+      String title, String date, String time, String type) {
+    return Card(
+      elevation: 2,
+      margin: EdgeInsets.symmetric(vertical: 8, horizontal: 0),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Padding(
+        padding: EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('멘토링 별점: '),
-            Text(mentoringRating),
+            Text(
+              title,
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: GlobalColors.mainColor,
+              ),
+            ),
+            SizedBox(height: 8),
+            Row(
+              children: [
+                Icon(Icons.calendar_today, size: 16, color: Colors.grey),
+                SizedBox(width: 4),
+                Text(
+                  date,
+                  style: TextStyle(color: Colors.grey[600]),
+                ),
+              ],
+            ),
+            SizedBox(height: 4),
+            Row(
+              children: [
+                Icon(Icons.access_time, size: 16, color: Colors.grey),
+                SizedBox(width: 4),
+                Text(
+                  time,
+                  style: TextStyle(color: Colors.grey[600]),
+                ),
+              ],
+            ),
+            SizedBox(height: 4),
+            Row(
+              children: [
+                Icon(Icons.category, size: 16, color: Colors.grey),
+                SizedBox(width: 4),
+                Text(
+                  type,
+                  style: TextStyle(color: Colors.grey[600]),
+                ),
+              ],
+            ),
           ],
         ),
-        Row(
-          children: [
-            Text('누적 멘토링 수: '),
-            Text(accumulatedMentoringCount),
-          ],
-        ),
-        const SizedBox(height: 16),
-        Text(
-          '최근 멘토링 내역',
-          style: TextStyle(
-            color: GlobalColors.mainColor,
-            fontWeight: FontWeight.bold,
-            fontSize: 16,
-          ),
-        ),
-        _buildRecentMentorings(),
-      ],
+      ),
     );
   }
 
@@ -575,69 +623,89 @@ class _MyPageState extends State<MyPage> with SingleTickerProviderStateMixin {
         'mentoringType': '멘토링 타입',
       },
     ];
-    final Color lightBackgroundColor = Color.fromARGB(255, 236, 242, 255);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: mentoringHistory.map((mentoring) {
-        return Card(
-          elevation: 2,
-          margin: EdgeInsets.symmetric(vertical: 8, horizontal: 0),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-          color: lightBackgroundColor,
-          child: Padding(
-            padding: EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  mentoring['title']!,
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: GlobalColors.mainColor,
-                  ),
-                ),
-                SizedBox(height: 8),
-                Row(
-                  children: [
-                    Icon(Icons.calendar_today, size: 16, color: Colors.grey),
-                    SizedBox(width: 4),
-                    Text(
-                      mentoring['date']!,
-                      style: TextStyle(color: Colors.grey[600]),
-                    ),
-                  ],
-                ),
-                SizedBox(height: 4),
-                Row(
-                  children: [
-                    Icon(Icons.access_time, size: 16, color: Colors.grey),
-                    SizedBox(width: 4),
-                    Text(
-                      mentoring['mentoringTime']!,
-                      style: TextStyle(color: Colors.grey[600]),
-                    ),
-                  ],
-                ),
-                SizedBox(height: 4),
-                Row(
-                  children: [
-                    Icon(Icons.category, size: 16, color: Colors.grey),
-                    SizedBox(width: 4),
-                    Text(
-                      mentoring['mentoringType']!,
-                      style: TextStyle(color: Colors.grey[600]),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
+        return _buildHistoryItem(
+          mentoring['title']!,
+          mentoring['date']!,
+          mentoring['mentoringTime']!,
+          mentoring['mentoringType']!,
         );
       }).toList(),
+    );
+  }
+
+  Widget _buildMentoringHistory() {
+    String mentoringRating = '별점이 아직 없어요';
+    String accumulatedMentoringCount = '0';
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          '내 멘티 배지',
+          style: TextStyle(
+            color: GlobalColors.mainColor,
+            fontWeight: FontWeight.bold,
+            fontSize: 18,
+          ),
+        ),
+        SizedBox(height: 16),
+        Center(
+          child: Column(
+            children: [
+              Container(
+                width: 80,
+                height: 80,
+                decoration: BoxDecoration(
+                  color: Colors.blue[100],
+                  shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.grey.withOpacity(0.5),
+                      spreadRadius: 2,
+                      blurRadius: 5,
+                      offset: Offset(0, 3),
+                    ),
+                  ],
+                ),
+                child: Center(
+                  child: Text(
+                    'Lv.1',
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                      color: GlobalColors.mainColor,
+                    ),
+                  ),
+                ),
+              ),
+              SizedBox(height: 8),
+              Text(
+                '초보 멘티',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: GlobalColors.mainColor,
+                ),
+              ),
+            ],
+          ),
+        ),
+        SizedBox(height: 24),
+        Text(
+          '나의 멘토링 이력',
+          style: TextStyle(
+            color: GlobalColors.mainColor,
+            fontWeight: FontWeight.bold,
+            fontSize: 18,
+          ),
+        ),
+        SizedBox(height: 8),
+        _buildRecentMentorings(),
+      ],
     );
   }
 }
