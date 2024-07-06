@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+// 특정 리뷰 클릭 시 상세화면 템플릿
+
 class HomeReviewDetailPage extends StatelessWidget {
   const HomeReviewDetailPage({Key? key}) : super(key: key);
 

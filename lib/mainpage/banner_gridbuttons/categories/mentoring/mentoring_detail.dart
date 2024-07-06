@@ -80,7 +80,11 @@ class MentoringDetailPage extends StatelessWidget {
               const SizedBox(width: 8),
               ElevatedButton(
                 onPressed: () {
-                  Navigator.pushNamed(context, '/reviewlist');
+                  Navigator.pushNamed(
+                    context,
+                    '/review_list_template',
+                    arguments: {'reviewlistkind': 2},
+                  );
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.blue,

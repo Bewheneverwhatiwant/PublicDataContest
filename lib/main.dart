@@ -2,13 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:publicdatacontest/appbar/home_appbar.dart';
-import 'package:publicdatacontest/mainpage/maincarousel/maincarousel_all/hone_review_all.dart';
+import 'package:publicdatacontest/mainpage/maincarousel/maincarousel_all/review_list_template.dart';
 import 'package:publicdatacontest/mypage/menti/profile_menti.dart';
 import 'mainpage/mainpage.dart';
 import 'bottomnavi.dart';
 import 'mainpage/banner_gridbuttons/categories/categorytemplate.dart';
 import 'mainpage/maincarousel/maincarousel_all/hireintern_all.dart';
-import 'mainpage/maincarousel/maincarousel_all/hone_review_all.dart';
+import 'mainpage/maincarousel/maincarousel_all/review_list_template.dart';
 import 'mainpage/make_mentoring.dart';
 import 'chatingpage/mychatlist.dart';
 import 'mypage/mypage.dart';
@@ -20,7 +20,6 @@ import 'mainpage/maincarousel/maincarousel_detail/home_review_detail.dart';
 import 'mainpage/maincarousel/maincarousel_detail/hireintern_detail.dart';
 import 'appbar/login.dart';
 import 'appbar/signup.dart';
-import 'mainpage/banner_gridbuttons/categories/mentoring/reviewlist.dart';
 import 'mainpage/banner_gridbuttons/categories/mentoring/classchat.dart';
 import 'mypage/mento/all_review_mento.dart';
 import 'splash.dart';
@@ -81,18 +80,9 @@ class _MyAppState extends State<MyApp> {
       initialRoute: _splashShown ? '/main' : '/',
       routes: {
         '/main': (context) => const MyHomePage(),
-        // '/thinking': (context) => const ThinkingPage(),
-        // '/photo': (context) => const PhotoPage(),
-        // '/other': (context) => const OtherPage(),
-        // '/music': (context) => const MusicPage(),
-        // '/money': (context) => const MoneyPage(),
-        // '/language': (context) => const LanguagePage(),
-        // '/it': (context) => const ITPage(),
-        // '/design': (context) => const DesignPage(),
-        // '/beauty': (context) => const BeautyPage(),
         '/categorytemplate': (context) => const CategoryTemplatePage(),
         '/hireinternall': (context) => const HireInternAll(),
-        '/homereviewall': (context) => const HomeReviewAll(),
+        '/review_list_template': (context) => const ReviewListTemplatePage(),
         '/makementoring': (context) => const MakeMentoring(),
         '/profilemento': (context) => const ProfileMentoPage(),
         '/profilementi': (context) => const ProfileMentiPage(),
@@ -102,7 +92,6 @@ class _MyAppState extends State<MyApp> {
         '/hireinterndetail': (context) => const HireInternDetailPage(),
         '/login': (context) => const LoginPage(),
         '/signup': (context) => const SignupPage(),
-        '/reviewlist': (context) => const ReviewListPage(),
         '/classchat': (context) => const ClassChatPage(),
         '/allmentoreview': (context) => const AllMentorReviewPage(),
         '/gisul_changup_center': (context) => GisulChangupCenterPage(),

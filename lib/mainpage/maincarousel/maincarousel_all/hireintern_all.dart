@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import '../../../appbar/new_appbar.dart';
 
+// 중장년 인턴 채용정보 전체보기 클릭 시 화면
+
 class HireInternAll extends StatefulWidget {
   const HireInternAll({super.key});
 

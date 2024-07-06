@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
 
-class HomeReviewAll extends StatefulWidget {
-  const HomeReviewAll({super.key});
+// 리뷰 리스트 화면 템플릿 정의
+// 1: 그냥 모든 멘토링에 대한 리뷰 리스트, 2: 특정 멘토링에 대한 리뷰 리스트, 3: 특정 멘토에 대한 리뷰 리스트
+
+class ReviewListTemplatePage extends StatefulWidget {
+  const ReviewListTemplatePage({super.key});
 
   @override
-  _HomeReviewAllState createState() => _HomeReviewAllState();
+  _ReviewListTemplatePageState createState() => _ReviewListTemplatePageState();
 }
 
-class _HomeReviewAllState extends State<HomeReviewAll> {
+class _ReviewListTemplatePageState extends State<ReviewListTemplatePage> {
   int _currentPage = 0;
   final int _itemsPerPage = 6;
   String _selectedSort = '최신순';
@@ -22,11 +25,21 @@ class _HomeReviewAllState extends State<HomeReviewAll> {
     },
   );
 
+  final Map<int, String> appBarTitles = {
+    1: '모든 멘토링 리스트',
+    2: '특정 멘토링에 대한 모든 리뷰',
+    3: '특정 멘토에 대한 모든 리뷰',
+  };
+
   @override
   Widget build(BuildContext context) {
+    final Map arguments = ModalRoute.of(context)?.settings.arguments as Map;
+    final int reviewlistkind = arguments['reviewlistkind'];
+    final String appBarTitle = appBarTitles[reviewlistkind] ?? '리뷰 리스트';
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('멘토링 전체 리뷰'),
+        title: Text(appBarTitle),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () {

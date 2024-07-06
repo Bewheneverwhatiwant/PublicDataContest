@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+// 메인페이지 하단 모든 리뷰 출력 부분
+
 class HomeReview extends StatelessWidget {
   const HomeReview({super.key});
 
@@ -35,7 +37,11 @@ class HomeReview extends StatelessWidget {
               ),
               GestureDetector(
                 onTap: () {
-                  Navigator.pushNamed(context, '/homereviewall');
+                  Navigator.pushNamed(
+                    context,
+                    '/review_list_template',
+                    arguments: {'reviewlistkind': 1},
+                  );
                 },
                 child: const Text(
                   '전체보기 >',

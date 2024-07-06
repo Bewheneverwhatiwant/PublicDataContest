@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+// 중장년 인턴 채용 클릭 시 상세화면
+
 class HireInternDetailPage extends StatelessWidget {
   const HireInternDetailPage({Key? key}) : super(key: key);
 

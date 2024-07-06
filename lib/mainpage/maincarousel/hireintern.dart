@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+// 메인페이지 하단 인턴정보 출력 부분
+
 class HireIntern extends StatelessWidget {
   const HireIntern({super.key});
 
