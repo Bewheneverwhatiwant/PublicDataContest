@@ -137,24 +137,33 @@ class _SignupStep2State extends State<SignupStep2> {
   Future<void> _signup() async {
     final url =
         '${dotenv.env['API_SERVER']}/api/auth/signup/${widget.role == '멘토' ? 'mentor' : 'mentee'}';
+
+    final requestBody = {
+      "userId": _usernameController.text,
+      "password": _passwordController.text,
+      "name": widget.name,
+      "gender": widget.gender,
+      "birth": widget.dob,
+      "email": widget.email,
+      "phoneNumber": widget.phone,
+      "address": widget.address,
+      "employmentIdea": true,
+      "isEmailAlarmAgreed": _isAdConsentChecked,
+    };
+
     final response = await http.post(
       Uri.parse(url),
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({
-        "userId": _usernameController.text,
-        "password": _passwordController.text,
-        "name": widget.name,
-        "gender": widget.gender,
-        "birth": widget.dob,
-        "email": widget.email,
-        "phoneNumber": widget.phone,
-        "address": widget.address,
-        "employmentIdea": true,
-        "isEmailAlarmAgreed": _isAdConsentChecked,
-      }),
+      headers: {
+        'Content-Type': 'application/json',
+        'accept': '*/*',
+      },
+      body: jsonEncode(requestBody),
     );
 
+    print('Request Body: $requestBody');
+
     if (response.statusCode == 200) {
+      print('Signup Success: $requestBody');
       showDialog(
         context: context,
         builder: (BuildContext context) {
@@ -173,6 +182,7 @@ class _SignupStep2State extends State<SignupStep2> {
         },
       );
     } else {
+      print('Signup Failed: $requestBody');
       showDialog(
         context: context,
         builder: (BuildContext context) {

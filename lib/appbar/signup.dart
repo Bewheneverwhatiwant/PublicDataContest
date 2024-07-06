@@ -113,7 +113,7 @@ class _SignupPageState extends State<SignupPage> {
   }
 
   bool _validateDob(String dob) {
-    final dobRegex = RegExp(r'^\d{6}$');
+    final dobRegex = RegExp(r'^\d{4}-\d{2}-\d{2}$');
     return dobRegex.hasMatch(dob);
   }
 
@@ -309,11 +309,46 @@ class _SignupPageState extends State<SignupPage> {
                 TextFormField(
                   controller: _dobController,
                   focusNode: _dobFocusNode,
-                  decoration: _inputDecoration('생년월일', '6자리 숫자로 입력해주세요.'),
-                  keyboardType: TextInputType.number,
+                  decoration:
+                      _inputDecoration('생년월일', 'YYYY-MM-DD 형식으로 입력해주세요.'),
+                  keyboardType: TextInputType.datetime,
                   inputFormatters: [
-                    FilteringTextInputFormatter.digitsOnly,
-                    LengthLimitingTextInputFormatter(6),
+                    FilteringTextInputFormatter.allow(RegExp(r'[\d-]')),
+                    LengthLimitingTextInputFormatter(10),
+                    TextInputFormatter.withFunction(
+                      (oldValue, newValue) {
+                        final text = newValue.text;
+                        if (text.length == 4) {
+                          if (oldValue.text.length == 5) {
+                            return TextEditingValue(
+                              text: text.substring(0, 4),
+                              selection: TextSelection.collapsed(offset: 4),
+                            );
+                          } else {
+                            return TextEditingValue(
+                              text: text + '-',
+                              selection: TextSelection.collapsed(
+                                  offset: text.length + 1),
+                            );
+                          }
+                        }
+                        if (text.length == 7) {
+                          if (oldValue.text.length == 8) {
+                            return TextEditingValue(
+                              text: text.substring(0, 7),
+                              selection: TextSelection.collapsed(offset: 7),
+                            );
+                          } else {
+                            return TextEditingValue(
+                              text: text + '-',
+                              selection: TextSelection.collapsed(
+                                  offset: text.length + 1),
+                            );
+                          }
+                        }
+                        return newValue;
+                      },
+                    ),
                   ],
                   onChanged: (value) {
                     setState(() {
@@ -330,6 +365,22 @@ class _SignupPageState extends State<SignupPage> {
                       style: TextStyle(color: Colors.red),
                     ),
                   ),
+                // if (_isDobStarted && !_isDobValid)
+                //   const Padding(
+                //     padding: EdgeInsets.only(left: 16.0),
+                //     child: Text(
+                //       '유효한 생년월일을 입력해주세요.',
+                //       style: TextStyle(color: Colors.red),
+                //     ),
+                //   ),
+                // if (_isDobStarted && !_isDobValid)
+                //   const Padding(
+                //     padding: EdgeInsets.only(left: 16.0),
+                //     child: Text(
+                //       '유효한 생년월일을 입력해주세요.',
+                //       style: TextStyle(color: Colors.red),
+                //     ),
+                //   ),
                 const SizedBox(height: 8),
                 TextFormField(
                   controller: _emailController,
