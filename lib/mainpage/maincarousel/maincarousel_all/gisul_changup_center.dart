@@ -9,7 +9,7 @@ class GisulChangupCenterPage extends StatefulWidget {
 }
 
 class _GisulChangupCenterPageState extends State<GisulChangupCenterPage> {
-  List<dynamic> _data = [];
+  List<Map<String, dynamic>> _data = [];
 
   @override
   void initState() {
@@ -33,13 +33,49 @@ class _GisulChangupCenterPageState extends State<GisulChangupCenterPage> {
 
     if (response.statusCode == 200) {
       final responseData = json.decode(response.body);
-      print(responseData); // 응답 데이터를 출력하여 구조 확인
+      List<Map<String, dynamic>> data =
+          List<Map<String, dynamic>>.from(responseData['data']);
+      for (var item in data) {
+        final latLng = await _getLatLong(item['주소지']);
+        item['위도'] = latLng['latitude'];
+        item['경도'] = latLng['longitude'];
+      }
       setState(() {
-        _data = responseData['data'];
+        _data = data;
       });
     } else {
       print('Failed to fetch data');
     }
+  }
+
+  Future<Map<String, double>> _getLatLong(String address) async {
+    final apiKey = dotenv.env['KAKAO_API_KEY'];
+    final url =
+        'https://dapi.kakao.com/v2/local/search/address.json?query=$address';
+    final response = await http.get(
+      Uri.parse(url),
+      headers: {
+        'Authorization': 'KakaoAK $apiKey',
+      },
+    );
+
+    if (response.statusCode == 200) {
+      final data = json.decode(response.body);
+      if (data['documents'].isNotEmpty) {
+        final document = data['documents'][0];
+        return {
+          'latitude': double.parse(document['y']),
+          'longitude': double.parse(document['x']),
+        };
+      }
+    } else {
+      print('Failed to fetch coordinates for $address');
+      print(apiKey);
+    }
+    return {
+      'latitude': 0.0,
+      'longitude': 0.0,
+    };
   }
 
   @override
@@ -61,6 +97,8 @@ class _GisulChangupCenterPageState extends State<GisulChangupCenterPage> {
                         Text('지역: ${item['지역'] ?? 'No Region'}'),
                         Text('주소지: ${item['주소지'] ?? 'No Address'}'),
                         Text('연락처: ${item['연락처'] ?? 'No Contact'}'),
+                        Text('위도: ${item['위도']}'),
+                        Text('경도: ${item['경도']}'),
                       ],
                     ),
                   );
