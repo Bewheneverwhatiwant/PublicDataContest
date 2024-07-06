@@ -32,6 +32,7 @@ import 'mainpage/banner_gridbuttons/categories/mentoring/reviewlist.dart';
 import 'mainpage/banner_gridbuttons/categories/mentoring/classchat.dart';
 import 'mypage/mento/all_review_mento.dart';
 import 'splash.dart';
+import 'mainpage/maincarousel/maincarousel_all/gisul_changup_center.dart';
 
 void main() async {
   // 환경 변수 로드
@@ -91,6 +92,7 @@ class MyApp extends StatelessWidget {
         '/reviewlist': (context) => const ReviewListPage(),
         '/classchat': (context) => const ClassChatPage(),
         '/allmentoreview': (context) => const AllMentorReviewPage(),
+        '/gisul_changup_center': (context) => GisulChangupCenterPage(),
       },
     );
   }

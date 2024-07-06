@@ -35,8 +35,10 @@ class _HireInternAllState extends State<HireInternAll> {
                     borderRadius: BorderRadius.circular(20),
                   ),
                 ),
-                onPressed: () {},
-                child: const Text('미정'),
+                onPressed: () {
+                  Navigator.pushNamed(context, '/gisul_changup_center');
+                },
+                child: const Text('중장년 기술창업센터 바로가기'),
               ),
               const SizedBox(height: 16),
               Row(
