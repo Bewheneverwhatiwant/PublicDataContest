@@ -51,6 +51,9 @@ class _LoginPageState extends State<LoginPage> {
         }),
       );
 
+      print('Response status: ${response.statusCode}');
+      print('Response body: ${response.body}');
+
       if (response.statusCode == 200) {
         final responseData = jsonDecode(response.body);
         final accessToken = responseData['accessToken'];
@@ -68,7 +71,7 @@ class _LoginPageState extends State<LoginPage> {
                 TextButton(
                   onPressed: () {
                     Navigator.pushNamedAndRemoveUntil(
-                        context, '/', (route) => false);
+                        context, '/main', (route) => false);
                   },
                   child: const Text('확인'),
                 ),
