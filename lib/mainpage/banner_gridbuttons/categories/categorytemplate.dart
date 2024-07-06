@@ -1,22 +1,36 @@
 import 'package:flutter/material.dart';
 
-class ITPage extends StatefulWidget {
-  const ITPage({Key? key}) : super(key: key);
+class CategoryTemplatePage extends StatefulWidget {
+  const CategoryTemplatePage({Key? key}) : super(key: key);
 
   @override
-  _ITPageState createState() => _ITPageState();
+  _CategoryTemplatePageState createState() => _CategoryTemplatePageState();
 }
 
-class _ITPageState extends State<ITPage> {
+class _CategoryTemplatePageState extends State<CategoryTemplatePage> {
   final List<Map<String, String>> mentoringItems = List.generate(
-      10,
-      (index) => {
-            'title': '쿠버네티스 초급 과정 멘토링 모집합니다.',
-            'category': 'IT > 소분류',
-            'price': '50,000원',
-            'date': '2024.07.01',
-            'rating': '5/5',
-          });
+    10,
+    (index) => {
+      'title': '쿠버네티스 초급 과정 멘토링 모집합니다.',
+      'category': 'IT > 소분류',
+      'price': '50,000원',
+      'date': '2024.07.01',
+      'rating': '5/5',
+    },
+  );
+
+  final Map<int, String> categoryNames = {
+    1: '전체',
+    2: 'IT',
+    3: '언어',
+    4: '디자인',
+    5: '회계',
+    6: '미용',
+    7: '음악',
+    8: '사진',
+    9: '기획',
+    10: '기타',
+  };
 
   int _currentPage = 1;
   final int _itemsPerPage = 6;
@@ -24,9 +38,13 @@ class _ITPageState extends State<ITPage> {
 
   @override
   Widget build(BuildContext context) {
+    final Map arguments = ModalRoute.of(context)?.settings.arguments as Map;
+    final int kind = arguments['kind'];
+    final String appBarTitle = categoryNames[kind] ?? '카테고리';
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('멘토링 리스트'),
+        title: Text(appBarTitle),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () {

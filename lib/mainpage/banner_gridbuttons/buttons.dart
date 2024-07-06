@@ -41,71 +41,121 @@ class _ButtonsState extends State<Buttons> {
               GridButton(
                 imagePath: null,
                 label: '전체 보기',
+                kind: 1,
                 onPressed: () {
-                  Navigator.pushNamed(context, '/all');
+                  Navigator.pushNamed(
+                    context,
+                    '/categorytemplate',
+                    arguments: {'kind': 1},
+                  );
                 },
               ),
               GridButton(
                 imagePath: null,
                 label: 'IT',
+                kind: 2,
                 onPressed: () {
-                  Navigator.pushNamed(context, '/it');
+                  Navigator.pushNamed(
+                    context,
+                    '/categorytemplate',
+                    arguments: {'kind': 2},
+                  );
                 },
               ),
               GridButton(
                 imagePath: null,
                 label: '언어',
+                kind: 3,
                 onPressed: () {
-                  Navigator.pushNamed(context, '/language');
+                  Navigator.pushNamed(
+                    context,
+                    '/categorytemplate',
+                    arguments: {'kind': 3},
+                  );
                 },
               ),
               GridButton(
                 imagePath: null,
                 label: '디자인',
+                kind: 4,
                 onPressed: () {
-                  Navigator.pushNamed(context, '/design');
+                  Navigator.pushNamed(
+                    context,
+                    '/categorytemplate',
+                    arguments: {'kind': 4},
+                  );
                 },
               ),
               GridButton(
                 imagePath: null,
                 label: '회계',
+                kind: 5,
                 onPressed: () {
-                  Navigator.pushNamed(context, '/money');
+                  Navigator.pushNamed(
+                    context,
+                    '/categorytemplate',
+                    arguments: {'kind': 5},
+                  );
                 },
               ),
               GridButton(
                 imagePath: null,
                 label: '미용',
+                kind: 6,
                 onPressed: () {
-                  Navigator.pushNamed(context, '/beauty');
+                  Navigator.pushNamed(
+                    context,
+                    '/categorytemplate',
+                    arguments: {'kind': 6},
+                  );
                 },
               ),
               GridButton(
                 imagePath: null,
                 label: '음악',
+                kind: 7,
                 onPressed: () {
-                  Navigator.pushNamed(context, '/music');
+                  Navigator.pushNamed(
+                    context,
+                    '/categorytemplate',
+                    arguments: {'kind': 7},
+                  );
                 },
               ),
               GridButton(
                 imagePath: null,
                 label: '사진',
+                kind: 8,
                 onPressed: () {
-                  Navigator.pushNamed(context, '/photo');
+                  Navigator.pushNamed(
+                    context,
+                    '/categorytemplate',
+                    arguments: {'kind': 8},
+                  );
                 },
               ),
               GridButton(
                 imagePath: null,
                 label: '기획',
+                kind: 9,
                 onPressed: () {
-                  Navigator.pushNamed(context, '/thinking');
+                  Navigator.pushNamed(
+                    context,
+                    '/categorytemplate',
+                    arguments: {'kind': 9},
+                  );
                 },
               ),
               GridButton(
                 imagePath: null,
                 label: '기타',
+                kind: 10,
                 onPressed: () {
-                  Navigator.pushNamed(context, '/other');
+                  Navigator.pushNamed(
+                    context,
+                    '/categorytemplate',
+                    arguments: {'kind': 10},
+                  );
                 },
               ),
             ],

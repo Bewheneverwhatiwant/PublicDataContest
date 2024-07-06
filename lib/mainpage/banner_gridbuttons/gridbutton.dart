@@ -3,12 +3,14 @@ import 'package:flutter/material.dart';
 class GridButton extends StatelessWidget {
   final String? imagePath;
   final String label;
+  final int kind;
   final VoidCallback onPressed;
 
   const GridButton({
     super.key,
     this.imagePath,
     required this.label,
+    required this.kind,
     required this.onPressed,
   });
 
@@ -17,8 +19,8 @@ class GridButton extends StatelessWidget {
     return Column(
       children: [
         SizedBox(
-          width: 40, // 가로 길이
-          height: 40, // 세로 길이
+          width: 40,
+          height: 40,
           child: ElevatedButton(
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.white,

@@ -6,16 +6,7 @@ import 'package:publicdatacontest/mainpage/maincarousel/maincarousel_all/hone_re
 import 'package:publicdatacontest/mypage/menti/profile_menti.dart';
 import 'mainpage/mainpage.dart';
 import 'bottomnavi.dart';
-import 'mainpage/banner_gridbuttons/categories/thinking.dart';
-import 'mainpage/banner_gridbuttons/categories/photo.dart';
-import 'mainpage/banner_gridbuttons/categories/other.dart';
-import 'mainpage/banner_gridbuttons/categories/music.dart';
-import 'mainpage/banner_gridbuttons/categories/money.dart';
-import 'mainpage/banner_gridbuttons/categories/language.dart';
-import 'mainpage/banner_gridbuttons/categories/it.dart';
-import 'mainpage/banner_gridbuttons/categories/design.dart';
-import 'mainpage/banner_gridbuttons/categories/beauty.dart';
-import 'mainpage/banner_gridbuttons/categories/all.dart';
+import 'mainpage/banner_gridbuttons/categories/categorytemplate.dart';
 import 'mainpage/maincarousel/maincarousel_all/hireintern_all.dart';
 import 'mainpage/maincarousel/maincarousel_all/hone_review_all.dart';
 import 'mainpage/make_mentoring.dart';
@@ -90,16 +81,16 @@ class _MyAppState extends State<MyApp> {
       initialRoute: _splashShown ? '/main' : '/',
       routes: {
         '/main': (context) => const MyHomePage(),
-        '/thinking': (context) => const ThinkingPage(),
-        '/photo': (context) => const PhotoPage(),
-        '/other': (context) => const OtherPage(),
-        '/music': (context) => const MusicPage(),
-        '/money': (context) => const MoneyPage(),
-        '/language': (context) => const LanguagePage(),
-        '/it': (context) => const ITPage(),
-        '/design': (context) => const DesignPage(),
-        '/beauty': (context) => const BeautyPage(),
-        '/all': (context) => const AllPage(),
+        // '/thinking': (context) => const ThinkingPage(),
+        // '/photo': (context) => const PhotoPage(),
+        // '/other': (context) => const OtherPage(),
+        // '/music': (context) => const MusicPage(),
+        // '/money': (context) => const MoneyPage(),
+        // '/language': (context) => const LanguagePage(),
+        // '/it': (context) => const ITPage(),
+        // '/design': (context) => const DesignPage(),
+        // '/beauty': (context) => const BeautyPage(),
+        '/categorytemplate': (context) => const CategoryTemplatePage(),
         '/hireinternall': (context) => const HireInternAll(),
         '/homereviewall': (context) => const HomeReviewAll(),
         '/makementoring': (context) => const MakeMentoring(),
