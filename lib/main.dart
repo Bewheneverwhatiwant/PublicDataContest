@@ -92,7 +92,7 @@ class _MyHomePageState extends State<MyHomePage> {
   final List<Widget> _children = [
     const MainPage(),
     const MyChatList(),
-    const MyPage(isMento: true), // 요기 조정해서 멘토, 멘티의 마이페이지 UI 확인 가능
+    MyPage(isMento: true), // 요기 조정해서 멘토, 멘티의 마이페이지 UI 확인 가능
   ];
 
   void onTabTapped(int index) {

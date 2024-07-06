@@ -18,10 +18,6 @@ class ProfileMentoPage extends StatelessWidget {
             const SizedBox(height: 16),
             _buildMentorInfoSection(),
             const SizedBox(height: 16),
-            _buildMentorBadgeSection(),
-            const SizedBox(height: 16),
-            _buildMentorHistorySection(),
-            const SizedBox(height: 16),
             _buildReviewButton(context),
           ],
         ),
@@ -65,48 +61,11 @@ class ProfileMentoPage extends StatelessWidget {
         const SizedBox(height: 8),
         Row(
           children: [
-            const Expanded(child: Text('멘토링 분야 대분류/소분류, 대분류/소분류')),
+            const Expanded(child: Text('멘토링 분야 대분류/소분류')),
             TextButton(onPressed: () {}, child: const Text('추가하기')),
           ],
         ),
         const SizedBox(height: 8),
-        const Text('멘토링 인증서',
-            style: TextStyle(fontWeight: FontWeight.bold, color: Colors.blue)),
-        const SizedBox(height: 8),
-        Row(
-          children: [
-            Container(color: Colors.grey[300], width: 100, height: 100),
-            const SizedBox(width: 8),
-            Container(color: Colors.grey[300], width: 100, height: 100),
-          ],
-        ),
-      ],
-    );
-  }
-
-  Widget _buildMentorBadgeSection() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text('멘토의 명예 배지', style: TextStyle(fontWeight: FontWeight.bold)),
-        const SizedBox(height: 8),
-        Row(
-          children: [
-            Container(color: Colors.grey[300], width: 50, height: 50),
-            const SizedBox(width: 8),
-            Container(color: Colors.grey[300], width: 50, height: 50),
-            const SizedBox(width: 8),
-            Container(color: Colors.grey[300], width: 50, height: 50),
-          ],
-        ),
-      ],
-    );
-  }
-
-  Widget _buildMentorHistorySection() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
         const Text('멘토의 멘토링 역사', style: TextStyle(fontWeight: FontWeight.bold)),
         const SizedBox(height: 8),
         Row(
@@ -120,10 +79,17 @@ class ProfileMentoPage extends StatelessWidget {
           ],
         ),
         const SizedBox(height: 8),
-        const Text('현재 멘티 수'),
-        const Text('누적 멘티'),
-        const Text('취업에 성공한 멘티 수'),
-        const Text('누적 멘토링 수익'),
+        const Text('현재 멘토링 중인 멘티 수'),
+        const SizedBox(height: 16),
+        const Text('멘토 인증서', style: TextStyle(fontWeight: FontWeight.bold)),
+        const SizedBox(height: 8),
+        Row(
+          children: [
+            Container(color: Colors.grey[300], width: 100, height: 100),
+            const SizedBox(width: 8),
+            Container(color: Colors.grey[300], width: 100, height: 100),
+          ],
+        ),
       ],
     );
   }
@@ -138,7 +104,7 @@ class ProfileMentoPage extends StatelessWidget {
           minimumSize: const Size(double.infinity, 50),
         ),
         onPressed: () {
-          Navigator.pushNamed(context, '/allmentoreview');
+          Navigator.pushNamed(context, '/allmentorreview');
         },
         child: const Text('이 멘토에 대한 리뷰 보기'),
       ),

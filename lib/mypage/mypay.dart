@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:publicdatacontest/common/theme/colors/color_palette.dart';
 
 class MyPaySection extends StatefulWidget {
   const MyPaySection({Key? key}) : super(key: key);
@@ -68,28 +69,68 @@ class _MyPaySectionState extends State<MyPaySection> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text('항해Pay 관리', style: TextStyle(fontWeight: FontWeight.bold)),
-        const SizedBox(height: 8),
-        GestureDetector(
-          onTap: () => _showInputModal(context),
-          child: Row(
-            children: [
-              Icon(Icons.add, color: Colors.blue),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Container(
-                  color: Colors.grey[300],
-                  height: 100,
-                  child: const Center(child: Text('아직 등록한 계좌가 없어요')),
-                ),
-              ),
-            ],
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            '항해Pay 관리',
+            style: TextStyle(
+              color: GlobalColors.mainColor,
+              fontWeight: FontWeight.bold,
+              fontSize: 16,
+            ),
           ),
-        ),
-      ],
+          const SizedBox(height: 12),
+          GestureDetector(
+            onTap: () => _showInputModal(context),
+            child: Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(8),
+                color: Colors.grey[200],
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.grey.withOpacity(0.5),
+                    spreadRadius: 1,
+                    blurRadius: 3,
+                    offset: const Offset(0, 2), // changes position of shadow
+                  ),
+                ],
+              ),
+              child: Row(
+                children: [
+                  Icon(Icons.add, color: GlobalColors.mainColor),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          '계좌번호를 등록해주세요',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          '등록된 계좌번호가 없습니다.',
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: GlobalColors.lightgray,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
