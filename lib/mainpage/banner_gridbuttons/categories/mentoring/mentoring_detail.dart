@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class MentoringDetailPage extends StatelessWidget {
   const MentoringDetailPage({Key? key}) : super(key: key);
@@ -127,16 +128,26 @@ class MentoringDetailPage extends StatelessWidget {
           children: [
             IconButton(
               icon: const Icon(Icons.thumb_up_alt_outlined, color: Colors.blue),
-              onPressed: () {
-                // 좋아요 버튼 클릭 시 동작 추가
+              onPressed: () async {
+                bool isLoggedIn = await _checkIfLoggedIn();
+                if (isLoggedIn) {
+                  // 좋아요 버튼 클릭 시 동작 추가
+                } else {
+                  _showLoginAlert(context);
+                }
               },
             ),
             const Text('좋아요 2개'),
           ],
         ),
         ElevatedButton.icon(
-          onPressed: () {
-            Navigator.pushNamed(context, '/classchat');
+          onPressed: () async {
+            bool isLoggedIn = await _checkIfLoggedIn();
+            if (isLoggedIn) {
+              Navigator.pushNamed(context, '/classchat');
+            } else {
+              _showLoginAlert(context);
+            }
           },
           icon: const Icon(Icons.chat_bubble_outline),
           label: const Text('멘토와의 채팅'),
@@ -146,6 +157,32 @@ class MentoringDetailPage extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+
+  Future<bool> _checkIfLoggedIn() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? accessToken = prefs.getString('accessToken');
+    return accessToken != null;
+  }
+
+  void _showLoginAlert(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('알림'),
+          content: const Text('로그인 후 이용하실 수 있는 기능입니다.'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: const Text('확인'),
+            ),
+          ],
+        );
+      },
     );
   }
 }
