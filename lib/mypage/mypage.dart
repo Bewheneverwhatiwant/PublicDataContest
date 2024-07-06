@@ -122,19 +122,23 @@ class _MyPageState extends State<MyPage> with SingleTickerProviderStateMixin {
               labelColor: GlobalColors.mainColor,
               unselectedLabelColor: GlobalColors.lightgray,
               labelStyle: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 14), // Adjust font weight and size
-
+                fontWeight: FontWeight.bold,
+                fontSize: 14,
+              ),
               tabs: isMento
                   ? const [
-                      Tab(text: '내 멘토링 정보'),
-                      Tab(text: '명예의 전당'),
-                      Tab(text: '항해 Pay 관리'),
+                      Tab(text: '내 멘토링 정보', icon: Icon(Icons.info_outline)),
+                      Tab(text: '명예의 전당', icon: Icon(Icons.star_border)),
+                      Tab(
+                          text: '항해 Pay 관리',
+                          icon: Icon(Icons.account_balance_wallet)),
                     ]
                   : const [
-                      Tab(text: '구직 정보'),
-                      Tab(text: '내 히스토리'),
-                      Tab(text: '항해 Pay 관리'),
+                      Tab(text: '구직 정보', icon: Icon(Icons.work_outline)),
+                      Tab(text: '내 히스토리', icon: Icon(Icons.history)),
+                      Tab(
+                          text: '항해 Pay 관리',
+                          icon: Icon(Icons.account_balance_wallet)),
                     ],
             ),
             SizedBox(
