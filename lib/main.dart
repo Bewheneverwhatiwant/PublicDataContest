@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:publicdatacontest/appbar/home_appbar.dart';
 import 'package:publicdatacontest/mainpage/maincarousel/maincarousel_all/hone_review_all.dart';
 import 'package:publicdatacontest/mypage/menti/profile_menti.dart';
@@ -34,7 +35,9 @@ import 'mypage/mento/all_review_mento.dart';
 import 'splash.dart';
 import 'mainpage/maincarousel/maincarousel_all/gisul_changup_center.dart';
 
-void main() async {
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
   // 환경 변수 로드
   try {
     await dotenv.load(fileName: ".env");
@@ -50,11 +53,31 @@ void main() async {
     print('환경변수 로딩 중 오류 발생: $e');
   }
 
-  runApp(const MyApp());
+  runApp(MyApp());
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class MyApp extends StatefulWidget {
+  @override
+  _MyAppState createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  bool _splashShown = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _checkSplashShown();
+  }
+
+  Future<void> _checkSplashShown() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    bool splashShown = prefs.getBool('splashShown') ?? false;
+
+    setState(() {
+      _splashShown = splashShown;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -64,8 +87,7 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.white),
         useMaterial3: true,
       ),
-      //home: const MyHomePage(),
-      home: const SplashPage(),
+      initialRoute: _splashShown ? '/main' : '/',
       routes: {
         '/main': (context) => const MyHomePage(),
         '/thinking': (context) => const ThinkingPage(),
@@ -94,7 +116,33 @@ class MyApp extends StatelessWidget {
         '/allmentoreview': (context) => const AllMentorReviewPage(),
         '/gisul_changup_center': (context) => GisulChangupCenterPage(),
       },
+      onGenerateRoute: (settings) {
+        if (settings.name == '/') {
+          return MaterialPageRoute(builder: (context) {
+            return FutureBuilder<bool>(
+              future: _checkSplashShownOnRoute(),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const CircularProgressIndicator();
+                } else {
+                  if (snapshot.data ?? false) {
+                    return const MyHomePage();
+                  } else {
+                    return const SplashPage();
+                  }
+                }
+              },
+            );
+          });
+        }
+        return null;
+      },
     );
+  }
+
+  Future<bool> _checkSplashShownOnRoute() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    return prefs.getBool('splashShown') ?? false;
   }
 }
 

@@ -365,22 +365,6 @@ class _SignupPageState extends State<SignupPage> {
                       style: TextStyle(color: Colors.red),
                     ),
                   ),
-                // if (_isDobStarted && !_isDobValid)
-                //   const Padding(
-                //     padding: EdgeInsets.only(left: 16.0),
-                //     child: Text(
-                //       '유효한 생년월일을 입력해주세요.',
-                //       style: TextStyle(color: Colors.red),
-                //     ),
-                //   ),
-                // if (_isDobStarted && !_isDobValid)
-                //   const Padding(
-                //     padding: EdgeInsets.only(left: 16.0),
-                //     child: Text(
-                //       '유효한 생년월일을 입력해주세요.',
-                //       style: TextStyle(color: Colors.red),
-                //     ),
-                //   ),
                 const SizedBox(height: 8),
                 TextFormField(
                   controller: _emailController,

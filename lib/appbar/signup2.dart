@@ -236,21 +236,19 @@ class _SignupStep2State extends State<SignupStep2> {
                   style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 16),
-                Row(
+                const Row(
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: [
                     CircleAvatar(
                       radius: 20,
                       backgroundColor: Colors.grey,
-                      child: const Text('1',
-                          style: TextStyle(color: Colors.white)),
+                      child: Text('1', style: TextStyle(color: Colors.white)),
                     ),
-                    const SizedBox(width: 8),
+                    SizedBox(width: 8),
                     CircleAvatar(
                       radius: 20,
                       backgroundColor: Colors.blue,
-                      child: const Text('2',
-                          style: TextStyle(color: Colors.white)),
+                      child: Text('2', style: TextStyle(color: Colors.white)),
                     ),
                   ],
                 ),

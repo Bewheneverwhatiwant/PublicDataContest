@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class SplashPage extends StatefulWidget {
   const SplashPage({Key? key}) : super(key: key);
@@ -33,10 +34,16 @@ class _SplashPageState extends State<SplashPage>
       _controller.forward();
     });
 
-    // 3초 후에 메인 페이지로 이동
-    Timer(const Duration(seconds: 3), () {
-      Navigator.pushReplacementNamed(context, '/main');
-    });
+    _navigateToMain();
+  }
+
+  Future<void> _navigateToMain() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await Future.delayed(const Duration(seconds: 3));
+    await prefs.setBool('splashShown', true);
+    if (mounted) {
+      Navigator.pushNamedAndRemoveUntil(context, '/main', (route) => false);
+    }
   }
 
   @override
