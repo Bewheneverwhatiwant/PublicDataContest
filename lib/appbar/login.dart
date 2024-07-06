@@ -57,10 +57,12 @@ class _LoginPageState extends State<LoginPage> {
       if (response.statusCode == 200) {
         final responseData = jsonDecode(response.body);
         final accessToken = responseData['accessToken'];
+        final role = responseData['role'];
 
-        // 엑세스 토큰을 shared_preferences에 저장
+        // 엑세스 토큰과 role을 shared_preferences에 저장
         final prefs = await SharedPreferences.getInstance();
         await prefs.setString('accessToken', accessToken);
+        await prefs.setString('role', role);
 
         showDialog(
           context: context,

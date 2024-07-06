@@ -26,7 +26,7 @@ class MainPage extends StatelessWidget {
               ),
             ),
           ),
-          Buttons(isMento: isMento),
+          const Buttons(),
           const HireIntern(),
           const HomeReview(),
         ],

@@ -1,10 +1,30 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'gridbutton.dart';
 
-class Buttons extends StatelessWidget {
-  final bool isMento;
+class Buttons extends StatefulWidget {
+  const Buttons({super.key});
 
-  const Buttons({super.key, required this.isMento});
+  @override
+  _ButtonsState createState() => _ButtonsState();
+}
+
+class _ButtonsState extends State<Buttons> {
+  bool isMento = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _checkRole();
+  }
+
+  Future<void> _checkRole() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? role = prefs.getString('role');
+    setState(() {
+      isMento = role == 'mentor';
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
