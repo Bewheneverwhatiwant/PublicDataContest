@@ -1,17 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:publicdatacontest/common/theme/colors/color_palette.dart';
-import 'dart:typed_data';
-import 'mypay.dart';
+import 'dart:typed_data'; // 바이너리 데이터를 처리하기 위해 !! (file picker 사용 x)
+import '../mypay.dart';
 
-class MyPageMento extends StatefulWidget {
-  const MyPageMento({Key? key}) : super(key: key);
-
+class MyPageMentee extends StatefulWidget {
   @override
-  _MyPageMentoState createState() => _MyPageMentoState();
+  _MyPageMenteeState createState() => _MyPageMenteeState();
 }
 
-class _MyPageMentoState extends State<MyPageMento>
+class _MyPageMenteeState extends State<MyPageMentee>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
   List<Uint8List> _selectedFiles = [];
@@ -33,6 +31,7 @@ class _MyPageMentoState extends State<MyPageMento>
     try {
       FilePickerResult? result = await FilePicker.platform
           .pickFiles(type: FileType.image, allowMultiple: true);
+
       if (result != null) {
         setState(() {
           _selectedFiles
@@ -72,6 +71,7 @@ class _MyPageMentoState extends State<MyPageMento>
   }
 
   void _addCategory(String category) {
+    // 중복 체크
     if (!_selectedCategories.contains(category)) {
       setState(() {
         _selectedCategories.add(category);
@@ -83,7 +83,7 @@ class _MyPageMentoState extends State<MyPageMento>
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('멘토 마이페이지'),
+        title: Text('멘티 마이페이지'),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
@@ -94,7 +94,7 @@ class _MyPageMentoState extends State<MyPageMento>
             const SizedBox(height: 16),
             ElevatedButton(
               onPressed: () {
-                Navigator.pushNamed(context, '/profilemento');
+                Navigator.pushNamed(context, '/profilementee');
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: GlobalColors.mainColor,
@@ -119,8 +119,8 @@ class _MyPageMentoState extends State<MyPageMento>
                 fontSize: 14,
               ),
               tabs: const [
-                Tab(text: '내 멘토링 정보', icon: Icon(Icons.info_outline)),
-                Tab(text: '명예의 전당', icon: Icon(Icons.star_border)),
+                Tab(text: '구직 정보', icon: Icon(Icons.work_outline)),
+                Tab(text: '내 히스토리', icon: Icon(Icons.history)),
                 Tab(
                     text: '항해 Pay 관리',
                     icon: Icon(Icons.account_balance_wallet)),
@@ -131,8 +131,8 @@ class _MyPageMentoState extends State<MyPageMento>
               child: TabBarView(
                 controller: _tabController,
                 children: [
-                  _buildScrollableSection(_buildMentorInfo(context)),
-                  _buildScrollableSection(_buildMentoHonor(context)),
+                  _buildScrollableSection(_buildMenteeInfo(context)),
+                  _buildScrollableSection(_buildMentoringHistory()),
                   _buildScrollableSection(MyPaySection()),
                 ],
               ),
@@ -176,14 +176,13 @@ class _MyPageMentoState extends State<MyPageMento>
             Text('전화번호'),
             Text('거주지역'),
             Text('현재 재취업 의사'),
-            Text('멘토 활동 상태'),
           ],
         ),
       ],
     );
   }
 
-  Widget _buildMentorInfo(BuildContext context) {
+  Widget _buildMenteeInfo(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -193,15 +192,13 @@ class _MyPageMentoState extends State<MyPageMento>
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('내 멘토링 분야',
+                  Text('내 구직 분야',
                       style: TextStyle(
                           color: GlobalColors.mainColor,
                           fontWeight: FontWeight.bold,
                           fontSize: 16)),
                   _selectedCategories.isEmpty
-                      ? const Text(
-                          '멘토링 분야를 추가해주세요.',
-                        )
+                      ? Text('구직 분야를 추가해주세요.')
                       : Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: _selectedCategories.map((category) {
@@ -232,156 +229,133 @@ class _MyPageMentoState extends State<MyPageMento>
           ],
         ),
         const SizedBox(height: 16),
-        Text('내 멘토링 인증서',
-            style: TextStyle(
-                color: GlobalColors.mainColor,
-                fontWeight: FontWeight.bold,
-                fontSize: 16)),
-        const SizedBox(height: 8),
-        _buildCertificates(),
-        const SizedBox(height: 16),
-        _buildSection(_buildMentoButtons(context)),
+        Row(
+          children: [
+            Text('내 멘티 별점',
+                style: TextStyle(
+                    color: GlobalColors.mainColor,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16)),
+            const SizedBox(width: 20),
+            Text('아직 받은 별점이 없어요.',
+                style: TextStyle(color: GlobalColors.darkgray, fontSize: 14)),
+          ],
+        ),
       ],
     );
   }
 
-  Widget _buildCertificates() {
-    return Center(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          const SizedBox(height: 16),
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: Column(
+  Widget _buildHistoryItem(
+      String title, String date, String time, String type) {
+    return Card(
+      elevation: 2,
+      margin: EdgeInsets.symmetric(vertical: 8, horizontal: 0),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Padding(
+        padding: EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              title,
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: GlobalColors.mainColor,
+              ),
+            ),
+            SizedBox(height: 8),
+            Row(
               children: [
-                GestureDetector(
-                  onTap: _pickFile,
-                  child: Container(
-                    width: 100,
-                    height: 150,
-                    decoration: BoxDecoration(
-                      border: Border.all(color: Colors.grey),
-                      borderRadius: BorderRadius.circular(8.0),
-                    ),
-                    child: const Icon(Icons.add, size: 40, color: Colors.grey),
-                  ),
-                ),
-                const SizedBox(height: 15),
+                Icon(Icons.calendar_today, size: 16, color: Colors.grey),
+                SizedBox(width: 4),
                 Text(
-                  '아직 등록한 인증서가 없어요.',
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    color: GlobalColors.lightgray,
-                  ),
+                  date,
+                  style: TextStyle(color: Colors.grey[600]),
                 ),
-                Text(
-                  '인증서를 등록해야 멘토링을 시작할 수 있어요.',
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    color: GlobalColors.lightgray,
-                  ),
-                ),
-                ..._selectedFiles.map((file) {
-                  return Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                    child: Container(
-                      width: 100,
-                      height: 150,
-                      decoration: BoxDecoration(
-                        border: Border.all(color: Colors.grey),
-                        borderRadius: BorderRadius.circular(8.0),
-                      ),
-                      child: Image.memory(
-                        file,
-                        fit: BoxFit.cover,
-                      ),
-                    ),
-                  );
-                }).toList(),
               ],
             ),
-          ),
-        ],
+            SizedBox(height: 4),
+            Row(
+              children: [
+                Icon(Icons.access_time, size: 16, color: Colors.grey),
+                SizedBox(width: 4),
+                Text(
+                  time,
+                  style: TextStyle(color: Colors.grey[600]),
+                ),
+              ],
+            ),
+            SizedBox(height: 4),
+            Row(
+              children: [
+                Icon(Icons.category, size: 16, color: Colors.grey),
+                SizedBox(width: 4),
+                Text(
+                  type,
+                  style: TextStyle(color: Colors.grey[600]),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
 
-  Widget _buildMentoButtons(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 16.0),
-      child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-        Column(
-          children: [
-            ElevatedButton(
-              onPressed: () {
-                Navigator.pushNamed(
-                  context,
-                  '/review_list_template',
-                  arguments: {'reviewlistkind': 3},
-                );
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: GlobalColors.mainColor,
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 40, vertical: 12),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-              ),
-              child: const Text(
-                '나의 모든 리뷰 보기',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                ),
-              ),
-            ),
-            const SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.pushNamed(context, '/mentomyclass');
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: GlobalColors.mainColor,
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 40, vertical: 12),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-              ),
-              child: const Text(
-                '나의 모든 멘토링 관리하기',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                ),
-              ),
-            ),
-          ],
-        ),
-      ]),
+  Widget _buildRecentMentorings() {
+    const List<Map<String, String>> mentoringHistory = [
+      {
+        'title': '000멘토링',
+        'date': '2023.05.10',
+        'mentoringTime': '00:00 ~ 00:00',
+        'mentoringType': '멘토링 타입',
+      },
+      {
+        'title': '000멘토링',
+        'date': '2023.05.10',
+        'mentoringTime': '00:00 ~ 00:00',
+        'mentoringType': '멘토링 타입',
+      },
+      {
+        'title': '000멘토링',
+        'date': '2023.05.10',
+        'mentoringTime': '00:00 ~ 00:00',
+        'mentoringType': '멘토링 타입',
+      },
+    ];
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: mentoringHistory.map((mentoring) {
+        return _buildHistoryItem(
+          mentoring['title']!,
+          mentoring['date']!,
+          mentoring['mentoringTime']!,
+          mentoring['mentoringType']!,
+        );
+      }).toList(),
     );
   }
 
-  Widget _buildMentoHonor(BuildContext context) {
+  Widget _buildMentoringHistory() {
     String mentoringRating = '별점이 아직 없어요';
-    String accumulatedMenteeCount = '0';
     String accumulatedMentoringCount = '0';
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          '내 명예 배지',
+          '내 멘티 배지',
           style: TextStyle(
             color: GlobalColors.mainColor,
             fontWeight: FontWeight.bold,
-            fontSize: 16,
+            fontSize: 18,
           ),
         ),
+        SizedBox(height: 16),
         Center(
           child: Column(
             children: [
@@ -413,7 +387,7 @@ class _MyPageMentoState extends State<MyPageMento>
               ),
               SizedBox(height: 8),
               Text(
-                '초보 멘토',
+                '초보 멘티',
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
@@ -423,48 +397,17 @@ class _MyPageMentoState extends State<MyPageMento>
             ],
           ),
         ),
-        const SizedBox(height: 16),
-        Card(
-          elevation: 2,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Padding(
-            padding: EdgeInsets.all(16),
-            child: Column(
-              children: [
-                Row(
-                  children: [
-                    Icon(Icons.star, color: Colors.amber),
-                    SizedBox(width: 8),
-                    Text('멘토링 별점 : '),
-                    Text(mentoringRating,
-                        style: TextStyle(fontWeight: FontWeight.bold)),
-                  ],
-                ),
-                SizedBox(height: 8),
-                Row(
-                  children: [
-                    Icon(Icons.people, color: GlobalColors.mainColor),
-                    SizedBox(width: 8),
-                    Text('누적 멘티 수: '),
-                    Text(accumulatedMenteeCount,
-                        style: TextStyle(fontWeight: FontWeight.bold)),
-                  ],
-                ),
-                Row(
-                  children: [
-                    Icon(Icons.people, color: GlobalColors.mainColor),
-                    SizedBox(width: 8),
-                    Text('누적 멘토링 수: '),
-                    Text(accumulatedMentoringCount,
-                        style: TextStyle(fontWeight: FontWeight.bold)),
-                  ],
-                ),
-              ],
-            ),
+        SizedBox(height: 24),
+        Text(
+          '나의 멘토링 이력',
+          style: TextStyle(
+            color: GlobalColors.mainColor,
+            fontWeight: FontWeight.bold,
+            fontSize: 18,
           ),
         ),
+        SizedBox(height: 8),
+        _buildRecentMentorings(),
       ],
     );
   }
