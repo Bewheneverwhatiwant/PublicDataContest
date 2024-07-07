@@ -225,6 +225,7 @@ class _MyPageMentoState extends State<MyPageMento>
     if (response.statusCode == 200) {
       final responseData = json.decode(response.body);
       _parseAndDisplayUserInfo(responseData);
+      print(responseData);
     } else {
       print('Failed to fetch user info');
     }
