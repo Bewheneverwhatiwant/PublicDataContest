@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
@@ -18,7 +19,7 @@ class MyPageMento extends StatefulWidget {
 }
 
 class _MyPageMentoState extends State<MyPageMento>
-    with SingleTickerProviderStateMixin {
+    with SingleTickerProviderStateMixin, WidgetsBindingObserver {
   late TabController _tabController;
   ValueNotifier<List<Uint8List>> _selectedFilesNotifier =
       ValueNotifier<List<Uint8List>>([]);
@@ -38,17 +39,28 @@ class _MyPageMentoState extends State<MyPageMento>
   String reemploymentIdea = '';
   String active = '';
 
+  bool _isLoading = false;
+
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
     _fetchAndDisplayUserInfo();
+    WidgetsBinding.instance.addObserver(this);
   }
 
   @override
   void dispose() {
     _tabController.dispose();
+    WidgetsBinding.instance.removeObserver(this);
     super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      setState(() {}); // 앱이 다시 포커스를 얻었을 때 화면 갱신
+    }
   }
 
   void _pickFile() async {
@@ -81,24 +93,55 @@ class _MyPageMentoState extends State<MyPageMento>
   }
 
   void _selectFiles() async {
+    setState(() {
+      _isLoading = true; // 파일 선택 중 로딩 상태로 변경
+    });
     try {
       FilePickerResult? result = await FilePicker.platform
           .pickFiles(type: FileType.image, allowMultiple: false);
+      print('파일이 선택되었지만 null일 수 있음!');
       if (result != null && result.files.isNotEmpty) {
-        Uint8List? file = result.files.first.bytes;
-        if (file != null) {
-          // 알림을 띄우기 전에 setState 사용
-          _showConfirmationDialog(file);
+        PlatformFile platformFile = result.files.first;
+        Uint8List? fileBytes;
+
+        if (platformFile.bytes != null) {
+          fileBytes = platformFile.bytes;
+        } else {
+          // 파일 경로를 통해 파일을 읽어옴
+          File file = File(platformFile.path!);
+          fileBytes = await file.readAsBytes();
+        }
+
+        print(fileBytes);
+        String? fileName = platformFile.name; // 파일 이름 가져오기
+        print('파일 이름: $fileName'); // 파일 이름 출력
+        print('파일이 null이 아님!');
+        if (fileBytes != null) {
+          setState(() {
+            _isLoading = false; // 다이얼로그 호출 전 로딩 상태 해제
+          });
+          _showConfirmationDialog(fileBytes); // 다이얼로그 호출
         }
       } else {
-        print('No files selected');
+        print('파일이 선택되지 않음');
+        setState(() {
+          _isLoading = false; // 파일 선택이 실패하면 로딩 상태 해제
+        });
       }
     } catch (e) {
-      print('Error picking files: $e');
+      print('파일 선택 중 에러 발생: $e');
+      setState(() {
+        _isLoading = false; // 에러 발생 시 로딩 상태 해제
+      });
     }
   }
 
   void _showConfirmationDialog(Uint8List file) {
+    if (!mounted) {
+      print('컨텍스트가 유효하지 않습니다.');
+      return;
+    }
+
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -108,15 +151,16 @@ class _MyPageMentoState extends State<MyPageMento>
           actions: [
             TextButton(
               onPressed: () {
-                Navigator.of(context).pop(); // 취소
+                Navigator.of(context).pop();
               },
               child: Text('취소'),
             ),
             TextButton(
               onPressed: () {
-                Navigator.of(context).pop(); // 알림창 닫기
+                Navigator.of(context).pop();
                 setState(() {
                   _selectedFilesNotifier.value = [file]; // 파일 선택
+                  // _isLoading = false; // 다이얼로그 닫힐 때 로딩 상태 해제
                 });
               },
               child: Text('확인'),
@@ -220,60 +264,70 @@ class _MyPageMentoState extends State<MyPageMento>
       appBar: AppBar(
         title: Text('멘토 마이페이지'),
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildProfileSection(),
-            const SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.pushNamed(context, '/profilemento');
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: GlobalColors.mainColor,
-              ),
-              child: const Text(
-                '프로필 페이지로 이동',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                ),
+      body: Stack(
+        children: [
+          _buildMainContent(),
+          if (_isLoading)
+            Center(
+              child: CircularProgressIndicator(), // 로딩 인디케이터 표시
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMainContent() {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildProfileSection(),
+          const SizedBox(height: 16),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pushNamed(context, '/profilemento');
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: GlobalColors.mainColor,
+            ),
+            child: const Text(
+              '프로필 페이지로 이동',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
               ),
             ),
-            const SizedBox(height: 16),
-            TabBar(
+          ),
+          const SizedBox(height: 16),
+          TabBar(
+            controller: _tabController,
+            indicatorColor: GlobalColors.mainColor,
+            labelColor: GlobalColors.mainColor,
+            unselectedLabelColor: GlobalColors.lightgray,
+            labelStyle: const TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 14,
+            ),
+            tabs: const [
+              Tab(text: '내 멘토링 정보', icon: Icon(Icons.info_outline)),
+              Tab(text: '명예의 전당', icon: Icon(Icons.star_border)),
+              Tab(text: '항해 Pay 관리', icon: Icon(Icons.account_balance_wallet)),
+            ],
+          ),
+          SizedBox(
+            height: 400,
+            child: TabBarView(
               controller: _tabController,
-              indicatorColor: GlobalColors.mainColor,
-              labelColor: GlobalColors.mainColor,
-              unselectedLabelColor: GlobalColors.lightgray,
-              labelStyle: const TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 14,
-              ),
-              tabs: const [
-                Tab(text: '내 멘토링 정보', icon: Icon(Icons.info_outline)),
-                Tab(text: '명예의 전당', icon: Icon(Icons.star_border)),
-                Tab(
-                    text: '항해 Pay 관리',
-                    icon: Icon(Icons.account_balance_wallet)),
+              children: [
+                _buildScrollableSection(_buildMentorInfo(context)),
+                _buildScrollableSection(_buildMentoHonor(context)),
+                _buildScrollableSection(MyPaySection()),
               ],
             ),
-            SizedBox(
-              height: 400,
-              child: TabBarView(
-                controller: _tabController,
-                children: [
-                  _buildScrollableSection(_buildMentorInfo(context)),
-                  _buildScrollableSection(_buildMentoHonor(context)),
-                  _buildScrollableSection(MyPaySection()),
-                ],
-              ),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
