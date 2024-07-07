@@ -1,7 +1,11 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:publicdatacontest/common/theme/colors/color_palette.dart';
-import 'dart:typed_data'; // 바이너리 데이터를 처리하기 위해 !! (file picker 사용 x)
+import 'dart:typed_data';
+import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import '../mypay.dart';
 
 class MyPageMentee extends StatefulWidget {
@@ -14,11 +18,13 @@ class _MyPageMenteeState extends State<MyPageMentee>
   late TabController _tabController;
   List<Uint8List> _selectedFiles = [];
   List<String> _selectedCategories = [];
+  Map<String, dynamic> _menteeInfo = {};
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
+    _fetchAndDisplayUserInfo();
   }
 
   @override
@@ -71,12 +77,45 @@ class _MyPageMenteeState extends State<MyPageMentee>
   }
 
   void _addCategory(String category) {
-    // 중복 체크
     if (!_selectedCategories.contains(category)) {
       setState(() {
         _selectedCategories.add(category);
       });
     }
+  }
+
+  void _fetchAndDisplayUserInfo() async {
+    final String apiServer = dotenv.env['API_SERVER'] ?? '';
+    final String? accessToken = await _getAccessToken();
+
+    if (accessToken == null) {
+      print('AccessToken not found');
+      return;
+    }
+
+    final response = await http.get(
+      Uri.parse('$apiServer/api/auth/getInfo'),
+      headers: {
+        'Authorization': 'Bearer $accessToken',
+        'Content-Type': 'application/json',
+      },
+    );
+
+    if (response.statusCode == 200) {
+      final responseData = json.decode(response.body);
+      setState(() {
+        _menteeInfo = responseData;
+      });
+      print('mentee mypage API call success');
+      print(responseData);
+    } else {
+      print('Failed to fetch user info');
+    }
+  }
+
+  Future<String?> _getAccessToken() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString('accessToken');
   }
 
   @override
@@ -165,17 +204,18 @@ class _MyPageMenteeState extends State<MyPageMentee>
           color: Colors.grey[300],
         ),
         const SizedBox(width: 16),
-        const Column(
+        Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('아이디'),
-            Text('이름'),
-            Text('성별'),
-            Text('생년월일'),
-            Text('이메일'),
-            Text('전화번호'),
-            Text('거주지역'),
-            Text('현재 재취업 의사'),
+            Text('아이디: ${_menteeInfo['mentee']?['userId'] ?? ''}'),
+            Text('이름: ${_menteeInfo['mentee']?['menteeName'] ?? ''}'),
+            Text('성별: ${_menteeInfo['mentee']?['gender'] ?? ''}'),
+            Text('생년월일: ${_menteeInfo['mentee']?['birth'] ?? ''}'),
+            Text('이메일: ${_menteeInfo['mentee']?['email'] ?? ''}'),
+            Text('전화번호: ${_menteeInfo['mentee']?['phoneNumber'] ?? ''}'),
+            Text('주소: ${_menteeInfo['mentee']?['address'] ?? ''}'),
+            Text(
+                '가입한 날짜: ${_menteeInfo['mentee']?['createdAt']?.substring(0, 10) ?? ''}'),
           ],
         ),
       ],
@@ -198,7 +238,9 @@ class _MyPageMenteeState extends State<MyPageMentee>
                           fontWeight: FontWeight.bold,
                           fontSize: 16)),
                   _selectedCategories.isEmpty
-                      ? Text('구직 분야를 추가해주세요.')
+                      ? const Text(
+                          '구직 분야를 추가해주세요.',
+                        )
                       : Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: _selectedCategories.map((category) {
@@ -341,9 +383,6 @@ class _MyPageMenteeState extends State<MyPageMentee>
   }
 
   Widget _buildMentoringHistory() {
-    String mentoringRating = '별점이 아직 없어요';
-    String accumulatedMentoringCount = '0';
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [

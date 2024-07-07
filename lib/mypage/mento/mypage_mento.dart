@@ -313,8 +313,6 @@ class _MyPageMentoState extends State<MyPageMento>
         _buildCertificates(),
         const SizedBox(height: 16),
         _buildSection(_buildMentoButtons(context)),
-        Text('누적 멘티 수: ${_mentorInfo['mentor']?['studentCount'] ?? 0}'),
-        Text('누적 멘토링 횟수: ${_mentorInfo['mentor']?['mentoringCount'] ?? 0}'),
       ],
     );
   }
@@ -522,8 +520,7 @@ class _MyPageMentoState extends State<MyPageMento>
                     Icon(Icons.people, color: GlobalColors.mainColor),
                     SizedBox(width: 8),
                     Text('누적 멘티 수: '),
-                    Text(accumulatedMenteeCount,
-                        style: TextStyle(fontWeight: FontWeight.bold)),
+                    Text('${_mentorInfo['mentor']?['studentCount'] ?? 0}'),
                   ],
                 ),
                 Row(
@@ -531,8 +528,7 @@ class _MyPageMentoState extends State<MyPageMento>
                     Icon(Icons.people, color: GlobalColors.mainColor),
                     SizedBox(width: 8),
                     Text('누적 멘토링 수: '),
-                    Text(accumulatedMentoringCount,
-                        style: TextStyle(fontWeight: FontWeight.bold)),
+                    Text('${_mentorInfo['mentor']?['mentoringCount'] ?? 0}'),
                   ],
                 ),
               ],
