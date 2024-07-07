@@ -10,7 +10,7 @@ class CustomNewAppBar extends StatelessWidget implements PreferredSizeWidget {
     return AppBar(
       backgroundColor: Colors.white,
       title: Text(title, style: const TextStyle(color: Colors.black)),
-      shadowColor: Colors.grey.withOpacity(0.5), // 그림자
+      shadowColor: Colors.grey.withOpacity(0.5),
     );
   }
 

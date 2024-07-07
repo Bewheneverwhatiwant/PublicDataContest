@@ -51,6 +51,8 @@ class _HomeAppBarState extends State<HomeAppBar> {
             TextButton(
               onPressed: () {
                 Navigator.pop(context);
+                Navigator.pushNamedAndRemoveUntil(
+                    context, '/', (route) => false);
               },
               child: const Text('확인'),
             ),

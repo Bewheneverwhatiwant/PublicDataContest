@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:publicdatacontest/mypage/mento/mento_myclass.dart';
+import 'package:publicdatacontest/mypage/mento/profile_mento.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:publicdatacontest/appbar/home_appbar.dart';
 import 'mainpage/reviews/review_list_template.dart';
@@ -11,17 +13,14 @@ import 'mainpage/maincarousel/maincarousel_all/hireintern_all.dart';
 import 'mainpage/reviews/review_list_template.dart';
 import 'mainpage/make_mentoring.dart';
 import 'chatingpage/mychatlist.dart';
-import 'mypage/mypage.dart';
-import 'mypage/mento/profile_mento.dart';
-import 'mypage/menti/profile_menti.dart';
-import 'mypage/mento/mento_myclass.dart';
+import 'mypage/mypage_mentee.dart';
+import 'mypage/mypage_mento.dart';
 import 'mainpage/banner_gridbuttons/categories/mentoring/mentoring_detail.dart';
 import 'mainpage/reviews/review_detail_template.dart';
 import 'mainpage/maincarousel/maincarousel_all/hireintern_detail.dart';
 import 'appbar/login.dart';
 import 'appbar/signup.dart';
 import 'mainpage/banner_gridbuttons/categories/mentoring/classchat.dart';
-import 'mypage/mento/all_review_mento.dart';
 import 'splash.dart';
 import 'mainpage/maincarousel/maincarousel_all/gisul_changup_center.dart';
 
@@ -93,7 +92,6 @@ class _MyAppState extends State<MyApp> {
         '/login': (context) => const LoginPage(),
         '/signup': (context) => const SignupPage(),
         '/classchat': (context) => const ClassChatPage(),
-        '/allmentoreview': (context) => const AllMentorReviewPage(),
         '/gisul_changup_center': (context) => GisulChangupCenterPage(),
       },
       onGenerateRoute: (settings) {
@@ -138,13 +136,53 @@ class _MyHomePageState extends State<MyHomePage> {
   final List<Widget> _children = [
     const MainPage(),
     const MyChatList(),
-    MyPage(isMento: true), // 요기 조정해서 멘토, 멘티의 마이페이지 UI 확인 가능
+    MyPageWrapper(),
   ];
 
-  void onTabTapped(int index) {
+  void onTabTapped(int index) async {
+    if (index == 2) {
+      // MyPage 탭인 경우
+      bool loggedIn = await _isLoggedIn();
+      if (!loggedIn) {
+        _showLoginDialog();
+        return;
+      }
+    }
     setState(() {
       _currentIndex = index;
     });
+  }
+
+  void _showLoginDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('로그인 필요'),
+          content: Text('로그인 후 이용하실 수 있는 기능입니다.'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+                Navigator.pushNamed(context, '/login');
+              },
+              child: Text('로그인'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: Text('취소'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Future<bool> _isLoggedIn() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    return prefs.getString('accessToken') != null;
   }
 
   @override
@@ -161,5 +199,32 @@ class _MyHomePageState extends State<MyHomePage> {
         currentIndex: _currentIndex,
       ),
     );
+  }
+}
+
+class MyPageWrapper extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<String?>(
+      future: _getUserRole(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        } else if (snapshot.hasData) {
+          String? role = snapshot.data;
+          if (role == 'mentor') {
+            return MyPageMento();
+          } else if (role == 'mentee') {
+            return MyPageMentee();
+          }
+        }
+        return const Center(child: Text('로그인 후 이용하실 수 있는 기능입니다.'));
+      },
+    );
+  }
+
+  Future<String?> _getUserRole() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    return prefs.getString('role');
   }
 }

@@ -11,11 +11,13 @@ class Buttons extends StatefulWidget {
 
 class _ButtonsState extends State<Buttons> {
   bool isMento = false;
+  bool isLoggedIn = false;
 
   @override
   void initState() {
     super.initState();
     _checkRole();
+    _checkLoginStatus();
   }
 
   Future<void> _checkRole() async {
@@ -23,6 +25,13 @@ class _ButtonsState extends State<Buttons> {
     String? role = prefs.getString('role');
     setState(() {
       isMento = role == 'mentor';
+    });
+  }
+
+  Future<void> _checkLoginStatus() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      isLoggedIn = prefs.getString('accessToken') != null;
     });
   }
 
@@ -161,7 +170,7 @@ class _ButtonsState extends State<Buttons> {
             ],
           ),
         ),
-        if (isMento) // isMento가 true면 멘토링 개설 버튼 보임
+        if (isLoggedIn && isMento) // 사용자가 로그인하고 멘토일 때만 멘토링 개설 버튼 보임
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16.0),
             child: SizedBox(
