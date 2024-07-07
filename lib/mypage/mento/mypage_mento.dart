@@ -7,6 +7,7 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import '../mypay.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 class MyPageMento extends StatefulWidget {
   const MyPageMento({Key? key}) : super(key: key);
@@ -49,6 +50,33 @@ class _MyPageMentoState extends State<MyPageMento>
   }
 
   void _pickFile() async {
+    if (await _requestPermissions()) {
+      _selectFiles();
+    }
+  }
+
+  Future<bool> _requestPermissions() async {
+    var storageStatus = await Permission.storage.status;
+    if (storageStatus.isGranted) {
+      return true;
+    } else if (storageStatus.isDenied) {
+      var result = await Permission.storage.request();
+      if (result.isGranted) {
+        return true;
+      }
+    }
+
+    if (await Permission.manageExternalStorage.isGranted) {
+      return true;
+    } else if (await Permission.manageExternalStorage.request().isGranted) {
+      return true;
+    }
+
+    openAppSettings();
+    return false;
+  }
+
+  void _selectFiles() async {
     try {
       FilePickerResult? result = await FilePicker.platform
           .pickFiles(type: FileType.image, allowMultiple: true);
@@ -57,7 +85,7 @@ class _MyPageMentoState extends State<MyPageMento>
           _selectedFiles
               .addAll(result.files.map((file) => file.bytes!).toList());
         });
-      } else {}
+      }
     } catch (e) {
       print('Error picking files: $e');
     }
