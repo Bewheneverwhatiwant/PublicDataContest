@@ -75,23 +75,26 @@ class _HomeAppBarState extends State<HomeAppBar> {
         ),
       ),
       actions: [
-        TextButton(
-          onPressed: _isLoggedIn
-              ? _logout
-              : () {
-                  Navigator.pushNamed(context, '/login');
-                },
-          style: TextButton.styleFrom(
-            side: const BorderSide(color: Colors.grey, width: 2),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8.0),
+        Padding(
+          padding: const EdgeInsets.only(right: 10.0),
+          child: TextButton(
+            onPressed: _isLoggedIn
+                ? _logout
+                : () {
+                    Navigator.pushNamed(context, '/login');
+                  },
+            style: TextButton.styleFrom(
+              side: const BorderSide(color: Colors.grey, width: 2),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8.0),
+              ),
             ),
-          ),
-          child: Text(
-            _isLoggedIn ? '로그아웃' : '로그인',
-            style: const TextStyle(
-              color: Colors.black,
-              fontSize: 16,
+            child: Text(
+              _isLoggedIn ? '로그아웃' : '로그인',
+              style: const TextStyle(
+                color: Colors.black,
+                fontSize: 16,
+              ),
             ),
           ),
         ),
