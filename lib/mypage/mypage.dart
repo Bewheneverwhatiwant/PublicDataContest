@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:publicdatacontest/common/theme/colors/color_palette.dart';
+import 'package:publicdatacontest/profile/profile.dart';
 import 'dart:typed_data'; // 바이너리 데이터를 처리하기 위해 !! (file picker 사용 x)
 import 'mypay.dart';
 
@@ -92,6 +93,15 @@ class _MyPageState extends State<MyPage> with SingleTickerProviderStateMixin {
     }
   }
 
+  void _navigateToProfile() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => ProfilePage(isMento: isMento),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -115,6 +125,21 @@ class _MyPageState extends State<MyPage> with SingleTickerProviderStateMixin {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             _buildProfileSection(),
+            const SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: _navigateToProfile,
+              child: Text(
+                '프로필 페이지로 이동',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
+              ),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: GlobalColors.mainColor,
+              ),
+            ),
             const SizedBox(height: 16),
             TabBar(
               controller: _tabController,
@@ -182,8 +207,8 @@ class _MyPageState extends State<MyPage> with SingleTickerProviderStateMixin {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Container(
-          width: 100, // 예시로 고정 너비 설정
-          height: 100, // 예시로 고정 높이 설정
+          width: 100,
+          height: 100,
           color: Colors.grey[300],
         ),
         const SizedBox(width: 16),
@@ -206,7 +231,6 @@ class _MyPageState extends State<MyPage> with SingleTickerProviderStateMixin {
   }
 
 // -----------------------------------------멘토---------------------------------------
-// 멘토 - 첫 탭 <내 멘토링 정보>
 // 멘토 - 첫 탭 <내 멘토링 정보>
   Widget _buildMentorInfo(BuildContext context) {
     return Column(
@@ -376,7 +400,6 @@ class _MyPageState extends State<MyPage> with SingleTickerProviderStateMixin {
 
 // 내 멘토링 인증서
   Widget _buildCertificates() {
-    // Check if there are no uploaded files
     return Center(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
@@ -403,19 +426,16 @@ class _MyPageState extends State<MyPage> with SingleTickerProviderStateMixin {
                   '아직 등록한 인증서가 없어요.',
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
-                    color: GlobalColors
-                        .lightgray, // Optionally, you can change color or style
+                    color: GlobalColors.lightgray,
                   ),
                 ),
                 Text(
                   '인증서를 등록해야 멘토링을 시작할 수 있어요.',
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
-                    color: GlobalColors
-                        .lightgray, // Optionally, you can change color or style
+                    color: GlobalColors.lightgray,
                   ),
                 ),
-                // Display previously uploaded images if any
                 ..._selectedFiles.map((file) {
                   return Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 8.0),
@@ -475,7 +495,6 @@ class _MyPageState extends State<MyPage> with SingleTickerProviderStateMixin {
 
   //----------------------------------여기서부터 멘티--------------------------------------
   //멘티 - 첫 탭 <구직 정보>
-  // 멘티 - 첫 탭 <구직 정보>
   Widget _buildMenteeInfo(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
