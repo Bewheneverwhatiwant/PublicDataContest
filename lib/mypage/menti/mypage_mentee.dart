@@ -16,7 +16,6 @@ class MyPageMentee extends StatefulWidget {
 class _MyPageMenteeState extends State<MyPageMentee>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
-  List<Uint8List> _selectedFiles = [];
   List<String> _selectedCategories = [];
   Map<String, dynamic> _menteeInfo = {};
 
@@ -31,22 +30,6 @@ class _MyPageMenteeState extends State<MyPageMentee>
   void dispose() {
     _tabController.dispose();
     super.dispose();
-  }
-
-  void _pickFile() async {
-    try {
-      FilePickerResult? result = await FilePicker.platform
-          .pickFiles(type: FileType.image, allowMultiple: true);
-
-      if (result != null) {
-        setState(() {
-          _selectedFiles
-              .addAll(result.files.map((file) => file.bytes!).toList());
-        });
-      } else {}
-    } catch (e) {
-      print('Error picking files: $e');
-    }
   }
 
   void _showCategoryDialog() {
@@ -124,60 +107,66 @@ class _MyPageMenteeState extends State<MyPageMentee>
       appBar: AppBar(
         title: Text('멘티 마이페이지'),
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildProfileSection(),
-            const SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.pushNamed(context, '/profilementee');
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: GlobalColors.mainColor,
-              ),
-              child: const Text(
-                '프로필 페이지로 이동',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
+      body: Stack(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(10.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildProfileSection(),
+                const SizedBox(height: 16),
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.pushNamed(context, '/profilementee');
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: GlobalColors.mainColor,
+                  ),
+                  child: const Text(
+                    '프로필 페이지로 이동',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
                 ),
-              ),
-            ),
-            const SizedBox(height: 16),
-            TabBar(
-              controller: _tabController,
-              indicatorColor: GlobalColors.mainColor,
-              labelColor: GlobalColors.mainColor,
-              unselectedLabelColor: GlobalColors.lightgray,
-              labelStyle: const TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 14,
-              ),
-              tabs: const [
-                Tab(text: '구직 정보', icon: Icon(Icons.work_outline)),
-                Tab(text: '내 히스토리', icon: Icon(Icons.history)),
-                Tab(
-                    text: '항해 Pay 관리',
-                    icon: Icon(Icons.account_balance_wallet)),
+                const SizedBox(height: 16),
+                TabBar(
+                  controller: _tabController,
+                  indicatorColor: GlobalColors.mainColor,
+                  labelColor: GlobalColors.mainColor,
+                  unselectedLabelColor: GlobalColors.lightgray,
+                  labelStyle: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14,
+                  ),
+                  tabs: const [
+                    Tab(text: '구직 정보', icon: Icon(Icons.work_outline)),
+                    Tab(text: '내 히스토리', icon: Icon(Icons.history)),
+                    Tab(
+                        text: '항해 Pay 관리',
+                        icon: Icon(Icons.account_balance_wallet)),
+                  ],
+                ),
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.only(bottom: 10.0),
+                    child: TabBarView(
+                      controller: _tabController,
+                      children: [
+                        _buildScrollableSection(_buildMenteeInfo(context)),
+                        _buildScrollableSection(_buildMentoringHistory()),
+                        _buildScrollableSection(MyPaySection()),
+                      ],
+                    ),
+                  ),
+                ),
               ],
             ),
-            SizedBox(
-              height: 400,
-              child: TabBarView(
-                controller: _tabController,
-                children: [
-                  _buildScrollableSection(_buildMenteeInfo(context)),
-                  _buildScrollableSection(_buildMentoringHistory()),
-                  _buildScrollableSection(MyPaySection()),
-                ],
-              ),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

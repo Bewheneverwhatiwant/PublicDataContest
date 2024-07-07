@@ -266,67 +266,67 @@ class _MyPageMentoState extends State<MyPageMento>
       ),
       body: Stack(
         children: [
-          _buildMainContent(),
+          Padding(
+            padding: const EdgeInsets.all(10.0), // 전체 패딩 설정
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildProfileSection(),
+                const SizedBox(height: 16),
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.pushNamed(context, '/profilemento');
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: GlobalColors.mainColor,
+                  ),
+                  child: const Text(
+                    '프로필 페이지로 이동',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                TabBar(
+                  controller: _tabController,
+                  indicatorColor: GlobalColors.mainColor,
+                  labelColor: GlobalColors.mainColor,
+                  unselectedLabelColor: GlobalColors.lightgray,
+                  labelStyle: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14,
+                  ),
+                  tabs: const [
+                    Tab(text: '내 멘토링 정보', icon: Icon(Icons.info_outline)),
+                    Tab(text: '명예의 전당', icon: Icon(Icons.star_border)),
+                    Tab(
+                        text: '항해 Pay 관리',
+                        icon: Icon(Icons.account_balance_wallet)),
+                  ],
+                ),
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.only(bottom: 10.0),
+                    child: TabBarView(
+                      controller: _tabController,
+                      children: [
+                        _buildScrollableSection(_buildMentorInfo(context)),
+                        _buildScrollableSection(_buildMentoHonor(context)),
+                        _buildScrollableSection(MyPaySection()),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
           if (_isLoading)
             Center(
               child: CircularProgressIndicator(), // 로딩 인디케이터 표시
             ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildMainContent() {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(16.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _buildProfileSection(),
-          const SizedBox(height: 16),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.pushNamed(context, '/profilemento');
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: GlobalColors.mainColor,
-            ),
-            child: const Text(
-              '프로필 페이지로 이동',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-              ),
-            ),
-          ),
-          const SizedBox(height: 16),
-          TabBar(
-            controller: _tabController,
-            indicatorColor: GlobalColors.mainColor,
-            labelColor: GlobalColors.mainColor,
-            unselectedLabelColor: GlobalColors.lightgray,
-            labelStyle: const TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: 14,
-            ),
-            tabs: const [
-              Tab(text: '내 멘토링 정보', icon: Icon(Icons.info_outline)),
-              Tab(text: '명예의 전당', icon: Icon(Icons.star_border)),
-              Tab(text: '항해 Pay 관리', icon: Icon(Icons.account_balance_wallet)),
-            ],
-          ),
-          SizedBox(
-            height: 400,
-            child: TabBarView(
-              controller: _tabController,
-              children: [
-                _buildScrollableSection(_buildMentorInfo(context)),
-                _buildScrollableSection(_buildMentoHonor(context)),
-                _buildScrollableSection(MyPaySection()),
-              ],
-            ),
-          ),
         ],
       ),
     );
