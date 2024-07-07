@@ -8,6 +8,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import '../mypay.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 
 class MyPageMento extends StatefulWidget {
   const MyPageMento({Key? key}) : super(key: key);
@@ -19,7 +20,8 @@ class MyPageMento extends StatefulWidget {
 class _MyPageMentoState extends State<MyPageMento>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
-  List<Uint8List> _selectedFiles = [];
+  ValueNotifier<List<Uint8List>> _selectedFilesNotifier =
+      ValueNotifier<List<Uint8List>>([]);
   List<String> _selectedCategories = [];
   Map<String, dynamic> _mentorInfo = {};
 
@@ -50,12 +52,14 @@ class _MyPageMentoState extends State<MyPageMento>
   }
 
   void _pickFile() async {
-    if (await _requestPermissions()) {
+    if (kIsWeb || await _requestPermissions()) {
       _selectFiles();
     }
   }
 
   Future<bool> _requestPermissions() async {
+    if (kIsWeb) return true;
+
     var storageStatus = await Permission.storage.status;
     if (storageStatus.isGranted) {
       return true;
@@ -79,16 +83,48 @@ class _MyPageMentoState extends State<MyPageMento>
   void _selectFiles() async {
     try {
       FilePickerResult? result = await FilePicker.platform
-          .pickFiles(type: FileType.image, allowMultiple: true);
-      if (result != null) {
-        setState(() {
-          _selectedFiles
-              .addAll(result.files.map((file) => file.bytes!).toList());
-        });
+          .pickFiles(type: FileType.image, allowMultiple: false);
+      if (result != null && result.files.isNotEmpty) {
+        Uint8List? file = result.files.first.bytes;
+        if (file != null) {
+          // 알림을 띄우기 전에 setState 사용
+          _showConfirmationDialog(file);
+        }
+      } else {
+        print('No files selected');
       }
     } catch (e) {
       print('Error picking files: $e');
     }
+  }
+
+  void _showConfirmationDialog(Uint8List file) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('이미지 선택'),
+          content: Text('이 이미지를 선택하시겠습니까?'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(); // 취소
+              },
+              child: Text('취소'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(); // 알림창 닫기
+                setState(() {
+                  _selectedFilesNotifier.value = [file]; // 파일 선택
+                });
+              },
+              child: Text('확인'),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   void _showCategoryDialog() {
@@ -353,7 +389,7 @@ class _MyPageMentoState extends State<MyPageMento>
           const SizedBox(height: 16),
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
-            child: Column(
+            child: Row(
               children: [
                 GestureDetector(
                   onTap: _pickFile,
@@ -367,40 +403,60 @@ class _MyPageMentoState extends State<MyPageMento>
                     child: const Icon(Icons.add, size: 40, color: Colors.grey),
                   ),
                 ),
-                const SizedBox(height: 15),
-                Text(
-                  '아직 등록한 인증서가 없어요.',
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    color: GlobalColors.lightgray,
-                  ),
+                const SizedBox(width: 15),
+                ValueListenableBuilder<List<Uint8List>>(
+                  valueListenable: _selectedFilesNotifier,
+                  builder: (context, selectedFiles, child) {
+                    return Row(
+                      children: selectedFiles.map((file) {
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                          child: Container(
+                            width: 100,
+                            height: 150,
+                            decoration: BoxDecoration(
+                              border: Border.all(color: Colors.grey),
+                              borderRadius: BorderRadius.circular(8.0),
+                            ),
+                            child: Image.memory(
+                              file,
+                              fit: BoxFit.cover,
+                            ),
+                          ),
+                        );
+                      }).toList(),
+                    );
+                  },
                 ),
-                Text(
-                  '인증서를 등록해야 멘토링을 시작할 수 있어요.',
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    color: GlobalColors.lightgray,
-                  ),
-                ),
-                ..._selectedFiles.map((file) {
-                  return Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                    child: Container(
-                      width: 100,
-                      height: 150,
-                      decoration: BoxDecoration(
-                        border: Border.all(color: Colors.grey),
-                        borderRadius: BorderRadius.circular(8.0),
-                      ),
-                      child: Image.memory(
-                        file,
-                        fit: BoxFit.cover,
-                      ),
-                    ),
-                  );
-                }).toList(),
               ],
             ),
+          ),
+          const SizedBox(height: 15),
+          ValueListenableBuilder<List<Uint8List>>(
+            valueListenable: _selectedFilesNotifier,
+            builder: (context, selectedFiles, child) {
+              if (selectedFiles.isEmpty) {
+                return Column(
+                  children: [
+                    Text(
+                      '아직 등록한 인증서가 없어요.',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: GlobalColors.lightgray,
+                      ),
+                    ),
+                    Text(
+                      '인증서를 등록해야 멘토링을 시작할 수 있어요.',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: GlobalColors.lightgray,
+                      ),
+                    ),
+                  ],
+                );
+              }
+              return Container();
+            },
           ),
         ],
       ),
