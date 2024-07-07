@@ -1,7 +1,11 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:publicdatacontest/common/theme/colors/color_palette.dart';
 import 'dart:typed_data';
+import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import '../mypay.dart';
 
 class MyPageMento extends StatefulWidget {
@@ -16,11 +20,26 @@ class _MyPageMentoState extends State<MyPageMento>
   late TabController _tabController;
   List<Uint8List> _selectedFiles = [];
   List<String> _selectedCategories = [];
+  Map<String, dynamic> _mentorInfo = {};
+
+  String userId = '';
+  String mentorName = '';
+  String gender = '';
+  String birth = '';
+  String email = '';
+  String phoneNumber = '';
+  String address = '';
+  String createdAt = '';
+  int studentCount = 0;
+  int mentoringCount = 0;
+  String reemploymentIdea = '';
+  String active = '';
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
+    _fetchAndDisplayUserInfo();
   }
 
   @override
@@ -77,6 +96,58 @@ class _MyPageMentoState extends State<MyPageMento>
         _selectedCategories.add(category);
       });
     }
+  }
+
+  void _fetchAndDisplayUserInfo() async {
+    final String apiServer = dotenv.env['API_SERVER'] ?? '';
+    final String? accessToken = await _getAccessToken();
+
+    if (accessToken == null) {
+      print('AccessToken not found');
+      return;
+    }
+
+    final response = await http.get(
+      Uri.parse('$apiServer/api/auth/getInfo'),
+      headers: {
+        'Authorization': 'Bearer $accessToken',
+      },
+    );
+
+    if (response.statusCode == 200) {
+      final responseData = json.decode(response.body);
+      _parseAndDisplayUserInfo(responseData);
+    } else {
+      print('Failed to fetch user info');
+    }
+  }
+
+  void _parseAndDisplayUserInfo(Map<String, dynamic> responseData) {
+    var mentor = responseData['mentor'];
+    var role = responseData['role'];
+
+    setState(() {
+      userId = mentor['userId'];
+      mentorName = mentor['mentorName'];
+      gender = mentor['gender'];
+      birth = mentor['birth'];
+      email = mentor['email'];
+      phoneNumber = mentor['phoneNumber'];
+      address = mentor['address'];
+      // 날짜 형식 변환
+      DateTime createdAtDate = DateTime.parse(mentor['createdAt']);
+      createdAt =
+          '${createdAtDate.year}.${createdAtDate.month}.${createdAtDate.day}';
+      studentCount = mentor['studentCount'] ?? 0;
+      mentoringCount = mentor['mentoringCount'] ?? 0;
+      reemploymentIdea = mentor['reemploymentIdea'] ? '있음' : '없음';
+      active = mentor['active'] == null ? '활동 쉬는 중' : '활동 중';
+    });
+  }
+
+  Future<String?> _getAccessToken() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString('accessToken');
   }
 
   @override
@@ -165,18 +236,19 @@ class _MyPageMentoState extends State<MyPageMento>
           color: Colors.grey[300],
         ),
         const SizedBox(width: 16),
-        const Column(
+        Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('아이디'),
-            Text('이름'),
-            Text('성별'),
-            Text('생년월일'),
-            Text('이메일'),
-            Text('전화번호'),
-            Text('거주지역'),
-            Text('현재 재취업 의사'),
-            Text('멘토 활동 상태'),
+            Text('아이디: $userId'),
+            Text('이름: $mentorName'),
+            Text('성별: $gender'),
+            Text('생년월일: $birth'),
+            Text('이메일: $email'),
+            Text('전화번호: $phoneNumber'),
+            Text('주소: $address'),
+            Text('가입한 날짜: $createdAt'),
+            Text('현재 재취업 의사: $reemploymentIdea'),
+            Text('멘토 활동 상태: $active'),
           ],
         ),
       ],
@@ -241,6 +313,8 @@ class _MyPageMentoState extends State<MyPageMento>
         _buildCertificates(),
         const SizedBox(height: 16),
         _buildSection(_buildMentoButtons(context)),
+        Text('누적 멘티 수: ${_mentorInfo['mentor']?['studentCount'] ?? 0}'),
+        Text('누적 멘토링 횟수: ${_mentorInfo['mentor']?['mentoringCount'] ?? 0}'),
       ],
     );
   }
