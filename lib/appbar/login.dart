@@ -108,7 +108,7 @@ class _LoginPageState extends State<LoginPage> {
     return Scaffold(
       appBar: const CustomNewAppBar(title: '로그인'),
       body: Center(
-        child: Padding(
+        child: SingleChildScrollView(
           padding: const EdgeInsets.all(16.0),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
