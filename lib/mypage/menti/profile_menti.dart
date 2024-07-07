@@ -1,13 +1,34 @@
 import 'package:flutter/material.dart';
+import 'package:publicdatacontest/common/theme/colors/color_palette.dart';
 
-class ProfileMentiPage extends StatelessWidget {
-  const ProfileMentiPage({Key? key}) : super(key: key);
+class ProfileMenteePage extends StatefulWidget {
+  const ProfileMenteePage({Key? key}) : super(key: key);
+
+  @override
+  _ProfileMenteePageState createState() => _ProfileMenteePageState();
+}
+
+class _ProfileMenteePageState extends State<ProfileMenteePage>
+    with SingleTickerProviderStateMixin {
+  late TabController _tabController;
+
+  @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(length: 2, vsync: this);
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('멘티 프로필'),
+        title: Text('멘티 프로필'),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
@@ -16,11 +37,21 @@ class ProfileMentiPage extends StatelessWidget {
           children: [
             _buildProfileSection(),
             const SizedBox(height: 16),
-            _buildMenteeInfoSection(),
-            const SizedBox(height: 16),
-            _buildMenteeBadgeSection(),
-            const SizedBox(height: 16),
-            _buildMenteeHistorySection(),
+            TabBar(
+              controller: _tabController,
+              indicatorColor: GlobalColors.mainColor,
+              labelColor: GlobalColors.mainColor,
+              unselectedLabelColor: GlobalColors.lightgray,
+              labelStyle: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+              tabs: const [Tab(text: '멘티 정보'), Tab(text: '명예의 전당')],
+            ),
+            SizedBox(
+              height: 400,
+              child: TabBarView(
+                controller: _tabController,
+                children: [_buildMenteeInfo(), _buildMenteeHonor()],
+              ),
+            ),
           ],
         ),
       ),
@@ -32,49 +63,28 @@ class ProfileMentiPage extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Container(
-          color: Colors.grey[300],
           width: 100,
           height: 100,
+          color: Colors.grey[300],
         ),
         const SizedBox(width: 16),
-        const Column(
+        Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('아이디'),
-            Text('이름 / 성별'),
-            SizedBox(height: 8),
-            Text('이메일'),
-            Text('전화번호'),
-            Text('거주지역'),
-            SizedBox(height: 8),
-            Text('현재 취업 의사 yes/no'),
-            Text('멘토 활동 상태 on/off'),
-          ],
-        ),
-      ],
-    );
-  }
-
-  Widget _buildMenteeInfoSection() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text('멘티 정보', style: TextStyle(fontWeight: FontWeight.bold)),
-        const SizedBox(height: 8),
-        Row(
-          children: [
-            const Expanded(child: Text('구직 분야 대분류/소분류')),
-            TextButton(onPressed: () {}, child: const Text('추가하기')),
-          ],
-        ),
-        const SizedBox(height: 8),
-        Row(
-          children: [
-            const Text('멘티로서 별점'),
-            const SizedBox(width: 8),
             Row(
-              children: List.generate(
-                  5, (index) => const Icon(Icons.star, color: Colors.yellow)),
+              children: [
+                Icon(Icons.account_circle, size: 20, color: Colors.grey[600]),
+                SizedBox(width: 8),
+                Text('아이디: happyUser2024'),
+              ],
+            ),
+            SizedBox(height: 8),
+            Row(
+              children: [
+                Icon(Icons.email, size: 20, color: Colors.grey[600]),
+                SizedBox(width: 8),
+                Text('이메일: user123@example.com'),
+              ],
             ),
           ],
         ),
@@ -82,73 +92,114 @@ class ProfileMentiPage extends StatelessWidget {
     );
   }
 
-  Widget _buildMenteeBadgeSection() {
+  Widget _buildMenteeInfo() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text('멘티의 명예 배지', style: TextStyle(fontWeight: FontWeight.bold)),
-        const SizedBox(height: 8),
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8.0),
+          child: Text(
+            '구직 분야',
+            style: TextStyle(
+              color: GlobalColors.mainColor,
+              fontWeight: FontWeight.bold,
+              fontSize: 18,
+            ),
+          ),
+        ),
+        Container(
+          padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          decoration: BoxDecoration(
+            color: Colors.grey[200],
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Text(
+            'IT 개발자',
+            style: TextStyle(
+              fontSize: 16,
+            ),
+          ),
+        ),
+        SizedBox(height: 16),
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8.0),
+          child: Text(
+            '멘티로서의 별점',
+            style: TextStyle(
+              color: GlobalColors.mainColor,
+              fontWeight: FontWeight.bold,
+              fontSize: 18,
+            ),
+          ),
+        ),
         Row(
-          children: [
-            Container(color: Colors.grey[300], width: 50, height: 50),
-            const SizedBox(width: 8),
-            Container(color: Colors.grey[300], width: 50, height: 50),
-            const SizedBox(width: 8),
-            Container(color: Colors.grey[300], width: 50, height: 50),
-          ],
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: List.generate(
+            5,
+            (index) => Icon(
+              Icons.star,
+              color: Color.fromARGB(255, 255, 208, 0),
+              size: 30,
+            ),
+          ),
         ),
       ],
     );
   }
 
-  Widget _buildMenteeHistorySection() {
-    const List<Map<String, String>> menteeHistory = [
-      {
-        'title': '000멘토 | 000멘토링',
-        'date': '2024.6.1~2024.7.1',
-        'price': '50,000'
-      },
-      {
-        'title': '000멘토 | 000멘토링',
-        'date': '2024.6.1~2024.7.1',
-        'price': '50,000'
-      },
-      {
-        'title': '000멘토 | 000멘토링',
-        'date': '2024.6.1~2024.7.1',
-        'price': '50,000'
-      },
-    ];
-
+  Widget _buildMenteeHonor() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text('멘티의 모든 멘토링 내역',
-            style: TextStyle(fontWeight: FontWeight.bold, color: Colors.blue)),
-        const SizedBox(height: 8),
-        const Text('완료된 멘토링만 표시됩니다.'),
-        const SizedBox(height: 8),
-        ...menteeHistory.map((history) {
-          return Padding(
-            padding: const EdgeInsets.symmetric(vertical: 4.0),
-            child: Container(
-              padding: const EdgeInsets.all(16.0),
-              decoration: BoxDecoration(
-                color: Colors.grey[300],
-                borderRadius: BorderRadius.circular(8.0),
+        Text(
+          '멘티의 명예 배지',
+          style: TextStyle(
+            color: GlobalColors.mainColor,
+            fontWeight: FontWeight.bold,
+            fontSize: 16,
+          ),
+        ),
+        Center(
+          child: Column(
+            children: [
+              Container(
+                width: 80,
+                height: 80,
+                decoration: BoxDecoration(
+                  color: Colors.blue[100],
+                  shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.grey.withOpacity(0.5),
+                      spreadRadius: 2,
+                      blurRadius: 5,
+                      offset: Offset(0, 3),
+                    ),
+                  ],
+                ),
+                child: Center(
+                  child: Text(
+                    'Lv.1',
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                      color: GlobalColors.mainColor,
+                    ),
+                  ),
+                ),
               ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(history['title']!,
-                      style: const TextStyle(fontWeight: FontWeight.bold)),
-                  Text(history['date']!),
-                  Text(history['price']!),
-                ],
+              SizedBox(height: 8),
+              Text(
+                '초보 멘티',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: GlobalColors.mainColor,
+                ),
               ),
-            ),
-          );
-        }).toList(),
+            ],
+          ),
+        ),
       ],
     );
   }

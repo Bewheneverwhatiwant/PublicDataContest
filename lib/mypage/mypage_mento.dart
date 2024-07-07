@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:publicdatacontest/common/theme/colors/color_palette.dart';
-import 'package:publicdatacontest/profile/profile.dart';
 import 'dart:typed_data';
 import 'mypay.dart';
 
@@ -80,15 +79,6 @@ class _MyPageMentoState extends State<MyPageMento>
     }
   }
 
-  void _navigateToProfile() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => ProfilePage(isMento: true),
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -103,17 +93,19 @@ class _MyPageMentoState extends State<MyPageMento>
             _buildProfileSection(),
             const SizedBox(height: 16),
             ElevatedButton(
-              onPressed: _navigateToProfile,
-              child: Text(
+              onPressed: () {
+                Navigator.pushNamed(context, '/profilemento');
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: GlobalColors.mainColor,
+              ),
+              child: const Text(
                 '프로필 페이지로 이동',
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
                   color: Colors.white,
                 ),
-              ),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: GlobalColors.mainColor,
               ),
             ),
             const SizedBox(height: 16),

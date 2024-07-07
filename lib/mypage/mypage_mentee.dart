@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:publicdatacontest/common/theme/colors/color_palette.dart';
-import 'package:publicdatacontest/profile/profile.dart';
 import 'dart:typed_data'; // 바이너리 데이터를 처리하기 위해 !! (file picker 사용 x)
 import 'mypay.dart';
 
@@ -80,15 +79,6 @@ class _MyPageMenteeState extends State<MyPageMentee>
     }
   }
 
-  void _navigateToProfile() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => ProfilePage(isMento: false),
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -103,17 +93,19 @@ class _MyPageMenteeState extends State<MyPageMentee>
             _buildProfileSection(),
             const SizedBox(height: 16),
             ElevatedButton(
-              onPressed: _navigateToProfile,
-              child: Text(
+              onPressed: () {
+                Navigator.pushNamed(context, '/profilementee');
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: GlobalColors.mainColor,
+              ),
+              child: const Text(
                 '프로필 페이지로 이동',
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
                   color: Colors.white,
                 ),
-              ),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: GlobalColors.mainColor,
               ),
             ),
             const SizedBox(height: 16),
@@ -122,7 +114,7 @@ class _MyPageMenteeState extends State<MyPageMentee>
               indicatorColor: GlobalColors.mainColor,
               labelColor: GlobalColors.mainColor,
               unselectedLabelColor: GlobalColors.lightgray,
-              labelStyle: TextStyle(
+              labelStyle: const TextStyle(
                 fontWeight: FontWeight.bold,
                 fontSize: 14,
               ),
@@ -224,7 +216,7 @@ class _MyPageMenteeState extends State<MyPageMentee>
                   borderRadius: BorderRadius.circular(8),
                 ),
               ),
-              child: Text(
+              child: const Text(
                 '추가하기',
                 style: TextStyle(
                   fontSize: 12,

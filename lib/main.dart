@@ -84,7 +84,7 @@ class _MyAppState extends State<MyApp> {
         '/review_list_template': (context) => const ReviewListTemplatePage(),
         '/makementoring': (context) => const MakeMentoring(),
         '/profilemento': (context) => const ProfileMentoPage(),
-        '/profilementi': (context) => const ProfileMentiPage(),
+        '/profilementee': (context) => const ProfileMenteePage(),
         '/mentomyclass': (context) => const MentoMyClassPage(),
         '/mentoringdetail': (context) => const MentoringDetailPage(),
         '/reviewdetail': (context) => const HomeReviewDetailPage(),
