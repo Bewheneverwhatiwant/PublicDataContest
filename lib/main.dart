@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:device_preview/device_preview.dart';
 import 'package:publicdatacontest/mypage/mento/mento_myclass.dart';
 import 'package:publicdatacontest/mypage/mento/profile_mento.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -42,7 +43,9 @@ Future<void> main() async {
     print('환경변수 로딩 중 오류 발생: $e');
   }
 
-  runApp(MyApp());
+  runApp(DevicePreview(
+    builder: (context) => MyApp(),
+  ));
 }
 
 class MyApp extends StatefulWidget {
@@ -76,6 +79,9 @@ class _MyAppState extends State<MyApp> {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.white),
         useMaterial3: true,
       ),
+      // DevicePreview 설정 추가
+      locale: DevicePreview.locale(context),
+      builder: DevicePreview.appBuilder,
       initialRoute: _splashShown ? '/main' : '/',
       routes: {
         '/main': (context) => const MyHomePage(),
