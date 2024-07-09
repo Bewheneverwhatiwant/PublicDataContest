@@ -10,7 +10,8 @@ class HireInternDetailPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: GlobalColors.whiteColor,
+        scrolledUnderElevation: 0,
+        backgroundColor: Colors.white,
         title: const Text('인턴 채용정보'),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),

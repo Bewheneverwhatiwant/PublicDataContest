@@ -113,6 +113,8 @@ class _CategoryTemplatePageState extends State<CategoryTemplatePage> {
 
     return Scaffold(
       appBar: AppBar(
+        scrolledUnderElevation: 0,
+        backgroundColor: Colors.white,
         title: Text(appBarTitle),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),

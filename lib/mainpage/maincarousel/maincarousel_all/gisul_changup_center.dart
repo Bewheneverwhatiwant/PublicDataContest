@@ -109,6 +109,8 @@ class _GisulChangupCenterPageState extends State<GisulChangupCenterPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        scrolledUnderElevation: 0,
+        backgroundColor: Colors.white,
         title: Text('재취업 프로그램 살펴보기'),
       ),
       body: Column(

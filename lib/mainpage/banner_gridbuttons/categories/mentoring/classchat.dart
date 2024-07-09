@@ -137,6 +137,8 @@ class _ClassChatPageState extends State<ClassChatPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        scrolledUnderElevation: 0,
+        backgroundColor: Colors.white,
         title: const Text('000멘토 - 000 멘토링'),
       ),
       body: Column(
