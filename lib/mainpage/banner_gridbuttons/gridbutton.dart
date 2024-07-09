@@ -1,54 +1,49 @@
+// gridbutton.dart
+
 import 'package:flutter/material.dart';
 
 class GridButton extends StatelessWidget {
-  final String? imagePath;
+  final IconData icon;
   final String label;
   final int kind;
   final VoidCallback onPressed;
 
   const GridButton({
-    super.key,
-    this.imagePath,
+    required this.icon,
     required this.label,
     required this.kind,
     required this.onPressed,
-  });
+    Key? key,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        SizedBox(
-          width: 40,
-          height: 40,
-          child: ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.white,
-              foregroundColor: Colors.black,
-              elevation: 5,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8.0),
-              ),
-              padding: const EdgeInsets.all(0),
-            ),
-            onPressed: onPressed,
-            child: Ink(
-              decoration: BoxDecoration(
-                color: imagePath == null ? Colors.grey : null,
-                image: imagePath != null
-                    ? DecorationImage(
-                        image: AssetImage(imagePath!),
-                        fit: BoxFit.cover,
-                      )
-                    : null,
-                borderRadius: BorderRadius.circular(8.0),
-              ),
-            ),
-          ),
+    return ElevatedButton(
+      onPressed: onPressed,
+      style: ElevatedButton.styleFrom(
+        backgroundColor: Colors.white,
+        surfaceTintColor: Colors.black,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(50),
         ),
-        const SizedBox(height: 8),
-        Text(label, style: const TextStyle(fontSize: 14)),
-      ],
+        padding: EdgeInsets.all(5),
+      ),
+      child: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              icon,
+              size: 24,
+            ),
+            Text(
+              label,
+              textAlign: TextAlign.center,
+              style: TextStyle(fontSize: 11),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

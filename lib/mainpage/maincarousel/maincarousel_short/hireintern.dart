@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-
-// 메인페이지 하단 인턴정보 출력 부분
+import 'package:publicdatacontest/common/theme/colors/color_palette.dart';
+import '../../../appbar/new_appbar.dart';
 
 class HireIntern extends StatelessWidget {
   const HireIntern({super.key});
@@ -67,7 +67,7 @@ class HireIntern extends StatelessWidget {
                     width: 200,
                     padding: const EdgeInsets.all(16.0),
                     decoration: BoxDecoration(
-                      color: Colors.orange[50],
+                      color: Color.fromARGB(255, 255, 249, 237),
                       borderRadius: BorderRadius.circular(12.0),
                       boxShadow: [
                         BoxShadow(
@@ -84,36 +84,111 @@ class HireIntern extends StatelessWidget {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Text(
-                              '사업장명 : ${intern['사업장명']}',
-                              style: const TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
+                            RichText(
+                              text: TextSpan(
+                                children: [
+                                  WidgetSpan(
+                                    child: Icon(
+                                      Icons.business,
+                                      size: 16,
+                                      color: Colors.black,
+                                    ),
+                                  ),
+                                  const TextSpan(
+                                    text: ' 사업장명: ',
+                                    style: TextStyle(
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.black,
+                                    ),
+                                  ),
+                                  TextSpan(
+                                    text: intern['사업장명'],
+                                    style: const TextStyle(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.normal,
+                                      color: Colors.black,
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
-                            const Text(
-                              'D-n',
-                              style: TextStyle(
-                                fontSize: 16,
-                                color: Colors.red,
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 10, vertical: 3),
+                              decoration: BoxDecoration(
+                                color: Color.fromARGB(255, 255, 255, 255),
+                                borderRadius: BorderRadius.circular(15.0),
+                              ),
+                              child: const Text(
+                                'D - n',
+                                style: TextStyle(
+                                  fontSize: 10,
+                                  color: Color.fromARGB(255, 239, 99, 24),
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
                             ),
                           ],
                         ),
                         const SizedBox(height: 8),
-                        Text(
-                          '모집직종 : ${intern['모집직종']}',
-                          style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
+                        RichText(
+                          text: TextSpan(
+                            children: [
+                              WidgetSpan(
+                                child: Icon(
+                                  Icons.work,
+                                  size: 16,
+                                  color: Colors.black,
+                                ),
+                              ),
+                              const TextSpan(
+                                text: ' 모집직종: ',
+                                style: TextStyle(
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.black,
+                                ),
+                              ),
+                              TextSpan(
+                                text: intern['모집직종'],
+                                style: const TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.normal,
+                                  color: Colors.black,
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                         const SizedBox(height: 8),
-                        Text(
-                          '근무지역 : ${intern['근무지역']}',
-                          style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
+                        RichText(
+                          text: TextSpan(
+                            children: [
+                              WidgetSpan(
+                                child: Icon(
+                                  Icons.location_on,
+                                  size: 16,
+                                  color: Colors.black,
+                                ),
+                              ),
+                              const TextSpan(
+                                text: ' 근무지역: ',
+                                style: TextStyle(
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.black,
+                                ),
+                              ),
+                              TextSpan(
+                                text: intern['근무지역'],
+                                style: const TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.normal,
+                                  color: Colors.black,
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                       ],

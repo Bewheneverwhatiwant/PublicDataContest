@@ -44,11 +44,11 @@ class _ButtonsState extends State<Buttons> {
           child: GridView.count(
             shrinkWrap: true,
             crossAxisCount: 5,
-            crossAxisSpacing: 4.0,
-            mainAxisSpacing: 4.0,
+            crossAxisSpacing: 8.0,
+            mainAxisSpacing: 8.0,
             children: <Widget>[
               GridButton(
-                imagePath: null,
+                icon: Icons.category,
                 label: '전체',
                 kind: 1,
                 onPressed: () {
@@ -60,7 +60,7 @@ class _ButtonsState extends State<Buttons> {
                 },
               ),
               GridButton(
-                imagePath: null,
+                icon: Icons.language,
                 label: '언어',
                 kind: 2,
                 onPressed: () {
@@ -72,7 +72,7 @@ class _ButtonsState extends State<Buttons> {
                 },
               ),
               GridButton(
-                imagePath: null,
+                icon: Icons.account_balance_wallet,
                 label: '회계',
                 kind: 3,
                 onPressed: () {
@@ -84,7 +84,7 @@ class _ButtonsState extends State<Buttons> {
                 },
               ),
               GridButton(
-                imagePath: null,
+                icon: Icons.computer,
                 label: 'IT',
                 kind: 4,
                 onPressed: () {
@@ -96,7 +96,7 @@ class _ButtonsState extends State<Buttons> {
                 },
               ),
               GridButton(
-                imagePath: null,
+                icon: Icons.design_services,
                 label: '디자인',
                 kind: 5,
                 onPressed: () {
@@ -108,7 +108,7 @@ class _ButtonsState extends State<Buttons> {
                 },
               ),
               GridButton(
-                imagePath: null,
+                icon: Icons.music_note,
                 label: '음악',
                 kind: 6,
                 onPressed: () {
@@ -120,7 +120,7 @@ class _ButtonsState extends State<Buttons> {
                 },
               ),
               GridButton(
-                imagePath: null,
+                icon: Icons.spa,
                 label: '미용',
                 kind: 7,
                 onPressed: () {
@@ -132,7 +132,7 @@ class _ButtonsState extends State<Buttons> {
                 },
               ),
               GridButton(
-                imagePath: null,
+                icon: Icons.camera_alt,
                 label: '사진',
                 kind: 8,
                 onPressed: () {
@@ -144,7 +144,7 @@ class _ButtonsState extends State<Buttons> {
                 },
               ),
               GridButton(
-                imagePath: null,
+                icon: Icons.lightbulb,
                 label: '기획',
                 kind: 9,
                 onPressed: () {
@@ -156,7 +156,7 @@ class _ButtonsState extends State<Buttons> {
                 },
               ),
               GridButton(
-                imagePath: null,
+                icon: Icons.palette,
                 label: '공예',
                 kind: 10,
                 onPressed: () {
@@ -167,7 +167,12 @@ class _ButtonsState extends State<Buttons> {
                   );
                 },
               ),
-            ],
+            ].map((button) {
+              return Container(
+                color: Colors.white,
+                child: button,
+              );
+            }).toList(),
           ),
         ),
         if (isLoggedIn && isMento) // 사용자가 로그인하고 멘토일 때만 멘토링 개설 버튼 보임

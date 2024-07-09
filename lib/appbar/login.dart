@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
+import 'package:publicdatacontest/common/theme/colors/color_palette.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import 'new_appbar.dart';
@@ -17,11 +18,13 @@ class _LoginPageState extends State<LoginPage> {
   final TextEditingController _passwordController = TextEditingController();
 
   bool _isLoginEnabled = false;
+  String _errorMessage = '';
 
   void _validateInputs() {
     setState(() {
       _isLoginEnabled = _usernameController.text.isNotEmpty &&
           _passwordController.text.isNotEmpty;
+      _errorMessage = ''; // 입력 변경 시 오류 메시지 초기화
     });
   }
 
@@ -64,41 +67,11 @@ class _LoginPageState extends State<LoginPage> {
         await prefs.setString('accessToken', accessToken);
         await prefs.setString('role', role);
 
-        showDialog(
-          context: context,
-          builder: (BuildContext context) {
-            return AlertDialog(
-              title: const Text('로그인되었습니다!'),
-              actions: [
-                TextButton(
-                  onPressed: () {
-                    Navigator.pushNamedAndRemoveUntil(
-                        context, '/main', (route) => false);
-                  },
-                  child: const Text('확인'),
-                ),
-              ],
-            );
-          },
-        );
+        Navigator.pushNamedAndRemoveUntil(context, '/main', (route) => false);
       } else {
-        showDialog(
-          context: context,
-          builder: (BuildContext context) {
-            return AlertDialog(
-              title: const Text('로그인 실패'),
-              content: const Text('아이디 또는 비밀번호가 잘못되었습니다.'),
-              actions: [
-                TextButton(
-                  onPressed: () {
-                    Navigator.pop(context);
-                  },
-                  child: const Text('확인'),
-                ),
-              ],
-            );
-          },
-        );
+        setState(() {
+          _errorMessage = '아이디 또는 비밀번호가 잘못되었습니다.';
+        });
       }
     }
   }
@@ -106,66 +79,117 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: GlobalColors.whiteColor,
       appBar: const CustomNewAppBar(title: '로그인'),
       body: Center(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.all(16.0),
+          padding: const EdgeInsets.all(15.0),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Image.asset(
                 'assets/images/logo.png',
-                width: 150,
-                height: 150,
+                width: 200,
+                height: 200,
               ),
-              const SizedBox(height: 32),
-              TextField(
-                controller: _usernameController,
-                decoration: InputDecoration(
-                  hintText: '아이디를 입력해주세요.',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8.0),
+              const SizedBox(height: 25),
+              Container(
+                width: 300,
+                child: TextField(
+                  controller: _usernameController,
+                  cursorColor: GlobalColors.mainColor,
+                  decoration: InputDecoration(
+                    hintText: '아이디를 입력해주세요.',
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(18.0),
+                      borderSide: BorderSide(color: Colors.grey, width: 1.0),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(18.0),
+                      borderSide:
+                          BorderSide(color: GlobalColors.mainColor, width: 2.0),
+                    ),
                   ),
                 ),
               ),
               const SizedBox(height: 16),
-              TextField(
-                controller: _passwordController,
-                obscureText: true,
-                decoration: InputDecoration(
-                  hintText: '비밀번호를 입력해주세요.',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8.0),
+              Container(
+                width: 300,
+                child: TextField(
+                  controller: _passwordController,
+                  obscureText: true,
+                  cursorColor: GlobalColors.mainColor,
+                  decoration: InputDecoration(
+                    hintText: '비밀번호를 입력해주세요.',
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(18.0),
+                      borderSide: BorderSide(color: Colors.grey, width: 1.0),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(18.0),
+                      borderSide:
+                          BorderSide(color: GlobalColors.mainColor, width: 2.0),
+                    ),
                   ),
                 ),
               ),
-              const SizedBox(height: 32),
-              ElevatedButton(
-                onPressed: _isLoginEnabled ? _login : null,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: _isLoginEnabled ? Colors.blue : Colors.grey,
-                  minimumSize: const Size(double.infinity, 50),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8.0),
+              if (_errorMessage.isNotEmpty)
+                Padding(
+                  padding: const EdgeInsets.only(top: 8.0, bottom: 8.0),
+                  child: Text(
+                    _errorMessage,
+                    style: TextStyle(color: Colors.red, fontSize: 14),
+                  ),
+                )
+              else
+                SizedBox(height: 22),
+              Container(
+                width: 300,
+                height: 60,
+                child: ElevatedButton(
+                  onPressed: _isLoginEnabled ? _login : null,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: _isLoginEnabled
+                        ? GlobalColors.mainColor
+                        : GlobalColors.lightgray,
+                    minimumSize: const Size(double.infinity, 50),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(18.0),
+                    ),
+                  ),
+                  child: Text(
+                    '로그인',
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: _isLoginEnabled
+                          ? GlobalColors.whiteColor
+                          : GlobalColors.lightgray,
+                    ),
                   ),
                 ),
-                child: const Text('로그인'),
               ),
               const SizedBox(height: 16),
-              Row(
+              Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Text('항해가 처음이시라면'),
-                  TextButton(
-                    onPressed: () {
-                      Navigator.pushNamed(context, '/signup');
-                    },
-                    child: const Text(
-                      '회원가입',
-                      style: TextStyle(
-                        color: Colors.blue,
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Text('항해가 처음이시라면'),
+                      TextButton(
+                        onPressed: () {
+                          Navigator.pushNamed(context, '/signup');
+                        },
+                        child: Text(
+                          '회원가입',
+                          style: TextStyle(
+                            color: GlobalColors.mainColor,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                       ),
-                    ),
+                    ],
                   ),
                 ],
               ),
