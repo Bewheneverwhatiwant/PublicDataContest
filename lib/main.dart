@@ -76,6 +76,7 @@ class _MyAppState extends State<MyApp> {
     return MaterialApp(
       title: 'HangHae',
       theme: ThemeData(
+        scaffoldBackgroundColor: Colors.white,
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.white),
         useMaterial3: true,
       ),

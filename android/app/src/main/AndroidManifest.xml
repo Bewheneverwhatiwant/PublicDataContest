@@ -9,6 +9,7 @@
         android:label="항해"
         android:name="${applicationName}"
         android:icon="@mipmap/appstore"
+         android:enableOnBackInvokedCallback="true"
         android:usesCleartextTraffic="true">
         <activity
             android:name=".MainActivity"

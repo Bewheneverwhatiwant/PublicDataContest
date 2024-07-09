@@ -16,23 +16,30 @@ class _ButtonsState extends State<Buttons> {
   @override
   void initState() {
     super.initState();
-    _checkRole();
     _checkLoginStatus();
+  }
+
+  Future<void> _checkLoginStatus() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    bool loginStatus = prefs.getString('accessToken') != null;
+    if (mounted) {
+      setState(() {
+        isLoggedIn = loginStatus;
+      });
+    }
+    if (loginStatus) {
+      _checkRole();
+    }
   }
 
   Future<void> _checkRole() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? role = prefs.getString('role');
-    setState(() {
-      isMento = role == 'mentor';
-    });
-  }
-
-  Future<void> _checkLoginStatus() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    setState(() {
-      isLoggedIn = prefs.getString('accessToken') != null;
-    });
+    if (mounted) {
+      setState(() {
+        isMento = role == 'mentor';
+      });
+    }
   }
 
   @override

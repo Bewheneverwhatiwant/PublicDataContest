@@ -9,6 +9,8 @@ class HomeReviewDetailPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        scrolledUnderElevation: 0,
+        backgroundColor: Colors.white,
         title: const Text('멘토링 리뷰'),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),

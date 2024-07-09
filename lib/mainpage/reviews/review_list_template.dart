@@ -33,13 +33,15 @@ class _ReviewListTemplatePageState extends State<ReviewListTemplatePage> {
 
   @override
   Widget build(BuildContext context) {
-    final Map arguments = ModalRoute.of(context)?.settings.arguments as Map;
-    final int reviewlistkind = arguments['reviewlistkind'];
+    final Map? arguments = ModalRoute.of(context)?.settings.arguments as Map?;
+    final int reviewlistkind = arguments?['reviewlistkind'] ?? 1;
     final String appBarTitle = appBarTitles[reviewlistkind] ?? '리뷰 리스트';
 
     return Scaffold(
       appBar: AppBar(
         title: Text(appBarTitle),
+        scrolledUnderElevation: 0,
+        backgroundColor: Colors.white,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () {

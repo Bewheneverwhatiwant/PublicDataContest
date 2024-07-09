@@ -106,6 +106,8 @@ class _MyPageMenteeState extends State<MyPageMentee>
     return Scaffold(
       appBar: AppBar(
         title: Text('멘티 마이페이지'),
+        scrolledUnderElevation: 0,
+        backgroundColor: Colors.white,
       ),
       body: Stack(
         children: [

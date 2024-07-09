@@ -31,17 +31,22 @@ class _HomeAppBarState extends State<HomeAppBar> {
 
   Future<void> _checkLoginStatus() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    setState(() {
-      _isLoggedIn = prefs.getString('accessToken') != null;
-    });
+    bool loginStatus = prefs.getString('accessToken') != null;
+    if (mounted) {
+      setState(() {
+        _isLoggedIn = loginStatus;
+      });
+    }
   }
 
   Future<void> _logout() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.remove('accessToken');
-    setState(() {
-      _isLoggedIn = false;
-    });
+    if (mounted) {
+      setState(() {
+        _isLoggedIn = false;
+      });
+    }
     showDialog(
       context: context,
       builder: (BuildContext context) {

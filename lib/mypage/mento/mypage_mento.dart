@@ -264,6 +264,8 @@ class _MyPageMentoState extends State<MyPageMento>
     return Scaffold(
       appBar: AppBar(
         title: Text('멘토 마이페이지'),
+        scrolledUnderElevation: 0,
+        backgroundColor: Colors.white,
       ),
       body: Stack(
         children: [

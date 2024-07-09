@@ -9,8 +9,6 @@ class MainPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    bool isMento = true; // 멘토인지 멘티인지에 따라 '멘토링 개설' 버튼 조건부 렌더링을 위해 임시 처리!
-
     return Container(
       color: GlobalColors.whiteColor,
       child: SingleChildScrollView(

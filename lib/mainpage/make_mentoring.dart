@@ -166,6 +166,8 @@ class _MakeMentoringState extends State<MakeMentoring> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('멘토링 개설하기'),
+        scrolledUnderElevation: 0, // 스크롤에 따른 앱 바 색상 변하는 오류 수정
+        backgroundColor: Colors.white,
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
