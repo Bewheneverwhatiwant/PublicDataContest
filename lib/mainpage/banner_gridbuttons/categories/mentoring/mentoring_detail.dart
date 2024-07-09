@@ -16,6 +16,7 @@ class _MentoringDetailPageState extends State<MentoringDetailPage> {
   bool _isLoading = true;
   bool _hasError = false;
   int? _classId;
+  int? _mentorId;
 
   @override
   void initState() {
@@ -24,11 +25,16 @@ class _MentoringDetailPageState extends State<MentoringDetailPage> {
       final arguments =
           ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
 
-      if (arguments != null && arguments.containsKey('classId')) {
+      if (arguments != null &&
+          arguments.containsKey('classId') &&
+          arguments.containsKey('mentorId')) {
         _classId = arguments['classId'];
+        _mentorId = arguments['mentorId'];
+
         _saveClassId(_classId!);
+        _saveMentorId(_mentorId!);
       }
-      _loadClassIdAndFetchDetail();
+      _loadClassIdAndMentorIdAndFetchDetail();
     });
   }
 
@@ -37,10 +43,19 @@ class _MentoringDetailPageState extends State<MentoringDetailPage> {
     await prefs.setInt('classId', classId);
   }
 
-  Future<void> _loadClassIdAndFetchDetail() async {
+  Future<void> _saveMentorId(int mentorId) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setInt('mentorId', mentorId);
+  }
+
+  Future<void> _loadClassIdAndMentorIdAndFetchDetail() async {
     if (_classId == null) {
       SharedPreferences prefs = await SharedPreferences.getInstance();
       _classId = prefs.getInt('classId');
+    }
+    if (_mentorId == null) {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      _mentorId = prefs.getInt('mentorId');
     }
     if (_classId != null) {
       _fetchMentoringDetail(_classId!);
@@ -83,6 +98,58 @@ class _MentoringDetailPageState extends State<MentoringDetailPage> {
         _hasError = true;
       });
     }
+  }
+
+  Future<void> createChatRoom(int mentorId) async {
+    final prefs = await SharedPreferences.getInstance();
+    final accessToken = prefs.getString('accessToken') ?? '';
+    final role = prefs.getString('role') ?? '';
+
+    if (role != 'mentee') {
+      _showRoleAlert(context);
+      return;
+    }
+
+    try {
+      final response = await http.post(
+        Uri.parse(
+            '${dotenv.env['API_SERVER']}/api/chat/make_chat?mentorId=$mentorId'),
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Content-Type': 'application/json',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        print('채팅방 생성됨');
+        Navigator.pushNamed(context, '/classchat');
+      } else {
+        print('채팅방 생성 실패');
+        print(mentorId);
+      }
+    } catch (e) {
+      print('Error: $e');
+    }
+  }
+
+  void _showRoleAlert(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('알림'),
+          content: const Text('멘티만 채팅방 생성이 가능합니다.'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: const Text('확인'),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   @override
@@ -231,7 +298,10 @@ class _MentoringDetailPageState extends State<MentoringDetailPage> {
           onPressed: () async {
             bool isLoggedIn = await _checkIfLoggedIn();
             if (isLoggedIn) {
-              Navigator.pushNamed(context, '/classchat');
+              if (_mentorId != null) {
+                await createChatRoom(_mentorId!);
+              }
+              //Navigator.pushNamed(context, '/classchat');
             } else {
               _showLoginAlert(context);
             }

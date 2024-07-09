@@ -77,6 +77,7 @@ class _CategoryTemplatePageState extends State<CategoryTemplatePage> {
             }).map<Map<String, dynamic>>((dynamic item) {
               return {
                 'classId': item['classId'],
+                'mentorId': item['mentorId'],
                 'title': item['name']?.toString() ?? 'No Title',
                 'category': item['categoryName']?.toString() ?? 'No Category',
                 'price': '${item['price'] ?? 0}원',
@@ -195,7 +196,10 @@ class _CategoryTemplatePageState extends State<CategoryTemplatePage> {
             Navigator.pushNamed(
               context,
               '/mentoringdetail',
-              arguments: {'classId': item['classId']},
+              arguments: {
+                'classId': item['classId'],
+                'mentorId': item['mentorId']
+              },
             );
           },
           child: Card(
