@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class MyChatList extends StatefulWidget {
   const MyChatList({super.key});
@@ -15,6 +16,7 @@ class _MyChatListState extends State<MyChatList> {
   List<dynamic> chatList = [];
   bool _isLoading = true;
   bool _hasError = false;
+  String? _role;
 
   @override
   void initState() {
@@ -25,17 +27,19 @@ class _MyChatListState extends State<MyChatList> {
   Future<void> _checkLoginStatus() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     final accessToken = prefs.getString('accessToken');
+    final role = prefs.getString('role');
     setState(() {
       _isLoggedIn = accessToken != null;
+      _role = role;
     });
     if (_isLoggedIn) {
       _fetchChatList(accessToken!);
     }
   }
 
-// cors 에러 발생 중
   Future<void> _fetchChatList(String token) async {
-    final url = Uri.parse('https://example.com/api/chat/chat_list');
+    final apiServer = dotenv.env['API_SERVER'];
+    final url = Uri.parse('$apiServer/api/chat/chat_list');
     try {
       final response = await http.get(url, headers: {
         'Authorization': 'Bearer $token',
@@ -92,31 +96,40 @@ class _MyChatListState extends State<MyChatList> {
         itemCount: chatList.length,
         itemBuilder: (context, index) {
           final chat = chatList[index];
-          return Container(
-            margin: const EdgeInsets.symmetric(vertical: 8.0),
-            padding: const EdgeInsets.all(16.0),
-            decoration: BoxDecoration(
-              color: const Color(0xFFD9D9D9),
-              borderRadius: BorderRadius.circular(8.0),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Name: ${chat['name']}',
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
+          return GestureDetector(
+            onTap: () {
+              Navigator.pushNamed(
+                context,
+                '/classchat',
+                arguments: {'conversationId': chat['conversationId']},
+              );
+            },
+            child: Container(
+              margin: const EdgeInsets.symmetric(vertical: 8.0),
+              padding: const EdgeInsets.all(16.0),
+              decoration: BoxDecoration(
+                color: const Color(0xFFD9D9D9),
+                borderRadius: BorderRadius.circular(8.0),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    '대화상대: ${_role == 'mentee' ? chat['mentorName'] : chat['menteeName']}',
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  'Message: ${chat['message']}',
-                  style: const TextStyle(
-                    fontSize: 16,
+                  const SizedBox(height: 8),
+                  Text(
+                    '생성일: ${chat['startDate']}',
+                    style: const TextStyle(
+                      fontSize: 16,
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           );
         },
