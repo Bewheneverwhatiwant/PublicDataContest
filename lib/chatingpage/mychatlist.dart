@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 class MyChatList extends StatefulWidget {
   const MyChatList({super.key});
@@ -10,6 +12,9 @@ class MyChatList extends StatefulWidget {
 
 class _MyChatListState extends State<MyChatList> {
   bool _isLoggedIn = false;
+  List<dynamic> chatList = [];
+  bool _isLoading = true;
+  bool _hasError = false;
 
   @override
   void initState() {
@@ -19,9 +24,41 @@ class _MyChatListState extends State<MyChatList> {
 
   Future<void> _checkLoginStatus() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
+    final accessToken = prefs.getString('accessToken');
     setState(() {
-      _isLoggedIn = prefs.getString('accessToken') != null;
+      _isLoggedIn = accessToken != null;
     });
+    if (_isLoggedIn) {
+      _fetchChatList(accessToken!);
+    }
+  }
+
+// cors 에러 발생 중
+  Future<void> _fetchChatList(String token) async {
+    final url = Uri.parse('https://example.com/api/chat/chat_list');
+    try {
+      final response = await http.get(url, headers: {
+        'Authorization': 'Bearer $token',
+      });
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        setState(() {
+          chatList = data;
+          _isLoading = false;
+        });
+      } else {
+        setState(() {
+          _isLoading = false;
+          _hasError = true;
+        });
+      }
+    } catch (e) {
+      setState(() {
+        _isLoading = false;
+        _hasError = true;
+      });
+      print('Error: $e');
+    }
   }
 
   @override
@@ -33,58 +70,40 @@ class _MyChatListState extends State<MyChatList> {
   }
 
   Widget _buildChatList() {
-    const List<Map<String, String>> chatList = [
-      {
-        'name': '000 멘티',
-        'message': '안녕하세요, 쿠버네티스 과정 멘토링 희망합니다!',
-        'route': '/chat1'
-      },
-      {
-        'name': '000 멘티',
-        'message': '안녕하세요, 쿠버네티스 과정 멘토링 희망합니다!',
-        'route': '/chat2'
-      },
-      {
-        'name': '000 멘티',
-        'message': '안녕하세요, 쿠버네티스 과정 멘토링 희망합니다!',
-        'route': '/chat3'
-      },
-      {
-        'name': '000 멘티',
-        'message': '안녕하세요, 쿠버네티스 과정 멘토링 희망합니다!',
-        'route': '/chat4'
-      },
-      {
-        'name': '000 멘티',
-        'message': '안녕하세요, 쿠버네티스 과정 멘토링 희망합니다!',
-        'route': '/chat5'
-      },
-    ];
-
-    return ListView.builder(
-      padding: const EdgeInsets.all(16.0),
-      itemCount: chatList.length,
-      itemBuilder: (context, index) {
-        final chat = chatList[index];
-        return Padding(
-          padding: const EdgeInsets.symmetric(vertical: 8.0),
-          child: ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              padding: const EdgeInsets.all(16.0),
-              backgroundColor: Colors.grey[300],
-              foregroundColor: Colors.black,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8.0),
-              ),
+    if (_isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    } else if (chatList.isEmpty && !_hasError) {
+      return const Center(
+        child: Text(
+          '아직 채팅방이 없어요. 멘토와 채팅을 시작해보세요.',
+          style: TextStyle(fontSize: 18, color: Colors.grey),
+        ),
+      );
+    } else if (_hasError) {
+      return const Center(
+        child: Text(
+          '오류가 발생했습니다.',
+          style: TextStyle(fontSize: 18, color: Colors.grey),
+        ),
+      );
+    } else {
+      return ListView.builder(
+        padding: const EdgeInsets.all(16.0),
+        itemCount: chatList.length,
+        itemBuilder: (context, index) {
+          final chat = chatList[index];
+          return Container(
+            margin: const EdgeInsets.symmetric(vertical: 8.0),
+            padding: const EdgeInsets.all(16.0),
+            decoration: BoxDecoration(
+              color: const Color(0xFFD9D9D9),
+              borderRadius: BorderRadius.circular(8.0),
             ),
-            onPressed: () {
-              Navigator.pushNamed(context, chat['route']!);
-            },
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  chat['name']!,
+                  'Name: ${chat['name']}',
                   style: const TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
@@ -92,17 +111,17 @@ class _MyChatListState extends State<MyChatList> {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  chat['message']!,
+                  'Message: ${chat['message']}',
                   style: const TextStyle(
                     fontSize: 16,
                   ),
                 ),
               ],
             ),
-          ),
-        );
-      },
-    );
+          );
+        },
+      );
+    }
   }
 
   Widget _buildLoginPrompt() {
