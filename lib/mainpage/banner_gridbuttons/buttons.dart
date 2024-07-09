@@ -49,7 +49,7 @@ class _ButtonsState extends State<Buttons> {
             children: <Widget>[
               GridButton(
                 imagePath: null,
-                label: '전체 보기',
+                label: '전체',
                 kind: 1,
                 onPressed: () {
                   Navigator.pushNamed(
@@ -61,7 +61,7 @@ class _ButtonsState extends State<Buttons> {
               ),
               GridButton(
                 imagePath: null,
-                label: 'IT',
+                label: '언어',
                 kind: 2,
                 onPressed: () {
                   Navigator.pushNamed(
@@ -73,7 +73,7 @@ class _ButtonsState extends State<Buttons> {
               ),
               GridButton(
                 imagePath: null,
-                label: '언어',
+                label: '회계',
                 kind: 3,
                 onPressed: () {
                   Navigator.pushNamed(
@@ -85,7 +85,7 @@ class _ButtonsState extends State<Buttons> {
               ),
               GridButton(
                 imagePath: null,
-                label: '디자인',
+                label: 'IT',
                 kind: 4,
                 onPressed: () {
                   Navigator.pushNamed(
@@ -97,7 +97,7 @@ class _ButtonsState extends State<Buttons> {
               ),
               GridButton(
                 imagePath: null,
-                label: '회계',
+                label: '디자인',
                 kind: 5,
                 onPressed: () {
                   Navigator.pushNamed(
@@ -109,7 +109,7 @@ class _ButtonsState extends State<Buttons> {
               ),
               GridButton(
                 imagePath: null,
-                label: '미용',
+                label: '음악',
                 kind: 6,
                 onPressed: () {
                   Navigator.pushNamed(
@@ -121,7 +121,7 @@ class _ButtonsState extends State<Buttons> {
               ),
               GridButton(
                 imagePath: null,
-                label: '음악',
+                label: '미용',
                 kind: 7,
                 onPressed: () {
                   Navigator.pushNamed(
@@ -157,7 +157,7 @@ class _ButtonsState extends State<Buttons> {
               ),
               GridButton(
                 imagePath: null,
-                label: '기타',
+                label: '공예',
                 kind: 10,
                 onPressed: () {
                   Navigator.pushNamed(

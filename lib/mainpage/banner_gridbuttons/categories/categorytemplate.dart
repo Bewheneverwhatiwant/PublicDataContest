@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class CategoryTemplatePage extends StatefulWidget {
   const CategoryTemplatePage({Key? key}) : super(key: key);
@@ -8,39 +12,102 @@ class CategoryTemplatePage extends StatefulWidget {
 }
 
 class _CategoryTemplatePageState extends State<CategoryTemplatePage> {
-  final List<Map<String, String>> mentoringItems = List.generate(
-    10,
-    (index) => {
-      'title': '쿠버네티스 초급 과정 멘토링 모집합니다.',
-      'category': 'IT > 소분류',
-      'price': '50,000원',
-      'date': '2024.07.01',
-      'rating': '5/5',
-    },
-  );
-
+  final List<Map<String, String>> mentoringItems = [];
   final Map<int, String> categoryNames = {
     1: '전체',
-    2: 'IT',
-    3: '언어',
-    4: '디자인',
-    5: '회계',
-    6: '미용',
-    7: '음악',
+    2: '언어',
+    3: '회계',
+    4: 'IT',
+    5: '디자인',
+    6: '음악',
+    7: '미용',
     8: '사진',
     9: '기획',
-    10: '기타',
+    10: '공예',
   };
 
   int _currentPage = 1;
   final int _itemsPerPage = 6;
   String _selectedOrder = '최신순';
+  bool _isLoading = true;
+  bool _hasError = false;
+  int _categoryKind = 1;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final arguments =
+          ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>? ??
+              {'kind': 1};
+      setState(() {
+        _categoryKind = arguments['kind'] ?? 1;
+      });
+      _fetchMentoringList();
+    });
+  }
+
+  Future<void> _fetchMentoringList() async {
+    final prefs = await SharedPreferences.getInstance();
+    final accessToken = prefs.getString('accessToken') ?? '';
+    final category = categoryNames[_categoryKind] ?? '전체';
+
+    try {
+      final response = await http.get(
+        Uri.parse('${dotenv.env['API_SERVER']}/api/mentoring/mentoring_list'),
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final List<dynamic> data = json.decode(response.body);
+        setState(() {
+          mentoringItems.clear();
+          mentoringItems.addAll(
+            data.where((dynamic item) {
+              if (item is Map<String, dynamic>) {
+                if (category == '전체') {
+                  return true;
+                } else {
+                  return item['categoryName'] == category;
+                }
+              }
+              return false;
+            }).map<Map<String, String>>((dynamic item) {
+              return {
+                'title': item['name']?.toString() ?? 'No Title',
+                'mentorName': item['mentorName']?.toString() ?? 'No Mentor',
+                'category': item['categoryName']?.toString() ?? 'No Category',
+                'price': '${item['price'] ?? 0}원',
+                'date': item['createdAt']?.toString() ?? 'No Date',
+              };
+            }).toList(),
+          );
+
+          // date 기준으로 내림차순 정렬
+          mentoringItems.sort((a, b) => b['date']!.compareTo(a['date']!));
+
+          _isLoading = false;
+          _hasError = false;
+        });
+      } else {
+        setState(() {
+          _isLoading = false;
+          _hasError = true;
+        });
+      }
+    } catch (e) {
+      setState(() {
+        _isLoading = false;
+        _hasError = true;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    final Map arguments = ModalRoute.of(context)?.settings.arguments as Map;
-    final int kind = arguments['kind'];
-    final String appBarTitle = categoryNames[kind] ?? '카테고리';
+    final String appBarTitle = categoryNames[_categoryKind] ?? '카테고리';
 
     return Scaffold(
       appBar: AppBar(
@@ -61,7 +128,10 @@ class _CategoryTemplatePageState extends State<CategoryTemplatePage> {
             const SizedBox(height: 16),
             _buildOrderDropdown(),
             const SizedBox(height: 16),
-            Expanded(child: _buildMentoringList()),
+            Expanded(
+                child: _isLoading ? _buildLoading() : _buildMentoringList()),
+            if (!_isLoading && mentoringItems.isEmpty)
+              _buildNoMentoringMessage(),
             _buildPaginationControls(),
           ],
         ),
@@ -103,6 +173,10 @@ class _CategoryTemplatePageState extends State<CategoryTemplatePage> {
     );
   }
 
+  Widget _buildLoading() {
+    return const Center(child: CircularProgressIndicator());
+  }
+
   Widget _buildMentoringList() {
     final startIndex = (_currentPage - 1) * _itemsPerPage;
     final endIndex = (_currentPage * _itemsPerPage);
@@ -133,6 +207,7 @@ class _CategoryTemplatePageState extends State<CategoryTemplatePage> {
                     ),
                   ),
                   const SizedBox(height: 8),
+                  Text(item['mentorName']!),
                   Text(item['category']!),
                   const SizedBox(height: 4),
                   Text('가격: ${item['price']}'),
@@ -144,13 +219,6 @@ class _CategoryTemplatePageState extends State<CategoryTemplatePage> {
                         item['date']!,
                         style: const TextStyle(color: Colors.grey),
                       ),
-                      Text(
-                        item['rating']!,
-                        style: const TextStyle(
-                          color: Colors.blue,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
                     ],
                   ),
                 ],
@@ -159,6 +227,15 @@ class _CategoryTemplatePageState extends State<CategoryTemplatePage> {
           ),
         );
       },
+    );
+  }
+
+  Widget _buildNoMentoringMessage() {
+    return Center(
+      child: Text(
+        '아직 개설된 멘토링이 없어요',
+        style: TextStyle(fontSize: 16, color: Colors.grey),
+      ),
     );
   }
 
