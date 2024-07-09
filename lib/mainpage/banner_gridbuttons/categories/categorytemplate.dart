@@ -12,7 +12,7 @@ class CategoryTemplatePage extends StatefulWidget {
 }
 
 class _CategoryTemplatePageState extends State<CategoryTemplatePage> {
-  final List<Map<String, String>> mentoringItems = [];
+  final List<Map<String, dynamic>> mentoringItems = [];
   final Map<int, String> categoryNames = {
     1: '전체',
     2: '언어',
@@ -31,7 +31,7 @@ class _CategoryTemplatePageState extends State<CategoryTemplatePage> {
   String _selectedOrder = '최신순';
   bool _isLoading = true;
   bool _hasError = false;
-  int _categoryKind = 1;
+  int _categoryKind = 1; // 기본값으로 초기화
 
   @override
   void initState() {
@@ -74,19 +74,20 @@ class _CategoryTemplatePageState extends State<CategoryTemplatePage> {
                 }
               }
               return false;
-            }).map<Map<String, String>>((dynamic item) {
+            }).map<Map<String, dynamic>>((dynamic item) {
               return {
+                'classId': item['classId'],
                 'title': item['name']?.toString() ?? 'No Title',
-                'mentorName': item['mentorName']?.toString() ?? 'No Mentor',
                 'category': item['categoryName']?.toString() ?? 'No Category',
                 'price': '${item['price'] ?? 0}원',
                 'date': item['createdAt']?.toString() ?? 'No Date',
+                'rating': '5/5',
               };
             }).toList(),
           );
 
           // date 기준으로 내림차순 정렬
-          mentoringItems.sort((a, b) => b['date']!.compareTo(a['date']!));
+          mentoringItems.sort((a, b) => b['date'].compareTo(a['date']));
 
           _isLoading = false;
           _hasError = false;
@@ -191,7 +192,11 @@ class _CategoryTemplatePageState extends State<CategoryTemplatePage> {
         final item = currentItems[index];
         return GestureDetector(
           onTap: () {
-            Navigator.pushNamed(context, '/mentoringdetail');
+            Navigator.pushNamed(
+              context,
+              '/mentoringdetail',
+              arguments: {'classId': item['classId']},
+            );
           },
           child: Card(
             child: Padding(
@@ -207,7 +212,6 @@ class _CategoryTemplatePageState extends State<CategoryTemplatePage> {
                     ),
                   ),
                   const SizedBox(height: 8),
-                  Text(item['mentorName']!),
                   Text(item['category']!),
                   const SizedBox(height: 4),
                   Text('가격: ${item['price']}'),
@@ -218,6 +222,13 @@ class _CategoryTemplatePageState extends State<CategoryTemplatePage> {
                       Text(
                         item['date']!,
                         style: const TextStyle(color: Colors.grey),
+                      ),
+                      Text(
+                        item['rating']!,
+                        style: const TextStyle(
+                          color: Colors.blue,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ],
                   ),

@@ -1,8 +1,89 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
-class MentoringDetailPage extends StatelessWidget {
+class MentoringDetailPage extends StatefulWidget {
   const MentoringDetailPage({Key? key}) : super(key: key);
+
+  @override
+  _MentoringDetailPageState createState() => _MentoringDetailPageState();
+}
+
+class _MentoringDetailPageState extends State<MentoringDetailPage> {
+  Map<String, dynamic> mentoringDetail = {};
+  bool _isLoading = true;
+  bool _hasError = false;
+  int? _classId;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final arguments =
+          ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
+
+      if (arguments != null && arguments.containsKey('classId')) {
+        _classId = arguments['classId'];
+        _saveClassId(_classId!);
+      }
+      _loadClassIdAndFetchDetail();
+    });
+  }
+
+  Future<void> _saveClassId(int classId) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setInt('classId', classId);
+  }
+
+  Future<void> _loadClassIdAndFetchDetail() async {
+    if (_classId == null) {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      _classId = prefs.getInt('classId');
+    }
+    if (_classId != null) {
+      _fetchMentoringDetail(_classId!);
+    } else {
+      setState(() {
+        _isLoading = false;
+        _hasError = true;
+      });
+    }
+  }
+
+  Future<void> _fetchMentoringDetail(int classId) async {
+    final prefs = await SharedPreferences.getInstance();
+    final accessToken = prefs.getString('accessToken') ?? '';
+
+    try {
+      final response = await http.get(
+        Uri.parse(
+            '${dotenv.env['API_SERVER']}/api/mentoring/mentoring_detail?classId=$classId'),
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        setState(() {
+          mentoringDetail = json.decode(response.body);
+          _isLoading = false;
+          _hasError = false;
+        });
+      } else {
+        setState(() {
+          _isLoading = false;
+          _hasError = true;
+        });
+      }
+    } catch (e) {
+      setState(() {
+        _isLoading = false;
+        _hasError = true;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -16,33 +97,37 @@ class MentoringDetailPage extends StatelessWidget {
           },
         ),
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildCategorySection(),
-            const SizedBox(height: 16),
-            _buildMentoringInfo(context),
-            const SizedBox(height: 16),
-            _buildLikeAndChat(context),
-          ],
-        ),
-      ),
+      body: _isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : _hasError
+              ? const Center(child: Text('오류가 발생했습니다.'))
+              : SingleChildScrollView(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _buildCategorySection(),
+                      const SizedBox(height: 16),
+                      _buildMentoringInfo(context),
+                      const SizedBox(height: 16),
+                      _buildLikeAndChat(context),
+                    ],
+                  ),
+                ),
     );
   }
 
   Widget _buildCategorySection() {
-    return const Row(
+    return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Text(
-          'IT/웹, 앱 서비스',
-          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+          '${mentoringDetail['categoryName']}/${mentoringDetail['subcategoryName']}',
+          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
         ),
         Text(
-          '진행 중/모집 마감',
-          style: TextStyle(fontSize: 16, color: Colors.red),
+          mentoringDetail['active'] ? '진행 중' : '진행 종료',
+          style: const TextStyle(fontSize: 16, color: Colors.red),
         ),
       ],
     );
@@ -55,9 +140,9 @@ class MentoringDetailPage extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            '쿠버네티스 초급 과정 멘토링 모집합니다.',
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+          Text(
+            mentoringDetail['name'] ?? '멘토링 이름 없음',
+            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 8),
           Row(
@@ -67,7 +152,7 @@ class MentoringDetailPage extends StatelessWidget {
                   Navigator.pushNamed(context, '/profilemento');
                 },
                 icon: const Icon(Icons.person, color: Colors.yellow),
-                label: const Text('강대명 멘토'),
+                label: Text(mentoringDetail['mentorName'] ?? '멘토 이름 없음'),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.transparent,
                   shadowColor: Colors.transparent,
@@ -97,26 +182,24 @@ class MentoringDetailPage extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 8),
-          const Text(
-            '인프라 관리를 배우고 싶은 청년들을 위해 멘토링을 열게 되었습니다. '
-            '레벨이 기술을 이해하고 있는 분들께 추천드립니다. 프로필에서 보실 수 있듯이, '
-            '인터파크에서 15년간 서버 총괄을 맡았습니다. 기술협업, 입문면접에 대한 조언도 드릴 수 있으니 많은 신청 부탁드립니다.',
+          Text(
+            mentoringDetail['description'] ?? '설명 없음',
           ),
           const SizedBox(height: 8),
-          Container(
-            padding: const EdgeInsets.all(8.0),
-            color: Colors.white,
-            child: const Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text('멘토링 이름: 쿠버네티스 초급 과정'),
-                Text('멘토링 희망 지역: 강남역 10번 출구 스타벅스, 협의 가능'),
-                Text('멘토링 기간: 2달'),
-                Text('멘토링 횟수: 일주일 최대 2회'),
-                Text('멘토링 시간: 1회당 최대 2시간'),
-                Text('멘토링 가격: 50,000원'),
-                Text('최대 멘티 수: 5명'),
-              ],
+          SizedBox(
+            width: double.infinity,
+            child: Container(
+              padding: const EdgeInsets.all(8.0),
+              color: Colors.white,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('멘토링 이름: ${mentoringDetail['name'] ?? '없음'}'),
+                  Text('멘토링 희망 지역: ${mentoringDetail['location'] ?? '없음'}'),
+                  Text('멘토링 시간: 1회당 최대 ${mentoringDetail['time'] ?? '없음'} 분'),
+                  Text('멘토링 가격: ${mentoringDetail['price'] ?? '없음'}원'),
+                ],
+              ),
             ),
           ),
         ],
