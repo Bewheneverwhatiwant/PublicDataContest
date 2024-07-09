@@ -35,7 +35,7 @@ class _HireInternAllState extends State<HireInternAll> {
               children: [
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.grey,
+                    backgroundColor: const Color(0xFF6F79F7),
                     foregroundColor: Colors.black,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(35),
@@ -44,7 +44,8 @@ class _HireInternAllState extends State<HireInternAll> {
                   onPressed: () {
                     Navigator.pushNamed(context, '/gisul_changup_center');
                   },
-                  child: const Text('중장년 기술창업센터 바로가기'),
+                  child: const Text('중장년 기술창업센터 바로가기',
+                      style: TextStyle(fontSize: 16, color: Colors.white)),
                 ),
                 const SizedBox(height: 20),
                 Row(

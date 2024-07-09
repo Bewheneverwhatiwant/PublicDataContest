@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:publicdatacontest/common/theme/colors/color_palette.dart';
-import '../../../appbar/new_appbar.dart';
 
 class HireIntern extends StatelessWidget {
   const HireIntern({super.key});

@@ -24,6 +24,7 @@ import 'appbar/signup.dart';
 import 'mainpage/banner_gridbuttons/categories/mentoring/classchat.dart';
 import 'splash.dart';
 import 'mainpage/maincarousel/maincarousel_all/gisul_changup_center.dart';
+import 'mainpage/search/searchclass.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -100,6 +101,7 @@ class _MyAppState extends State<MyApp> {
         '/signup': (context) => const SignupPage(),
         '/classchat': (context) => const ClassChatPage(),
         '/gisul_changup_center': (context) => GisulChangupCenterPage(),
+        '/searchclass': (context) => const SearchClassPage(),
       },
       onGenerateRoute: (settings) {
         if (settings.name == '/') {

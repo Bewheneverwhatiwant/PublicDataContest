@@ -90,7 +90,7 @@ class _HomeAppBarState extends State<HomeAppBar> {
                     Navigator.pushNamed(context, '/login');
                   },
             style: TextButton.styleFrom(
-              side: const BorderSide(color: Colors.grey, width: 2),
+              side: const BorderSide(color: Colors.grey, width: 1),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(8.0),
               ),
