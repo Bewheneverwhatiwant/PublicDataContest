@@ -18,11 +18,13 @@ class _LoginPageState extends State<LoginPage> {
   final TextEditingController _passwordController = TextEditingController();
 
   bool _isLoginEnabled = false;
+  String _errorMessage = '';
 
   void _validateInputs() {
     setState(() {
       _isLoginEnabled = _usernameController.text.isNotEmpty &&
           _passwordController.text.isNotEmpty;
+      _errorMessage = ''; // 입력 변경 시 오류 메시지 초기화
     });
   }
 
@@ -65,41 +67,11 @@ class _LoginPageState extends State<LoginPage> {
         await prefs.setString('accessToken', accessToken);
         await prefs.setString('role', role);
 
-        showDialog(
-          context: context,
-          builder: (BuildContext context) {
-            return AlertDialog(
-              title: const Text('로그인되었습니다!'),
-              actions: [
-                TextButton(
-                  onPressed: () {
-                    Navigator.pushNamedAndRemoveUntil(
-                        context, '/main', (route) => false);
-                  },
-                  child: const Text('확인'),
-                ),
-              ],
-            );
-          },
-        );
+        Navigator.pushNamedAndRemoveUntil(context, '/main', (route) => false);
       } else {
-        showDialog(
-          context: context,
-          builder: (BuildContext context) {
-            return AlertDialog(
-              title: const Text('로그인 실패'),
-              content: const Text('아이디 또는 비밀번호가 잘못되었습니다.'),
-              actions: [
-                TextButton(
-                  onPressed: () {
-                    Navigator.pop(context);
-                  },
-                  child: const Text('확인'),
-                ),
-              ],
-            );
-          },
-        );
+        setState(() {
+          _errorMessage = '아이디 또는 비밀번호가 잘못되었습니다.';
+        });
       }
     }
   }
@@ -125,19 +97,17 @@ class _LoginPageState extends State<LoginPage> {
                 width: 300,
                 child: TextField(
                   controller: _usernameController,
-                  obscureText: true,
                   cursorColor: GlobalColors.mainColor,
                   decoration: InputDecoration(
                     hintText: '아이디를 입력해주세요.',
                     enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(18.0), // 둥근 모서리 설정
+                      borderRadius: BorderRadius.circular(18.0),
                       borderSide: BorderSide(color: Colors.grey, width: 1.0),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(18.0),
-                      borderSide: BorderSide(
-                          color: GlobalColors.mainColor,
-                          width: 2.0), // 클릭했을 때 border 색상 설정
+                      borderSide:
+                          BorderSide(color: GlobalColors.mainColor, width: 2.0),
                     ),
                   ),
                 ),
@@ -152,19 +122,27 @@ class _LoginPageState extends State<LoginPage> {
                   decoration: InputDecoration(
                     hintText: '비밀번호를 입력해주세요.',
                     enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(18.0), // 둥근 모서리 설정
+                      borderRadius: BorderRadius.circular(18.0),
                       borderSide: BorderSide(color: Colors.grey, width: 1.0),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(18.0),
-                      borderSide: BorderSide(
-                          color: GlobalColors.mainColor,
-                          width: 2.0), // 클릭했을 때 border 색상 설정
+                      borderSide:
+                          BorderSide(color: GlobalColors.mainColor, width: 2.0),
                     ),
                   ),
                 ),
               ),
-              const SizedBox(height: 30),
+              if (_errorMessage.isNotEmpty)
+                Padding(
+                  padding: const EdgeInsets.only(top: 8.0, bottom: 8.0),
+                  child: Text(
+                    _errorMessage,
+                    style: TextStyle(color: Colors.red, fontSize: 14),
+                  ),
+                )
+              else
+                SizedBox(height: 22),
               Container(
                 width: 300,
                 height: 60,
@@ -182,29 +160,36 @@ class _LoginPageState extends State<LoginPage> {
                   child: Text(
                     '로그인',
                     style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                        color: _isLoginEnabled
-                            ? GlobalColors.whiteColor
-                            : GlobalColors.lightgray),
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: _isLoginEnabled
+                          ? GlobalColors.whiteColor
+                          : GlobalColors.lightgray,
+                    ),
                   ),
                 ),
               ),
               const SizedBox(height: 16),
-              Row(
+              Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Text('항해가 처음이시라면'),
-                  TextButton(
-                    onPressed: () {
-                      Navigator.pushNamed(context, '/signup');
-                    },
-                    child: Text(
-                      '회원가입',
-                      style: TextStyle(
-                          color: GlobalColors.mainColor,
-                          fontWeight: FontWeight.bold),
-                    ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Text('항해가 처음이시라면'),
+                      TextButton(
+                        onPressed: () {
+                          Navigator.pushNamed(context, '/signup');
+                        },
+                        child: Text(
+                          '회원가입',
+                          style: TextStyle(
+                            color: GlobalColors.mainColor,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),

@@ -166,14 +166,20 @@ class _SignupStep2State extends State<SignupStep2> {
         context: context,
         builder: (BuildContext context) {
           return AlertDialog(
-            title: const Text('회원가입되었습니다!'),
+            title: const Text(
+              '회원가입되었습니다!',
+              style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+            ),
             actions: [
               TextButton(
                 onPressed: () {
                   Navigator.pushNamedAndRemoveUntil(
                       context, '/', (route) => false);
                 },
-                child: const Text('확인'),
+                child: const Text(
+                  '확인',
+                  style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold),
+                ),
               ),
             ],
           );
@@ -185,14 +191,20 @@ class _SignupStep2State extends State<SignupStep2> {
         context: context,
         builder: (BuildContext context) {
           return AlertDialog(
-            title: const Text('회원가입 실패'),
+            title: const Text(
+              '회원가입 실패',
+              style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+            ),
             content: Text('에러: ${response.reasonPhrase}'),
             actions: [
               TextButton(
                 onPressed: () {
                   Navigator.pop(context);
                 },
-                child: const Text('확인'),
+                child: const Text(
+                  '확인',
+                  style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold),
+                ),
               ),
             ],
           );
