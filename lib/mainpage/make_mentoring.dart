@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class MakeMentoring extends StatefulWidget {
   const MakeMentoring({super.key});
@@ -44,6 +48,9 @@ class _MakeMentoringState extends State<MakeMentoring> {
         _locationController.text.isNotEmpty &&
         _descriptionController.text.isNotEmpty;
   }
+
+  String _selectedCategory = 'IT/웹';
+  int _subcategoryId = 1;
 
   void _validateHour(String value) {
     setState(() {
@@ -92,23 +99,55 @@ class _MakeMentoringState extends State<MakeMentoring> {
     });
   }
 
-  void _submitForm() {
+  Future<void> _submitForm() async {
     if (_formKey.currentState!.validate()) {
-      showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-          title: const Text('멘토링 개설하기'),
-          content: const Text('성공적으로 개설되었습니다!'),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.pushNamed(context, '/');
-              },
-              child: const Text('확인'),
-            ),
-          ],
-        ),
+      final prefs = await SharedPreferences.getInstance();
+      final accessToken = prefs.getString('accessToken') ?? '';
+
+      final response = await http.post(
+        Uri.parse('${dotenv.env['API_SERVER']}/api/mentoring/make_mentoring'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $accessToken',
+        },
+        body: json.encode({
+          'name': _nameController.text,
+          'location': _locationController.text,
+          'time': int.parse(_hourController.text) * 60 +
+              int.parse(_minuteController.text),
+          'price': int.parse(_priceController.text),
+          'description': _descriptionController.text,
+          'subcategoryId': _subcategoryId,
+        }),
       );
+
+      print('name: ${_nameController.text}');
+      print('location: ${_locationController.text}');
+      print(
+          'time: ${int.parse(_hourController.text) * 60 + int.parse(_minuteController.text)}');
+      print('price: ${int.parse(_priceController.text)}');
+      print('description: ${_descriptionController.text}');
+      print('subcategoryId: $_subcategoryId');
+
+      if (response.statusCode == 200) {
+        showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Text('멘토링 개설하기'),
+            content: const Text('성공적으로 개설되었습니다!'),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.pushNamed(context, '/');
+                },
+                child: const Text('확인'),
+              ),
+            ],
+          ),
+        );
+      } else {
+        print('Failed to create mentoring: ${response.body}');
+      }
     }
   }
 
@@ -148,16 +187,18 @@ class _MakeMentoringState extends State<MakeMentoring> {
                       decoration: BoxDecoration(
                         border: Border.all(color: Colors.blue),
                       ),
-                      child: const Text(
-                        'IT/웹',
+                      child: Text(
+                        _selectedCategory,
                         textAlign: TextAlign.center,
-                        style: TextStyle(fontSize: 16),
+                        style: const TextStyle(fontSize: 16),
                       ),
                     ),
                   ),
                   const SizedBox(width: 8),
                   ElevatedButton(
-                    onPressed: () {},
+                    onPressed: () {
+                      _showCategoryDialog();
+                    },
                     child: const Text('변경하기'),
                   ),
                 ],
@@ -306,6 +347,37 @@ class _MakeMentoringState extends State<MakeMentoring> {
           ),
         ),
       ),
+    );
+  }
+
+  void _showCategoryDialog() {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('분야 선택'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              _categoryOption('IT/웹', 1),
+              _categoryOption('미용/피부관리', 2),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _categoryOption(String category, int id) {
+    return ListTile(
+      title: Text(category),
+      onTap: () {
+        setState(() {
+          _selectedCategory = category;
+          _subcategoryId = id;
+        });
+        Navigator.of(context).pop();
+      },
     );
   }
 }
