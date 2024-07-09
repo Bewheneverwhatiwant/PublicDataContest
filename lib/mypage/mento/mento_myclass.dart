@@ -20,6 +20,8 @@ class _MentoMyClassPageState extends State<MentoMyClassPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        scrolledUnderElevation: 0,
+        backgroundColor: Colors.white,
         title: const Text('나의 모든 멘토링 관리'),
         actions: [
           IconButton(

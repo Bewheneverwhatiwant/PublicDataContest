@@ -263,34 +263,39 @@ class _MyPageMentoState extends State<MyPageMento>
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('멘토 마이페이지'),
+        title: const Text('멘토님의 마이페이지'),
         scrolledUnderElevation: 0,
         backgroundColor: Colors.white,
       ),
       body: Stack(
         children: [
           Padding(
-            padding: const EdgeInsets.all(10.0), // 전체 패딩 설정
+            padding: const EdgeInsets.all(10.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 _buildProfileSection(),
                 const SizedBox(height: 16),
-                ElevatedButton(
-                  onPressed: () {
-                    Navigator.pushNamed(context, '/profilemento');
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: GlobalColors.mainColor,
-                  ),
-                  child: const Text(
-                    '프로필 페이지로 이동',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    ElevatedButton(
+                      onPressed: () {
+                        Navigator.pushNamed(context, '/profilemento');
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: GlobalColors.mainColor,
+                      ),
+                      child: const Text(
+                        '프로필 페이지로 이동',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
                     ),
-                  ),
+                  ],
                 ),
                 const SizedBox(height: 16),
                 TabBar(
@@ -312,7 +317,7 @@ class _MyPageMentoState extends State<MyPageMento>
                 ),
                 Expanded(
                   child: Padding(
-                    padding: const EdgeInsets.only(bottom: 10.0),
+                    padding: const EdgeInsets.only(top: 20.0, bottom: 10.0),
                     child: TabBarView(
                       controller: _tabController,
                       children: [

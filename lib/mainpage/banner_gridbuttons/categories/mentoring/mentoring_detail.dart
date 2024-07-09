@@ -156,6 +156,8 @@ class _MentoringDetailPageState extends State<MentoringDetailPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        scrolledUnderElevation: 0,
+        backgroundColor: Colors.white,
         title: const Text('멘토링 상세 설명'),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),

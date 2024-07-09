@@ -105,7 +105,7 @@ class _MyPageMenteeState extends State<MyPageMentee>
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('멘티 마이페이지'),
+        title: Text('멘티님의 마이페이지'),
         scrolledUnderElevation: 0,
         backgroundColor: Colors.white,
       ),
@@ -118,21 +118,26 @@ class _MyPageMenteeState extends State<MyPageMentee>
               children: [
                 _buildProfileSection(),
                 const SizedBox(height: 16),
-                ElevatedButton(
-                  onPressed: () {
-                    Navigator.pushNamed(context, '/profilementee');
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: GlobalColors.mainColor,
-                  ),
-                  child: const Text(
-                    '프로필 페이지로 이동',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    ElevatedButton(
+                      onPressed: () {
+                        Navigator.pushNamed(context, '/profilementee');
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: GlobalColors.mainColor,
+                      ),
+                      child: const Text(
+                        '프로필 페이지로 이동',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
                     ),
-                  ),
+                  ],
                 ),
                 const SizedBox(height: 16),
                 TabBar(
@@ -154,7 +159,7 @@ class _MyPageMenteeState extends State<MyPageMentee>
                 ),
                 Expanded(
                   child: Padding(
-                    padding: const EdgeInsets.only(bottom: 10.0),
+                    padding: const EdgeInsets.only(top: 20.0, bottom: 10.0),
                     child: TabBarView(
                       controller: _tabController,
                       children: [

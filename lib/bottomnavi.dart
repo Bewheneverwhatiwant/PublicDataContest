@@ -18,6 +18,8 @@ class BottomNaviState extends State<BottomNavi> {
       backgroundColor: Colors.white,
       onTap: widget.onTabTapped,
       currentIndex: widget.currentIndex,
+      selectedItemColor: const Color(0xFF6F79F7),
+      unselectedItemColor: Colors.grey,
       items: const [
         BottomNavigationBarItem(
           icon: Icon(Icons.home),

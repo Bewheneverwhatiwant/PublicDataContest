@@ -190,13 +190,16 @@ class _ButtonsState extends State<Buttons> {
               height: 50,
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.grey,
+                  backgroundColor: const Color(0xFF6F79F7),
                   foregroundColor: Colors.white,
                 ),
                 onPressed: () {
                   Navigator.pushNamed(context, '/makementoring');
                 },
-                child: const Text('멘토링 개설하기'),
+                child: const Text(
+                  '멘토링 개설하기',
+                  style: TextStyle(fontSize: 20, color: Colors.white),
+                ),
               ),
             ),
           ),

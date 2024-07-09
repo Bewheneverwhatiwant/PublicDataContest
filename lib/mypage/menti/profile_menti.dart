@@ -28,6 +28,8 @@ class _ProfileMenteePageState extends State<ProfileMenteePage>
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        scrolledUnderElevation: 0,
+        backgroundColor: Colors.white,
         title: Text('멘티 프로필'),
       ),
       body: SingleChildScrollView(

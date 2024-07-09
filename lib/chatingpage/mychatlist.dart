@@ -78,9 +78,19 @@ class _MyChatListState extends State<MyChatList> {
       return const Center(child: CircularProgressIndicator());
     } else if (chatList.isEmpty && !_hasError) {
       return const Center(
-        child: Text(
-          '아직 채팅방이 없어요. 멘토와 채팅을 시작해보세요.',
-          style: TextStyle(fontSize: 18, color: Colors.grey),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              '아직 채팅방이 없어요.',
+              style: TextStyle(fontSize: 18, color: Colors.grey),
+            ),
+            Text(
+              '멘토링으로 채팅을 시작해보세요.',
+              style: TextStyle(fontSize: 18, color: Colors.grey),
+            ),
+          ],
         ),
       );
     } else if (_hasError) {

@@ -197,8 +197,8 @@ class _MyHomePageState extends State<MyHomePage> {
     return Scaffold(
       appBar: const HomeAppBar(
         logoPath: 'assets/images/logo.png',
-        logoWidth: 60.0,
-        logoHeight: 40.0,
+        logoWidth: 100.0,
+        logoHeight: 80.0,
       ),
       body: _children[_currentIndex],
       bottomNavigationBar: BottomNavi(

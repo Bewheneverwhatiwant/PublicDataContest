@@ -73,7 +73,7 @@ class _HomeAppBarState extends State<HomeAppBar> {
       scrolledUnderElevation: 0, // 스크롤에 따른 앱 바 색상 변하는 오류 수정
       backgroundColor: Colors.white,
       leading: Padding(
-        padding: const EdgeInsets.all(8.0),
+        padding: const EdgeInsets.all(1.0),
         child: Image.asset(
           widget.logoPath,
           width: widget.logoWidth,

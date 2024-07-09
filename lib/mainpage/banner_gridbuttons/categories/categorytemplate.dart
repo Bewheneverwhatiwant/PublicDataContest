@@ -31,7 +31,7 @@ class _CategoryTemplatePageState extends State<CategoryTemplatePage> {
   String _selectedOrder = '최신순';
   bool _isLoading = true;
   bool _hasError = false;
-  int _categoryKind = 1; // 기본값으로 초기화
+  int _categoryKind = 1;
 
   @override
   void initState() {
@@ -75,14 +75,14 @@ class _CategoryTemplatePageState extends State<CategoryTemplatePage> {
               }
               return false;
             }).map<Map<String, dynamic>>((dynamic item) {
+              String formattedDate = _formatDate(item['createdAt']);
               return {
                 'classId': item['classId'],
                 'mentorId': item['mentorId'],
                 'title': item['name']?.toString() ?? 'No Title',
                 'category': item['categoryName']?.toString() ?? 'No Category',
                 'price': '${item['price'] ?? 0}원',
-                'date': item['createdAt']?.toString() ?? 'No Date',
-                'rating': '5/5',
+                'date': formattedDate,
               };
             }).toList(),
           );
@@ -105,6 +105,11 @@ class _CategoryTemplatePageState extends State<CategoryTemplatePage> {
         _hasError = true;
       });
     }
+  }
+
+  String _formatDate(String date) {
+    final DateTime parsedDate = DateTime.parse(date);
+    return '${parsedDate.year}년${parsedDate.month.toString().padLeft(2, '0')}월${parsedDate.day.toString().padLeft(2, '0')}일';
   }
 
   @override
@@ -133,9 +138,11 @@ class _CategoryTemplatePageState extends State<CategoryTemplatePage> {
             _buildOrderDropdown(),
             const SizedBox(height: 16),
             Expanded(
-                child: _isLoading ? _buildLoading() : _buildMentoringList()),
-            if (!_isLoading && mentoringItems.isEmpty)
-              _buildNoMentoringMessage(),
+                child: _isLoading
+                    ? _buildLoading()
+                    : mentoringItems.isEmpty
+                        ? _buildNoMentoringMessage()
+                        : _buildMentoringList()),
             _buildPaginationControls(),
           ],
         ),
@@ -223,18 +230,11 @@ class _CategoryTemplatePageState extends State<CategoryTemplatePage> {
                   Text('가격: ${item['price']}'),
                   const SizedBox(height: 8),
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    mainAxisAlignment: MainAxisAlignment.end,
                     children: [
                       Text(
                         item['date']!,
                         style: const TextStyle(color: Colors.grey),
-                      ),
-                      Text(
-                        item['rating']!,
-                        style: const TextStyle(
-                          color: Colors.blue,
-                          fontWeight: FontWeight.bold,
-                        ),
                       ),
                     ],
                   ),
@@ -248,9 +248,9 @@ class _CategoryTemplatePageState extends State<CategoryTemplatePage> {
   }
 
   Widget _buildNoMentoringMessage() {
-    return Center(
+    return const Center(
       child: Text(
-        '아직 개설된 멘토링이 없어요',
+        '아직 개설된 멘토링이 없어요.',
         style: TextStyle(fontSize: 16, color: Colors.grey),
       ),
     );
