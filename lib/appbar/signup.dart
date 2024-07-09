@@ -414,6 +414,7 @@ class _SignupPageState extends State<SignupPage> {
                                 SnackBar(
                                   content: Text('사용 가능한 이메일입니다!'),
                                   backgroundColor: GlobalColors.darkgray,
+                                  duration: Duration(seconds: 1),
                                 ),
                               );
                             });
