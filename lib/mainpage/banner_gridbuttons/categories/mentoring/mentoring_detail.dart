@@ -145,6 +145,7 @@ class _MentoringDetailPageState extends State<MentoringDetailPage> {
         Navigator.pushNamed(context, '/classchat',
             arguments: {'conversationId': conversationId});
         print('넘겨진 conversationId: ${conversationId}');
+        print('넘겨진 멘토 id: ${mentorId}');
       } else {
         print('채팅방 생성 실패');
         print(mentorId);

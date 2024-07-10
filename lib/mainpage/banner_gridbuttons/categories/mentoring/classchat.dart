@@ -17,6 +17,8 @@ class _ClassChatPageState extends State<ClassChatPage> {
   bool _hasError = false;
   String? _role;
   int? _conversationId;
+  String? _senderType;
+  String? _senderName;
   final TextEditingController _controller = TextEditingController();
 
   @override
@@ -65,6 +67,10 @@ class _ClassChatPageState extends State<ClassChatPage> {
         final data = json.decode(response.body);
         setState(() {
           messages = data;
+          if (messages.isNotEmpty) {
+            _senderType = messages[0]['senderType'].toString();
+            _senderName = messages[0]['senderName'].toString();
+          }
           _isLoading = false;
           _hasError = false;
         });
@@ -139,8 +145,9 @@ class _ClassChatPageState extends State<ClassChatPage> {
       appBar: AppBar(
         scrolledUnderElevation: 0,
         backgroundColor: Colors.white,
-        title: const Text('000멘토 - 000 멘토링'), // /chatting_detail API 응답값 확인한 후,
-        // 나의 role과 일치하는 이름, 멘토링 이름 띄우도록 수정하기
+        title: Text(_senderName != null && _senderType != null
+            ? '$_senderName $_senderType와의 채팅'
+            : '멘토와의 채팅방입니다.'),
       ),
       body: Column(
         children: [
