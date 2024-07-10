@@ -4,6 +4,8 @@ import '../mainpage/banner_gridbuttons/buttons.dart';
 import 'maincarousel/maincarousel_short/hireintern.dart';
 import 'maincarousel/maincarousel_short/home_review.dart';
 import 'dart:ui';
+import 'maincarousel/maincarousel_short/foreignjob.dart';
+import 'maincarousel/maincarousel_short/goodforeign.dart';
 
 class MainPage extends StatelessWidget {
   const MainPage({super.key});
@@ -50,6 +52,12 @@ class MainPage extends StatelessWidget {
                   HireIntern(),
                   SizedBox(height: 20),
                   HomeReview(),
+                  SizedBox(height: 20),
+                  // 공공 API 2개에서 key가 등록 안됐다는 오류 나는 중 (분명 등록 승인라고 뜨는데 !!!)
+                  // 하두 더 기다려서, key 동기화됐는지 시도해보고... 다른 걸로 바꿀 예정
+                  // ForeignJob(),
+                  // SizedBox(height: 20),
+                  //GoodForeign(),
                 ],
               ),
             ),
