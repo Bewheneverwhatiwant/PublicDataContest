@@ -3,6 +3,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 class MentoringDetailPage extends StatefulWidget {
   const MentoringDetailPage({Key? key}) : super(key: key);
@@ -110,6 +111,10 @@ class _MentoringDetailPageState extends State<MentoringDetailPage> {
       return;
     }
 
+    setState(() {
+      _isLoading = true;
+    });
+
     try {
       final response = await http.post(
         Uri.parse(
@@ -120,14 +125,34 @@ class _MentoringDetailPageState extends State<MentoringDetailPage> {
         },
       );
 
+      setState(() {
+        _isLoading = false;
+      });
+
       if (response.statusCode == 200) {
-        print('채팅방 생성됨');
-        Navigator.pushNamed(context, '/classchat');
+        final responseData = json.decode(response.body);
+        final conversationId = responseData['conversationId'];
+        final isAlready = responseData['isAlready'];
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content:
+                Text(isAlready ? '이미 이 멘토와의 채팅방이 존재합니다.' : '이 멘토와 채팅을 시작합니다!'),
+            duration: Duration(seconds: 1),
+          ),
+        );
+
+        Navigator.pushNamed(context, '/classchat',
+            arguments: {'conversationId': conversationId});
+        print('넘겨진 conversationId: ${conversationId}');
       } else {
         print('채팅방 생성 실패');
         print(mentorId);
       }
     } catch (e) {
+      setState(() {
+        _isLoading = false;
+      });
       print('Error: $e');
     }
   }

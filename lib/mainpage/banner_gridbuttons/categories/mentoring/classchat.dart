@@ -139,7 +139,8 @@ class _ClassChatPageState extends State<ClassChatPage> {
       appBar: AppBar(
         scrolledUnderElevation: 0,
         backgroundColor: Colors.white,
-        title: const Text('000멘토 - 000 멘토링'),
+        title: const Text('000멘토 - 000 멘토링'), // /chatting_detail API 응답값 확인한 후,
+        // 나의 role과 일치하는 이름, 멘토링 이름 띄우도록 수정하기
       ),
       body: Column(
         children: [
