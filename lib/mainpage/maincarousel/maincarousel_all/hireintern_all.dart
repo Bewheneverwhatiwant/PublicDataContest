@@ -1,8 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 import 'package:publicdatacontest/common/theme/colors/color_palette.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:xml/xml.dart' as xml;
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+
 import '../../../appbar/new_appbar.dart';
 
-// 중장년 인턴 채용정보 전체보기 클릭 시 화면
+// 훈련받은 기업 전체보기 화면
 
 class HireInternAll extends StatefulWidget {
   const HireInternAll({super.key});
@@ -15,17 +20,75 @@ class _HireInternAllState extends State<HireInternAll> {
   int _currentPage = 0;
   final int _itemsPerPage = 6;
   String _selectedSort = '최신순';
+  List<Map<String, String>> _internData = [];
+  bool _isLoading = true;
 
-  final List<Map<String, String>> _internData = List.generate(
-    20,
-    (index) => {'사업장명': 'abcd', '모집직종': 'abcd', '근무지역': 'abcd'},
-  );
+  @override
+  void initState() {
+    super.initState();
+    _fetchInternData();
+  }
+
+  Future<void> _fetchInternData() async {
+    setState(() {
+      _isLoading = true;
+    });
+
+    final serviceKey = dotenv.env['API_COMPANY_KEY_ENCOD'];
+    final url = Uri.parse(
+        'https://apis.data.go.kr/B490007/hrd4uService1/getBizHrdInfo?serviceKey=$serviceKey&pageNo=1&numOfRows=10');
+
+    try {
+      final response = await http.get(url, headers: {
+        'accept': '*/*',
+      });
+
+      if (response.statusCode == 200) {
+        final xmlString = response.body;
+        final parsedData = _parseXml(xmlString);
+        setState(() {
+          _internData = parsedData;
+          _isLoading = false;
+        });
+      } else {
+        setState(() {
+          _isLoading = false;
+        });
+        print('Failed to fetch data');
+      }
+    } catch (e) {
+      setState(() {
+        _isLoading = false;
+      });
+      print('Error: $e');
+    }
+  }
+
+  List<Map<String, String>> _parseXml(String xmlString) {
+    final document = xml.XmlDocument.parse(xmlString);
+    final entries = document.findAllElements('ENTSVC_INFO');
+    List<Map<String, String>> parsedData = [];
+
+    for (var entry in entries) {
+      final bizNm = entry.findElements('BIZ_NM').single.text;
+      final lnmAdres = entry.findElements('LNM_ADRES').single.text;
+      final gyejNm = entry.findElements('GYEJ_NM').single.text;
+
+      parsedData.add({
+        '사업장명': bizNm,
+        '근무지역': lnmAdres,
+        '분야': gyejNm,
+      });
+    }
+
+    return parsedData;
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: GlobalColors.whiteColor,
-      appBar: const CustomNewAppBar(title: '인턴 채용공고 전체보기'),
+      appBar: const CustomNewAppBar(title: '훈련받은 기업 전체보기'),
       body: Container(
         color: GlobalColors.whiteColor,
         child: SingleChildScrollView(
@@ -85,153 +148,162 @@ class _HireInternAllState extends State<HireInternAll> {
                   ),
                 ),
                 const SizedBox(height: 16),
-                ..._internData
-                    .skip(_currentPage * _itemsPerPage)
-                    .take(_itemsPerPage)
-                    .map((intern) {
-                  return Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 10.0),
-                    child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        padding: EdgeInsets.zero,
-                        backgroundColor: Colors.transparent,
-                        shadowColor: Colors.transparent,
-                      ),
-                      onPressed: () {
-                        Navigator.pushNamed(context, '/hireinterndetail');
-                      },
-                      child: Container(
-                        padding: const EdgeInsets.all(16.0),
-                        decoration: BoxDecoration(
-                          color: Color.fromARGB(255, 255, 249, 237),
-                          borderRadius: BorderRadius.circular(15.0),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.grey.withOpacity(0.3),
-                              spreadRadius: 2,
-                              blurRadius: 5,
-                              offset: const Offset(0, 2),
-                            ),
-                          ],
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                RichText(
-                                  text: TextSpan(
-                                    children: [
-                                      WidgetSpan(
-                                        child: Icon(
-                                          Icons.business,
-                                          size: 16,
-                                          color: Colors.black,
-                                        ),
-                                      ),
-                                      const TextSpan(
-                                        text: ' 사업장명: ',
-                                        style: TextStyle(
-                                          fontSize: 15,
-                                          fontWeight: FontWeight.bold,
-                                          color: Colors.black,
-                                        ),
-                                      ),
-                                      TextSpan(
-                                        text: intern['사업장명'],
-                                        style: const TextStyle(
-                                          fontSize: 14,
-                                          fontWeight: FontWeight.normal,
-                                          color: Colors.black,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
+                _isLoading
+                    ? const Center(child: CircularProgressIndicator())
+                    : Column(
+                        children: _internData
+                            .skip(_currentPage * _itemsPerPage)
+                            .take(_itemsPerPage)
+                            .map((intern) {
+                          return Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 10.0),
+                            child: ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                padding: EdgeInsets.zero,
+                                backgroundColor: Colors.transparent,
+                                shadowColor: Colors.transparent,
+                              ),
+                              onPressed: () {
+                                Navigator.pushNamed(
+                                    context, '/hireinterndetail');
+                              },
+                              child: Container(
+                                padding: const EdgeInsets.all(16.0),
+                                decoration: BoxDecoration(
+                                  color: Color.fromARGB(255, 255, 249, 237),
+                                  borderRadius: BorderRadius.circular(15.0),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.grey.withOpacity(0.3),
+                                      spreadRadius: 2,
+                                      blurRadius: 5,
+                                      offset: const Offset(0, 2),
+                                    ),
+                                  ],
                                 ),
-                                Container(
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 10, vertical: 3),
-                                  decoration: BoxDecoration(
-                                    color: Color.fromARGB(255, 255, 255, 255),
-                                    borderRadius: BorderRadius.circular(15.0),
-                                  ),
-                                  child: const Text(
-                                    'D - n',
-                                    style: TextStyle(
-                                        fontSize: 10,
-                                        color: Color.fromARGB(255, 239, 99, 24),
-                                        fontWeight: FontWeight.bold),
-                                  ),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        RichText(
+                                          text: TextSpan(
+                                            children: [
+                                              const WidgetSpan(
+                                                child: Icon(
+                                                  Icons.business,
+                                                  size: 16,
+                                                  color: Colors.black,
+                                                ),
+                                              ),
+                                              const TextSpan(
+                                                text: ' 사업장명: ',
+                                                style: TextStyle(
+                                                  fontSize: 15,
+                                                  fontWeight: FontWeight.bold,
+                                                  color: Colors.black,
+                                                ),
+                                              ),
+                                              TextSpan(
+                                                text: intern['사업장명'],
+                                                style: const TextStyle(
+                                                  fontSize: 14,
+                                                  fontWeight: FontWeight.normal,
+                                                  color: Colors.black,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                        Container(
+                                          padding: const EdgeInsets.symmetric(
+                                              horizontal: 10, vertical: 3),
+                                          decoration: BoxDecoration(
+                                            color: const Color.fromARGB(
+                                                255, 255, 255, 255),
+                                            borderRadius:
+                                                BorderRadius.circular(15.0),
+                                          ),
+                                          child: const Text(
+                                            'D - n',
+                                            style: TextStyle(
+                                                fontSize: 10,
+                                                color: Color.fromARGB(
+                                                    255, 239, 99, 24),
+                                                fontWeight: FontWeight.bold),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 8),
+                                    RichText(
+                                      text: TextSpan(
+                                        children: [
+                                          const WidgetSpan(
+                                            child: Icon(
+                                              Icons.work,
+                                              size: 16,
+                                              color: Colors.black,
+                                            ),
+                                          ),
+                                          const TextSpan(
+                                            text: ' 분야: ',
+                                            style: TextStyle(
+                                              fontSize: 15,
+                                              fontWeight: FontWeight.bold,
+                                              color: Colors.black,
+                                            ),
+                                          ),
+                                          TextSpan(
+                                            text: intern['분야'],
+                                            style: const TextStyle(
+                                              fontSize: 14,
+                                              fontWeight: FontWeight.normal,
+                                              color: Colors.black,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    const SizedBox(height: 8),
+                                    RichText(
+                                      text: TextSpan(
+                                        children: [
+                                          const WidgetSpan(
+                                            child: Icon(
+                                              Icons.location_on,
+                                              size: 16,
+                                              color: Colors.black,
+                                            ),
+                                          ),
+                                          const TextSpan(
+                                            text: ' 근무지역: ',
+                                            style: TextStyle(
+                                              fontSize: 15,
+                                              fontWeight: FontWeight.bold,
+                                              color: Colors.black,
+                                            ),
+                                          ),
+                                          TextSpan(
+                                            text: intern['근무지역'],
+                                            style: const TextStyle(
+                                              fontSize: 14,
+                                              fontWeight: FontWeight.normal,
+                                              color: Colors.black,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
                                 ),
-                              ],
-                            ),
-                            const SizedBox(height: 8),
-                            RichText(
-                              text: TextSpan(
-                                children: [
-                                  WidgetSpan(
-                                    child: Icon(
-                                      Icons.work,
-                                      size: 16,
-                                      color: Colors.black,
-                                    ),
-                                  ),
-                                  const TextSpan(
-                                    text: ' 모집직종: ',
-                                    style: TextStyle(
-                                      fontSize: 15,
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.black,
-                                    ),
-                                  ),
-                                  TextSpan(
-                                    text: intern['모집직종'],
-                                    style: const TextStyle(
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.normal,
-                                      color: Colors.black,
-                                    ),
-                                  ),
-                                ],
                               ),
                             ),
-                            const SizedBox(height: 8),
-                            RichText(
-                              text: TextSpan(
-                                children: [
-                                  WidgetSpan(
-                                    child: Icon(
-                                      Icons.location_on,
-                                      size: 16,
-                                      color: Colors.black,
-                                    ),
-                                  ),
-                                  const TextSpan(
-                                    text: ' 근무지역: ',
-                                    style: TextStyle(
-                                      fontSize: 15,
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.black,
-                                    ),
-                                  ),
-                                  TextSpan(
-                                    text: intern['근무지역'],
-                                    style: const TextStyle(
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.normal,
-                                      color: Colors.black,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
+                          );
+                        }).toList(),
                       ),
-                    ),
-                  );
-                }),
                 const SizedBox(height: 16),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
