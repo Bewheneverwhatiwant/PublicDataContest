@@ -1,5 +1,9 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:publicdatacontest/common/theme/colors/color_palette.dart';
+import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class MyPaySection extends StatefulWidget {
   const MyPaySection({Key? key}) : super(key: key);
@@ -35,8 +39,9 @@ class _MyPaySectionState extends State<MyPaySection> {
             ),
             TextButton(
               onPressed: () {
+                final String payment = _controller.text;
                 Navigator.of(context).pop();
-                _showCompletionDialog(context);
+                _registerAccount(payment);
               },
               child: const Text('입력 완료'),
             ),
@@ -46,25 +51,37 @@ class _MyPaySectionState extends State<MyPaySection> {
     );
   }
 
-  void _showCompletionDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('완료'),
-          content: const Text('입력 완료되었습니다!'),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-                Navigator.of(context).pushReplacementNamed('/');
-              },
-              child: const Text('확인'),
-            ),
-          ],
-        );
+  Future<void> _registerAccount(String payment) async {
+    final String apiServer = dotenv.env['API_SERVER'] ?? '';
+    final String? accessToken = await _getAccessToken();
+
+    if (accessToken == null) {
+      print('AccessToken not found');
+      return;
+    }
+
+    final response = await http.put(
+      Uri.parse('$apiServer/api/auth/register_pay?payment=$payment'),
+      headers: {
+        'Authorization': 'Bearer $accessToken',
+        'Content-Type': 'application/json',
       },
     );
+
+    if (response.statusCode == 200) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('계좌가 등록되었습니다: $payment')),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('계좌 등록에 실패했습니다: $payment')),
+      );
+    }
+  }
+
+  Future<String?> _getAccessToken() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString('accessToken');
   }
 
   @override
