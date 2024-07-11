@@ -7,6 +7,7 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import '../mypay.dart';
+import './myfield_mentee.dart';
 
 class MyPageMentee extends StatefulWidget {
   @override
@@ -222,50 +223,9 @@ class _MyPageMenteeState extends State<MyPageMentee>
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          children: [
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text('내 구직 분야',
-                      style: TextStyle(
-                          color: GlobalColors.mainColor,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16)),
-                  _selectedCategories.isEmpty
-                      ? const Text(
-                          '구직 분야를 추가해주세요.',
-                        )
-                      : Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: _selectedCategories.map((category) {
-                            return Text(category);
-                          }).toList(),
-                        ),
-                ],
-              ),
-            ),
-            TextButton(
-              onPressed: _showCategoryDialog,
-              style: TextButton.styleFrom(
-                backgroundColor: GlobalColors.mainColor,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-              ),
-              child: const Text(
-                '추가하기',
-                style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                  height: 0.5,
-                ),
-              ),
-            ),
-          ],
-        ),
+        MyFieldMentee(
+            selectedCategories: _selectedCategories,
+            showCategoryDialog: _showCategoryDialog),
         const SizedBox(height: 16),
         Row(
           children: [

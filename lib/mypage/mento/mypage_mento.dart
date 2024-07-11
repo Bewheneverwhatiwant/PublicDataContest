@@ -10,6 +10,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import '../mypay.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
+import './myfield.dart';
 
 class MyPageMento extends StatefulWidget {
   const MyPageMento({Key? key}) : super(key: key);
@@ -385,50 +386,9 @@ class _MyPageMentoState extends State<MyPageMento>
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          children: [
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text('내 멘토링 분야',
-                      style: TextStyle(
-                          color: GlobalColors.mainColor,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16)),
-                  _selectedCategories.isEmpty
-                      ? const Text(
-                          '멘토링 분야를 추가해주세요.',
-                        )
-                      : Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: _selectedCategories.map((category) {
-                            return Text(category);
-                          }).toList(),
-                        ),
-                ],
-              ),
-            ),
-            TextButton(
-              onPressed: _showCategoryDialog,
-              style: TextButton.styleFrom(
-                backgroundColor: GlobalColors.mainColor,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-              ),
-              child: const Text(
-                '추가하기',
-                style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                  height: 0.5,
-                ),
-              ),
-            ),
-          ],
-        ),
+        MyField(
+            selectedCategories: _selectedCategories,
+            showCategoryDialog: _showCategoryDialog),
         const SizedBox(height: 16),
         Text('내 멘토링 인증서',
             style: TextStyle(
