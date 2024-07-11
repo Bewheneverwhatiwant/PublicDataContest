@@ -19,6 +19,7 @@ class _ClassChatPageState extends State<ClassChatPage> {
   int? _conversationId;
   String? _senderType;
   String? _senderName;
+  bool _showBottomSheet = false; // Bottom sheet 표시를 관리
   final TextEditingController _controller = TextEditingController();
 
   @override
@@ -184,12 +185,27 @@ class _ClassChatPageState extends State<ClassChatPage> {
             padding: const EdgeInsets.all(8.0),
             child: Row(
               children: [
+                IconButton(
+                  icon: const Icon(Icons.add, color: Color(0xFF6F79F7)),
+                  onPressed: () {
+                    setState(() {
+                      _showBottomSheet =
+                          !_showBottomSheet; // + 버튼 클릭 시 bottom sheet 표시 변경
+                    });
+                  },
+                ),
                 Expanded(
                   child: TextField(
                     controller: _controller,
                     decoration: const InputDecoration(
                       hintText: '메시지를 입력하세요...',
                     ),
+                    onTap: () {
+                      setState(() {
+                        _showBottomSheet =
+                            false; // TextField 클릭하면 bottom sheet 닫힘!
+                      });
+                    },
                   ),
                 ),
                 IconButton(
@@ -204,8 +220,56 @@ class _ClassChatPageState extends State<ClassChatPage> {
               ],
             ),
           ),
+          if (_showBottomSheet) _buildBottomSheet()
         ],
       ),
+    );
+  }
+
+  Widget _buildBottomSheet() {
+    return Container(
+      color: Colors.grey[200],
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              _buildBottomSheetButton('입금 요청하기', Icons.attach_money, () {
+                Navigator.pushNamed(context, '/sendmoney',
+                    arguments: {'conversationId': _conversationId});
+              }),
+              _buildBottomSheetButton('멘토링 성사하기', Icons.check_circle, () {}),
+              _buildBottomSheetButton('최종 멘토링 종료 요청하기', Icons.stop, () {}),
+            ],
+          ),
+          const SizedBox(height: 16),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              _buildBottomSheetButton(
+                  '일일 멘토링 시작 요청하기', Icons.play_arrow, () {}),
+              _buildBottomSheetButton('일일 멘토링 종료 요청하기', Icons.pause, () {}),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildBottomSheetButton(
+      String label, IconData icon, VoidCallback onPressed) {
+    return Column(
+      children: [
+        FloatingActionButton(
+          onPressed: onPressed,
+          child: Icon(icon, color: Colors.white),
+          backgroundColor: Colors.grey,
+        ),
+        const SizedBox(height: 8),
+        Text(label, style: const TextStyle(fontSize: 14)),
+      ],
     );
   }
 }
