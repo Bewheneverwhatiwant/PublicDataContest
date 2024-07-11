@@ -57,6 +57,18 @@ class _ButtonsState extends State<Buttons> {
               GridButton(
                 icon: Icons.category,
                 label: '전체',
+                kind: 0,
+                onPressed: () {
+                  Navigator.pushNamed(
+                    context,
+                    '/categorytemplate',
+                    arguments: {'kind': 0},
+                  );
+                },
+              ),
+              GridButton(
+                icon: Icons.language,
+                label: '언어',
                 kind: 1,
                 onPressed: () {
                   Navigator.pushNamed(
@@ -67,8 +79,8 @@ class _ButtonsState extends State<Buttons> {
                 },
               ),
               GridButton(
-                icon: Icons.language,
-                label: '언어',
+                icon: Icons.account_balance_wallet,
+                label: '회계',
                 kind: 2,
                 onPressed: () {
                   Navigator.pushNamed(
@@ -79,8 +91,8 @@ class _ButtonsState extends State<Buttons> {
                 },
               ),
               GridButton(
-                icon: Icons.account_balance_wallet,
-                label: '회계',
+                icon: Icons.computer,
+                label: 'IT',
                 kind: 3,
                 onPressed: () {
                   Navigator.pushNamed(
@@ -91,8 +103,8 @@ class _ButtonsState extends State<Buttons> {
                 },
               ),
               GridButton(
-                icon: Icons.computer,
-                label: 'IT',
+                icon: Icons.design_services,
+                label: '디자인',
                 kind: 4,
                 onPressed: () {
                   Navigator.pushNamed(
@@ -103,8 +115,8 @@ class _ButtonsState extends State<Buttons> {
                 },
               ),
               GridButton(
-                icon: Icons.design_services,
-                label: '디자인',
+                icon: Icons.music_note,
+                label: '음악',
                 kind: 5,
                 onPressed: () {
                   Navigator.pushNamed(
@@ -115,8 +127,8 @@ class _ButtonsState extends State<Buttons> {
                 },
               ),
               GridButton(
-                icon: Icons.music_note,
-                label: '음악',
+                icon: Icons.spa,
+                label: '미용',
                 kind: 6,
                 onPressed: () {
                   Navigator.pushNamed(
@@ -127,8 +139,8 @@ class _ButtonsState extends State<Buttons> {
                 },
               ),
               GridButton(
-                icon: Icons.spa,
-                label: '미용',
+                icon: Icons.camera_alt,
+                label: '사진',
                 kind: 7,
                 onPressed: () {
                   Navigator.pushNamed(
@@ -139,8 +151,8 @@ class _ButtonsState extends State<Buttons> {
                 },
               ),
               GridButton(
-                icon: Icons.camera_alt,
-                label: '사진',
+                icon: Icons.lightbulb,
+                label: '기획',
                 kind: 8,
                 onPressed: () {
                   Navigator.pushNamed(
@@ -151,26 +163,14 @@ class _ButtonsState extends State<Buttons> {
                 },
               ),
               GridButton(
-                icon: Icons.lightbulb,
-                label: '기획',
+                icon: Icons.palette,
+                label: '공예',
                 kind: 9,
                 onPressed: () {
                   Navigator.pushNamed(
                     context,
                     '/categorytemplate',
                     arguments: {'kind': 9},
-                  );
-                },
-              ),
-              GridButton(
-                icon: Icons.palette,
-                label: '공예',
-                kind: 10,
-                onPressed: () {
-                  Navigator.pushNamed(
-                    context,
-                    '/categorytemplate',
-                    arguments: {'kind': 10},
                   );
                 },
               ),

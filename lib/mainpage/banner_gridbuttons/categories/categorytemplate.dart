@@ -14,16 +14,16 @@ class CategoryTemplatePage extends StatefulWidget {
 class _CategoryTemplatePageState extends State<CategoryTemplatePage> {
   final List<Map<String, dynamic>> mentoringItems = [];
   final Map<int, String> categoryNames = {
-    1: '전체',
-    2: '언어',
-    3: '회계',
-    4: 'IT',
-    5: '디자인',
-    6: '음악',
-    7: '미용',
-    8: '사진',
-    9: '기획',
-    10: '공예',
+    0: '전체',
+    1: '언어',
+    2: '회계',
+    3: 'IT',
+    4: '디자인',
+    5: '음악',
+    6: '미용',
+    7: '사진/영상',
+    8: '기획',
+    9: '공예',
   };
 
   int _currentPage = 1;
@@ -31,7 +31,7 @@ class _CategoryTemplatePageState extends State<CategoryTemplatePage> {
   String _selectedOrder = '최신순';
   bool _isLoading = true;
   bool _hasError = false;
-  int _categoryKind = 1;
+  int _categoryKind = 0;
   int? _selectedCategoryId;
   int? _selectedSubCategoryId;
 
@@ -41,9 +41,9 @@ class _CategoryTemplatePageState extends State<CategoryTemplatePage> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final arguments =
           ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>? ??
-              {'kind': 1};
+              {'kind': 0};
       setState(() {
-        _categoryKind = arguments['kind'] ?? 1;
+        _categoryKind = arguments['kind'] ?? 0;
       });
       _fetchMentoringList();
     });
@@ -89,7 +89,6 @@ class _CategoryTemplatePageState extends State<CategoryTemplatePage> {
             }).toList(),
           );
 
-          // date 기준으로 내림차순 정렬
           mentoringItems.sort((a, b) => b['date'].compareTo(a['date']));
 
           _isLoading = false;
@@ -208,7 +207,10 @@ class _CategoryTemplatePageState extends State<CategoryTemplatePage> {
   }
 
   void _showSubCategoryDialog() async {
-    if (_selectedCategoryId == null) {
+    final categories = await _fetchCategories();
+    List<dynamic> subCategories = [];
+
+    if (_selectedCategoryId == null && _categoryKind == 0) {
       showDialog(
         context: context,
         builder: (BuildContext context) {
@@ -225,11 +227,13 @@ class _CategoryTemplatePageState extends State<CategoryTemplatePage> {
         },
       );
       return;
+    } else if (_selectedCategoryId != null) {
+      subCategories = categories.firstWhere((category) =>
+          category['categoryId'] == _selectedCategoryId)['subCategories'];
+    } else {
+      subCategories = categories.firstWhere((category) =>
+          category['categoryId'] == _categoryKind)['subCategories'];
     }
-
-    final categories = await _fetchCategories();
-    final subCategories = categories.firstWhere((category) =>
-        category['categoryId'] == _selectedCategoryId)['subCategories'];
 
     showDialog(
       context: context,
@@ -287,29 +291,41 @@ class _CategoryTemplatePageState extends State<CategoryTemplatePage> {
   }
 
   Widget _buildCategoryButtons() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-      children: [
-        ElevatedButton(
-          onPressed: () {
-            setState(() {
-              _selectedCategoryId = null;
-              _selectedSubCategoryId = null;
-              _fetchMentoringList();
-            });
-          },
-          child: const Text('전체보기'),
-        ),
-        ElevatedButton(
-          onPressed: _showCategoryDialog,
-          child: Text(_selectedCategoryId == null ? '대분류' : '선택됨'),
-        ),
-        ElevatedButton(
-          onPressed: _showSubCategoryDialog,
-          child: Text(_selectedSubCategoryId == null ? '소분류' : '선택됨'),
-        ),
-      ],
-    );
+    if (categoryNames[_categoryKind] == '전체') {
+      return Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: [
+          ElevatedButton(
+            onPressed: () {
+              setState(() {
+                _selectedCategoryId = null;
+                _selectedSubCategoryId = null;
+                _fetchMentoringList();
+              });
+            },
+            child: const Text('전체보기'),
+          ),
+          ElevatedButton(
+            onPressed: _showCategoryDialog,
+            child: Text(_selectedCategoryId == null ? '대분류' : '선택됨'),
+          ),
+          ElevatedButton(
+            onPressed: _showSubCategoryDialog,
+            child: Text(_selectedSubCategoryId == null ? '소분류' : '선택됨'),
+          ),
+        ],
+      );
+    } else {
+      return Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: [
+          ElevatedButton(
+            onPressed: _showSubCategoryDialog,
+            child: const Text('소분류'),
+          ),
+        ],
+      );
+    }
   }
 
   Widget _buildOrderDropdown() {
