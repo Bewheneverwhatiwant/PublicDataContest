@@ -3,9 +3,6 @@ import 'package:http/http.dart' as http;
 import 'package:xml/xml.dart' as xml;
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
-// 분명 마이페이지에서는 Key가 승인되었다고 뜨는데, 호출 시 SERVICE_KEY_IS_NOT_REGISTERED_ERROR 오류가 남
-// 이해불가.. 기다렸다가 다시 시도해볼 예정인 파일
-
 class GoodForeign extends StatefulWidget {
   const GoodForeign({super.key});
 
@@ -25,17 +22,28 @@ class _GoodForeignState extends State<GoodForeign> {
 
   Future<void> _fetchJobData() async {
     final serviceKey = dotenv.env['API_GOOD_DECOD'];
-    final url = Uri.parse(
-        'http://apis.data.go.kr/B490007/worldjob30/openApi30?serviceKey=$serviceKey&pageNo=1&numOfRows=10');
+    final baseUrl = 'http://apis.data.go.kr/B490007/worldjob30/openApi30';
+    final queryParameters = {
+      'serviceKey': Uri.encodeQueryComponent(serviceKey!),
+      'pageNo': '1',
+      'numOfRows': '10',
+    };
+
+    final uri = Uri.parse(baseUrl);
+    final uriWithQuery = uri.replace(queryParameters: queryParameters);
+
+    // 퍼센트 인코딩된 쿼리에서 + 를 %2B 로 변환
+    final encodedQuery = uriWithQuery.query.replaceAll('+', '%2B');
+    final urlWithEncodedQuery = uriWithQuery.replace(query: encodedQuery);
 
     try {
-      final response = await http.get(url, headers: {
+      final response = await http.get(urlWithEncodedQuery, headers: {
         'accept': '*/*',
       });
 
       if (response.statusCode == 200) {
         final xmlString = response.body;
-        print(response.body);
+        print('API 응답 값: $xmlString'); // 응답 값 콘솔 출력
         final parsedData = _parseXml(xmlString);
         setState(() {
           _jobData = parsedData;

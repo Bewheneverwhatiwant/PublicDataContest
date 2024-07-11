@@ -3,30 +3,29 @@ import 'package:http/http.dart' as http;
 import 'package:xml/xml.dart' as xml;
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
-class ForeignJob extends StatefulWidget {
-  const ForeignJob({super.key});
+class ForeignMento extends StatefulWidget {
+  const ForeignMento({super.key});
 
   @override
-  _ForeignJobState createState() => _ForeignJobState();
+  _ForeignMentoState createState() => _ForeignMentoState();
 }
 
-class _ForeignJobState extends State<ForeignJob> {
+class _ForeignMentoState extends State<ForeignMento> {
   bool _isLoading = true;
-  List<Map<String, String>> _jobData = [];
+  List<Map<String, String>> _mentoData = [];
 
   @override
   void initState() {
     super.initState();
-    _fetchJobData();
+    _fetchMentoData();
   }
 
-  Future<void> _fetchJobData() async {
-    final serviceKey = Uri.encodeComponent(dotenv.env['API_FOREIGN_DECOD']!);
-    final pageNo = Uri.encodeComponent('1');
-    final numOfRows = Uri.encodeComponent('10');
-
+// ENCOD 키로 하면 HTTP ROUTING ERROR가 나고, DECOD로 하면 KEY NOT REGISTERED 오류 나는 중^^!
+  Future<void> _fetchMentoData() async {
+    final serviceKey = dotenv.env['API_MENTO_FOREIGN_DECOD'];
+    //print('해외취업 공공API키: ${serviceKey}');
     final url = Uri.parse(
-        'http://apis.data.go.kr/B490007/worldjob31/openApi31?serviceKey=$serviceKey&pageNo=$pageNo&numOfRows=$numOfRows');
+        'http://apis.data.go.kr/B490007/worldjob18/openApi18?ServiceKey=$serviceKey&pageNo=1&numOfRows=10');
 
     try {
       final response = await http.get(url, headers: {
@@ -35,13 +34,14 @@ class _ForeignJobState extends State<ForeignJob> {
 
       if (response.statusCode == 200) {
         final xmlString = response.body;
-        print('API 응답 값: $xmlString');
+        print(xmlString);
         final parsedData = _parseXml(xmlString);
         setState(() {
-          _jobData = parsedData;
+          _mentoData = parsedData;
           _isLoading = false;
         });
       } else {
+        print(serviceKey);
         setState(() {
           _isLoading = false;
         });
@@ -61,14 +61,14 @@ class _ForeignJobState extends State<ForeignJob> {
     List<Map<String, String>> parsedData = [];
 
     for (var entry in entries) {
-      final nation = entry.findElements('rctntcNationNm').single.text;
-      final job = entry.findElements('rctntcKscoNm').single.text;
-      final industry = entry.findElements('lplcKscoNm').single.text;
+      final title = entry.findElements('bbscttSj').single.text;
+      final url = entry.findElements('bbscttUrl').single.text;
+      final author = entry.findElements('questRealmNm').single.text;
 
       parsedData.add({
-        '국가': nation,
-        '직종': job,
-        '업종': industry,
+        '제목': title,
+        'URL': url,
+        '작성자': author,
       });
 
       // 10개까지만 출력
@@ -89,7 +89,7 @@ class _ForeignJobState extends State<ForeignJob> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               const Text(
-                '해외취업 모집공고',
+                '해외취업 멘토링',
                 style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
@@ -97,7 +97,7 @@ class _ForeignJobState extends State<ForeignJob> {
               ),
               GestureDetector(
                 onTap: () {
-                  Navigator.pushNamed(context, '/foreignjoball');
+                  Navigator.pushNamed(context, '/foreignmentoall');
                 },
                 child: const Text(
                   '전체보기 >',
@@ -116,14 +116,14 @@ class _ForeignJobState extends State<ForeignJob> {
               ? const Center(child: CircularProgressIndicator())
               : ListView.builder(
                   scrollDirection: Axis.horizontal,
-                  itemCount: _jobData.length,
+                  itemCount: _mentoData.length,
                   itemBuilder: (context, index) {
-                    final job = _jobData[index];
+                    final mento = _mentoData[index];
                     return Padding(
                       padding: const EdgeInsets.all(8.0),
                       child: GestureDetector(
                         onTap: () {
-                          Navigator.pushNamed(context, '/jobdetail');
+                          Navigator.pushNamed(context, '/mentodetail');
                         },
                         child: Container(
                           width: 200,
@@ -153,13 +153,13 @@ class _ForeignJobState extends State<ForeignJob> {
                                             CrossAxisAlignment.start,
                                         children: [
                                           const Icon(
-                                            Icons.flag,
+                                            Icons.assignment,
                                             size: 16,
                                             color: Colors.black,
                                           ),
                                           const SizedBox(width: 4),
                                           const Text(
-                                            ' 국가: ',
+                                            ' 제목: ',
                                             style: TextStyle(
                                               fontSize: 15,
                                               fontWeight: FontWeight.bold,
@@ -168,7 +168,7 @@ class _ForeignJobState extends State<ForeignJob> {
                                           ),
                                           Flexible(
                                             child: Text(
-                                              job['국가'] ?? '',
+                                              mento['제목'] ?? '',
                                               style: const TextStyle(
                                                 fontSize: 14,
                                                 fontWeight: FontWeight.normal,
@@ -188,13 +188,13 @@ class _ForeignJobState extends State<ForeignJob> {
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     const Icon(
-                                      Icons.work,
+                                      Icons.link,
                                       size: 16,
                                       color: Colors.black,
                                     ),
                                     const SizedBox(width: 4),
                                     const Text(
-                                      ' 직종: ',
+                                      ' URL: ',
                                       style: TextStyle(
                                         fontSize: 15,
                                         fontWeight: FontWeight.bold,
@@ -203,7 +203,7 @@ class _ForeignJobState extends State<ForeignJob> {
                                     ),
                                     Flexible(
                                       child: Text(
-                                        job['직종'] ?? '',
+                                        mento['URL'] ?? '',
                                         style: const TextStyle(
                                           fontSize: 14,
                                           fontWeight: FontWeight.normal,
@@ -220,13 +220,13 @@ class _ForeignJobState extends State<ForeignJob> {
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     const Icon(
-                                      Icons.business,
+                                      Icons.person,
                                       size: 16,
                                       color: Colors.black,
                                     ),
                                     const SizedBox(width: 4),
                                     const Text(
-                                      ' 업종: ',
+                                      ' 작성자: ',
                                       style: TextStyle(
                                         fontSize: 15,
                                         fontWeight: FontWeight.bold,
@@ -235,7 +235,7 @@ class _ForeignJobState extends State<ForeignJob> {
                                     ),
                                     Flexible(
                                       child: Text(
-                                        job['업종'] ?? '',
+                                        mento['작성자'] ?? '',
                                         style: const TextStyle(
                                           fontSize: 14,
                                           fontWeight: FontWeight.normal,

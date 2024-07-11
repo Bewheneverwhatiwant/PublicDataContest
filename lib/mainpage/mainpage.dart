@@ -6,6 +6,7 @@ import 'maincarousel/maincarousel_short/home_review.dart';
 import 'dart:ui';
 import 'maincarousel/maincarousel_short/foreignjob.dart';
 import 'maincarousel/maincarousel_short/goodforeign.dart';
+import 'maincarousel/maincarousel_short/foreignmento.dart';
 
 class MainPage extends StatelessWidget {
   const MainPage({super.key});
@@ -53,11 +54,12 @@ class MainPage extends StatelessWidget {
                   SizedBox(height: 20),
                   HomeReview(),
                   SizedBox(height: 20),
-                  // 공공 API 2개에서 key가 등록 안됐다는 오류 나는 중 (분명 등록 승인라고 뜨는데 !!!)
-                  // 하두 더 기다려서, key 동기화됐는지 시도해보고... 다른 걸로 바꿀 예정
+                  // 밑에 공공API 3개: ENCODE 키 쓰면 키 미등록 에러, DECODE 키 쓰면 ROUTING 에러나는 중.
+                  // 이해를 할 수 없음.
                   // ForeignJob(),
                   // SizedBox(height: 20),
-                  //GoodForeign(),
+                  // GoodForeign(),
+                  // ForeignMento(), <- 기다려보고 안되면 키 재발급받아서 다시 해보기.
                 ],
               ),
             ),
