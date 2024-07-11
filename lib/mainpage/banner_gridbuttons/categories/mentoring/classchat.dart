@@ -19,8 +19,8 @@ class _ClassChatPageState extends State<ClassChatPage> {
   int? _conversationId;
   String? _senderType;
   String? _senderName;
-  bool _showBottomSheet = false; // Bottom sheet 표시를 관리
   final TextEditingController _controller = TextEditingController();
+  bool _showBottomButtons = false;
 
   @override
   void initState() {
@@ -122,6 +122,63 @@ class _ClassChatPageState extends State<ClassChatPage> {
     }
   }
 
+  void _showBottomSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      builder: (BuildContext context) {
+        return Container(
+          color: Colors.grey[300],
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                leading: const Icon(Icons.attach_money),
+                title: const Text('입금 요청하기'),
+                onTap: () {
+                  Navigator.pop(context);
+                  Navigator.pushNamed(context, '/sendmoney',
+                      arguments: {'conversationId': _conversationId});
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.check),
+                title: const Text('멘토링 성사하기'),
+                onTap: () {
+                  Navigator.pop(context);
+                  // handle action
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.cancel),
+                title: const Text('최종 멘토링 종료 요청하기'),
+                onTap: () {
+                  Navigator.pop(context);
+                  // handle action
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.play_arrow),
+                title: const Text('일일 멘토링 시작 요청하기'),
+                onTap: () {
+                  Navigator.pop(context);
+                  // handle action
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.stop),
+                title: const Text('일일 멘토링 종료 요청하기'),
+                onTap: () {
+                  Navigator.pop(context);
+                  // handle action
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
   Widget chat(bool isMe, String message) {
     return Align(
       alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
@@ -188,10 +245,7 @@ class _ClassChatPageState extends State<ClassChatPage> {
                 IconButton(
                   icon: const Icon(Icons.add, color: Color(0xFF6F79F7)),
                   onPressed: () {
-                    setState(() {
-                      _showBottomSheet =
-                          !_showBottomSheet; // + 버튼 클릭 시 bottom sheet 표시 변경
-                    });
+                    _showBottomSheet(context);
                   },
                 ),
                 Expanded(
@@ -202,8 +256,7 @@ class _ClassChatPageState extends State<ClassChatPage> {
                     ),
                     onTap: () {
                       setState(() {
-                        _showBottomSheet =
-                            false; // TextField 클릭하면 bottom sheet 닫힘!
+                        _showBottomButtons = false;
                       });
                     },
                   ),
@@ -220,56 +273,8 @@ class _ClassChatPageState extends State<ClassChatPage> {
               ],
             ),
           ),
-          if (_showBottomSheet) _buildBottomSheet()
         ],
       ),
-    );
-  }
-
-  Widget _buildBottomSheet() {
-    return Container(
-      color: Colors.grey[200],
-      padding: const EdgeInsets.all(16.0),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              _buildBottomSheetButton('입금 요청하기', Icons.attach_money, () {
-                Navigator.pushNamed(context, '/sendmoney',
-                    arguments: {'conversationId': _conversationId});
-              }),
-              _buildBottomSheetButton('멘토링 성사하기', Icons.check_circle, () {}),
-              _buildBottomSheetButton('최종 멘토링 종료 요청하기', Icons.stop, () {}),
-            ],
-          ),
-          const SizedBox(height: 16),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              _buildBottomSheetButton(
-                  '일일 멘토링 시작 요청하기', Icons.play_arrow, () {}),
-              _buildBottomSheetButton('일일 멘토링 종료 요청하기', Icons.pause, () {}),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildBottomSheetButton(
-      String label, IconData icon, VoidCallback onPressed) {
-    return Column(
-      children: [
-        FloatingActionButton(
-          onPressed: onPressed,
-          child: Icon(icon, color: Colors.white),
-          backgroundColor: Colors.grey,
-        ),
-        const SizedBox(height: 8),
-        Text(label, style: const TextStyle(fontSize: 14)),
-      ],
     );
   }
 }

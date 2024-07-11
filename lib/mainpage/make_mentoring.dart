@@ -49,7 +49,7 @@ class _MakeMentoringState extends State<MakeMentoring> {
         _descriptionController.text.isNotEmpty;
   }
 
-  String _selectedCategory = 'IT/웹';
+  String _selectedCategory = '분야를 골라주세요.';
   int _subcategoryId = 1;
 
   void _validateHour(String value) {
