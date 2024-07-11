@@ -166,7 +166,7 @@ class _MakeMentoringState extends State<MakeMentoring> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('멘토링 개설하기'),
-        scrolledUnderElevation: 0, // 스크롤에 따른 앱 바 색상 변하는 오류 수정
+        scrolledUnderElevation: 0,
         backgroundColor: Colors.white,
       ),
       body: SingleChildScrollView(
@@ -352,22 +352,40 @@ class _MakeMentoringState extends State<MakeMentoring> {
     );
   }
 
-  void _showCategoryDialog() {
+  Future<void> _showCategoryDialog() async {
+    final categories = await _fetchCategories();
     showDialog(
       context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: const Text('분야 선택'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              _categoryOption('IT/웹', 1),
-              _categoryOption('미용/피부관리', 2),
-            ],
-          ),
-        );
+      builder: (BuildContext context) {
+        return CategoryDialog(
+            categories: categories,
+            onSelect: (String selectedCategory, int subcategoryId) {
+              setState(() {
+                _selectedCategory = selectedCategory;
+                _subcategoryId = subcategoryId;
+              });
+            });
       },
     );
+  }
+
+  Future<List<dynamic>> _fetchCategories() async {
+    final String apiServer = dotenv.env['API_SERVER'] ?? '';
+    final prefs = await SharedPreferences.getInstance();
+    final accessToken = prefs.getString('accessToken') ?? '';
+
+    final response = await http.get(
+      Uri.parse('$apiServer/api/category/subCategory/mentor'),
+      headers: {
+        'Authorization': 'Bearer $accessToken',
+      },
+    );
+
+    if (response.statusCode == 200) {
+      return json.decode(response.body);
+    } else {
+      throw Exception('Failed to load categories');
+    }
   }
 
   Widget _categoryOption(String category, int id) {
@@ -380,6 +398,47 @@ class _MakeMentoringState extends State<MakeMentoring> {
         });
         Navigator.of(context).pop();
       },
+    );
+  }
+}
+
+class CategoryDialog extends StatelessWidget {
+  final List<dynamic> categories;
+  final Function(String, int) onSelect;
+
+  const CategoryDialog({
+    Key? key,
+    required this.categories,
+    required this.onSelect,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: const Text('분야 선택'),
+      content: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: categories.map<Widget>((category) {
+            return ListTile(
+              title: Text(
+                  '${category['categoryName']} / ${category['subCategoryName']}'),
+              onTap: () {
+                onSelect(
+                    '${category['categoryName']} / ${category['subCategoryName']}',
+                    category['subCategoryId']);
+                Navigator.of(context).pop();
+              },
+            );
+          }).toList(),
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: const Text('닫기'),
+        ),
+      ],
     );
   }
 }
