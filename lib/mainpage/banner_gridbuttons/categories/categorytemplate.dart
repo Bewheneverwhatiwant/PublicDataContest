@@ -32,6 +32,8 @@ class _CategoryTemplatePageState extends State<CategoryTemplatePage> {
   bool _isLoading = true;
   bool _hasError = false;
   int _categoryKind = 1;
+  int? _selectedCategoryId;
+  int? _selectedSubCategoryId;
 
   @override
   void initState() {
@@ -107,9 +109,143 @@ class _CategoryTemplatePageState extends State<CategoryTemplatePage> {
     }
   }
 
+  Future<void> _fetchFilteredList(int? categoryId, int? subCategoryId) async {
+    final prefs = await SharedPreferences.getInstance();
+    final accessToken = prefs.getString('accessToken') ?? '';
+    final String apiUrl;
+
+    if (categoryId != null) {
+      apiUrl =
+          '${dotenv.env['API_SERVER']}/api/mentoring/category_filtering?categoryId=$categoryId';
+    } else if (subCategoryId != null) {
+      apiUrl =
+          '${dotenv.env['API_SERVER']}/api/mentoring/subCategory_filtering?subCategoryId=$subCategoryId';
+    } else {
+      apiUrl = '${dotenv.env['API_SERVER']}/api/mentoring/mentoring_list';
+    }
+
+    try {
+      final response = await http.get(
+        Uri.parse(apiUrl),
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final List<dynamic> data = json.decode(response.body);
+        setState(() {
+          mentoringItems.clear();
+          mentoringItems.addAll(
+            data.map<Map<String, dynamic>>((dynamic item) {
+              String formattedDate = _formatDate(item['createdAt']);
+              return {
+                'classId': item['classId'],
+                'mentorId': item['mentorId'],
+                'title': item['name']?.toString() ?? 'No Title',
+                'category': item['categoryName']?.toString() ?? 'No Category',
+                'price': '${item['price'] ?? 0}원',
+                'date': formattedDate,
+              };
+            }).toList(),
+          );
+
+          // date 기준으로 내림차순 정렬
+          mentoringItems.sort((a, b) => b['date'].compareTo(a['date']));
+
+          _isLoading = false;
+          _hasError = false;
+        });
+      } else {
+        setState(() {
+          _isLoading = false;
+          _hasError = true;
+        });
+      }
+    } catch (e) {
+      setState(() {
+        _isLoading = false;
+        _hasError = true;
+      });
+    }
+  }
+
   String _formatDate(String date) {
     final DateTime parsedDate = DateTime.parse(date);
     return '${parsedDate.year}년${parsedDate.month.toString().padLeft(2, '0')}월${parsedDate.day.toString().padLeft(2, '0')}일';
+  }
+
+  Future<List<dynamic>> _fetchCategories() async {
+    final String apiServer = dotenv.env['API_SERVER'] ?? '';
+    final response =
+        await http.get(Uri.parse('$apiServer/api/category/categoryList'));
+
+    if (response.statusCode == 200) {
+      return json.decode(response.body);
+    } else {
+      throw Exception('Failed to load categories');
+    }
+  }
+
+  void _showCategoryDialog() async {
+    final categories = await _fetchCategories();
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return CategoryDialog(
+          categories: categories,
+          onCategorySelected: (categoryId) {
+            setState(() {
+              _selectedCategoryId = categoryId;
+              _selectedSubCategoryId = null;
+            });
+            _fetchFilteredList(categoryId, null);
+            Navigator.of(context).pop();
+          },
+        );
+      },
+    );
+  }
+
+  void _showSubCategoryDialog() async {
+    if (_selectedCategoryId == null) {
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: const Text('알림'),
+            content: const Text('대분류를 먼저 골라주세요.'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text('확인'),
+              ),
+            ],
+          );
+        },
+      );
+      return;
+    }
+
+    final categories = await _fetchCategories();
+    final subCategories = categories.firstWhere((category) =>
+        category['categoryId'] == _selectedCategoryId)['subCategories'];
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return SubCategoryDialog(
+          subCategories: subCategories,
+          onSubCategorySelected: (subCategoryId) {
+            setState(() {
+              _selectedSubCategoryId = subCategoryId;
+            });
+            _fetchFilteredList(null, subCategoryId);
+            Navigator.of(context).pop();
+          },
+        );
+      },
+    );
   }
 
   @override
@@ -154,9 +290,24 @@ class _CategoryTemplatePageState extends State<CategoryTemplatePage> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: [
-        ElevatedButton(onPressed: () {}, child: const Text('전체보기')),
-        ElevatedButton(onPressed: () {}, child: const Text('대분류')),
-        ElevatedButton(onPressed: () {}, child: const Text('소분류')),
+        ElevatedButton(
+          onPressed: () {
+            setState(() {
+              _selectedCategoryId = null;
+              _selectedSubCategoryId = null;
+              _fetchMentoringList();
+            });
+          },
+          child: const Text('전체보기'),
+        ),
+        ElevatedButton(
+          onPressed: _showCategoryDialog,
+          child: Text(_selectedCategoryId == null ? '대분류' : '선택됨'),
+        ),
+        ElevatedButton(
+          onPressed: _showSubCategoryDialog,
+          child: Text(_selectedSubCategoryId == null ? '소분류' : '선택됨'),
+        ),
       ],
     );
   }
@@ -282,6 +433,74 @@ class _CategoryTemplatePageState extends State<CategoryTemplatePage> {
                   });
                 }
               : null,
+        ),
+      ],
+    );
+  }
+}
+
+class CategoryDialog extends StatelessWidget {
+  final List<dynamic> categories;
+  final Function(int) onCategorySelected;
+
+  const CategoryDialog(
+      {Key? key, required this.categories, required this.onCategorySelected})
+      : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: const Text('대분류 선택'),
+      content: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: categories.map((category) {
+            return ListTile(
+              title: Text(category['categoryName']),
+              onTap: () => onCategorySelected(category['categoryId']),
+            );
+          }).toList(),
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: const Text('닫기'),
+        ),
+      ],
+    );
+  }
+}
+
+class SubCategoryDialog extends StatelessWidget {
+  final List<dynamic> subCategories;
+  final Function(int) onSubCategorySelected;
+
+  const SubCategoryDialog(
+      {Key? key,
+      required this.subCategories,
+      required this.onSubCategorySelected})
+      : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: const Text('소분류 선택'),
+      content: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: subCategories.map((subCategory) {
+            return ListTile(
+              title: Text(subCategory['subCategoryName']),
+              onTap: () => onSubCategorySelected(subCategory['subCategoryId']),
+            );
+          }).toList(),
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: const Text('닫기'),
         ),
       ],
     );
