@@ -226,9 +226,11 @@ class _ClassChatPageState extends State<ClassChatPage> {
                   IconButton(
                     icon: const Icon(Icons.add, color: Color(0xFF6F79F7)),
                     onPressed: () {
-                      if (_conversationId != null && _classId != null) {
-                        showCustomBottomSheet(
-                            context, _conversationId!, _classId!);
+                      print(_conversationId);
+                      print(
+                          _classId); // bottomNavi의 채팅에서 채팅방 입장 시 classId가 null 일 수 있음
+                      if (_conversationId != null) {
+                        showCustomBottomSheet(context, _conversationId!);
                       }
                     },
                   ),

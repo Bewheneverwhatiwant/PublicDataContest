@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+// 결제가 완료되면 채팅방에 보내질 컴포넌트
+
 class AfterPayMentoringPage extends StatelessWidget {
   final String timestamp;
 

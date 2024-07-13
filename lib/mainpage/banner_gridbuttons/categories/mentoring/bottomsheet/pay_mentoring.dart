@@ -1,60 +1,84 @@
 import 'package:flutter/material.dart';
 
-// 채팅방 bottom sheet에서 '결제 요청하기' 클릭 시 보내질 네모버튼 UI
-
 class PayMentoringPage extends StatelessWidget {
+  const PayMentoringPage({Key? key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Center(
-        child: SizedBox(
-          width: 600, // 나중에 채팅방에 띄워보고 크기 조정하기
-          height: 300,
-          child: ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              padding: EdgeInsets.zero,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
-              ),
-            ),
-            onPressed: () {
-              // 요기 버튼 클릭
-            },
+    final double screenWidth = MediaQuery.of(context).size.width;
+
+    return Container(
+      width: screenWidth / 1.5,
+      height: 250,
+      padding: const EdgeInsets.all(10.0),
+      decoration: BoxDecoration(
+        color: Colors.grey[200],
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Flexible(
             child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.all(1.0),
+                      child: Image.asset(
+                        'images/logo.png',
+                        width: 60,
+                        height: 40,
+                      ),
+                    ),
+                  ],
+                ),
+                const Text(
+                  '만나서 반가워요,나의 멘티!',
+                  style: TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 10),
                 Expanded(
                   child: Container(
                     decoration: BoxDecoration(
-                      color: Colors.grey[200],
+                      color: Colors.grey[300],
                       borderRadius: const BorderRadius.vertical(
-                        top: Radius.circular(10),
+                        bottom: Radius.circular(10),
                       ),
                     ),
-                    child: Row(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Padding(
-                          padding: const EdgeInsets.all(16.0),
-                          child: Image.asset(
-                            'images/logo.png',
-                            height: 80,
+                        const Text(
+                          '멘토링 비용을 결제해주세요.',
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
                           ),
                         ),
-                        Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                        const SizedBox(height: 4),
+                        const Text(
+                          '50,000원',
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.end,
                           children: [
-                            const Text(
-                              '만나서 반가워요,\n나의 멘티',
-                              style: TextStyle(
-                                fontSize: 24,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            const SizedBox(height: 10),
                             Text(
-                              '숙련된 멘토가 곧 도와드릴게요.',
+                              'Hang Hae',
                               style: TextStyle(
-                                fontSize: 16,
+                                fontSize: 12,
                                 color: Colors.grey[700],
                               ),
                             ),
@@ -64,47 +88,10 @@ class PayMentoringPage extends StatelessWidget {
                     ),
                   ),
                 ),
-                Container(
-                  decoration: BoxDecoration(
-                    color: Colors.grey[300],
-                    borderRadius: const BorderRadius.vertical(
-                      bottom: Radius.circular(10),
-                    ),
-                  ),
-                  padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        '멘토링 비용을 결제해주세요.',
-                        style: TextStyle(
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 10),
-                      const Text(
-                        '50,000원',
-                        style: TextStyle(
-                          fontSize: 28,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 10),
-                      Text(
-                        'Hang Hae',
-                        style: TextStyle(
-                          fontSize: 16,
-                          color: Colors.grey[700],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
               ],
             ),
           ),
-        ),
+        ],
       ),
     );
   }

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
-void showCustomBottomSheet(
-    BuildContext context, int conversationId, int classId) {
+void showCustomBottomSheet(BuildContext context, int conversationId) {
   showModalBottomSheet(
     context: context,
     builder: (BuildContext context) {
@@ -15,8 +14,7 @@ void showCustomBottomSheet(
               title: const Text('입금 요청하기'),
               onTap: () {
                 Navigator.pop(context);
-                Navigator.pushNamed(context, '/sendmoney',
-                    arguments: {'conversationId': conversationId});
+                showMentoringSelectionDialog(context, conversationId);
               },
             ),
             ListTile(
@@ -45,6 +43,73 @@ void showCustomBottomSheet(
             ),
           ],
         ),
+      );
+    },
+  );
+}
+
+void showMentoringSelectionDialog(BuildContext context, int conversationId) {
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      String selectedMentoring = '멘토링1';
+      return AlertDialog(
+        title: const Text(
+          '이 멘티가 결제해야 하는 멘토링을\n골라주세요.',
+          style: TextStyle(fontSize: 16),
+        ),
+        content: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return Column(
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                RadioListTile(
+                  title: const Text('멘토링1'),
+                  value: '멘토링1',
+                  groupValue: selectedMentoring,
+                  onChanged: (value) {
+                    setState(() {
+                      selectedMentoring = value.toString();
+                    });
+                  },
+                ),
+                RadioListTile(
+                  title: const Text('멘토링2'),
+                  value: '멘토링2',
+                  groupValue: selectedMentoring,
+                  onChanged: (value) {
+                    setState(() {
+                      selectedMentoring = value.toString();
+                    });
+                  },
+                ),
+                RadioListTile(
+                  title: const Text('멘토링3'),
+                  value: '멘토링3',
+                  groupValue: selectedMentoring,
+                  onChanged: (value) {
+                    setState(() {
+                      selectedMentoring = value.toString();
+                    });
+                  },
+                ),
+              ],
+            );
+          },
+        ),
+        actions: <Widget>[
+          TextButton(
+            child: const Text('확인'),
+            onPressed: () {
+              Navigator.pop(context);
+              Navigator.pushNamed(
+                context,
+                '/sendmoney',
+                arguments: {'conversationId': conversationId},
+              );
+            },
+          ),
+        ],
       );
     },
   );
