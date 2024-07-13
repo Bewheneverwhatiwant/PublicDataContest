@@ -4,6 +4,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'bottomsheet.dart';
+import 'bottomsheet/after_pay_mentoring.dart';
 
 class ClassChatPage extends StatefulWidget {
   const ClassChatPage({Key? key}) : super(key: key);
@@ -163,20 +164,11 @@ class _ClassChatPageState extends State<ClassChatPage> {
 
   Widget pay(bool isMe, String timestamp) {
     return Align(
-      alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
-      child: Container(
-        margin: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
-        padding: const EdgeInsets.all(12.0),
-        decoration: BoxDecoration(
-          color: Colors.grey[300],
-          borderRadius: BorderRadius.circular(12.0),
-        ),
-        child: Text(
-          '결제가 완료되었습니다!\n결제시각: $timestamp',
-          style: const TextStyle(fontSize: 16),
-        ),
-      ),
-    );
+        alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+          child: AfterPayMentoringPage(timestamp: timestamp),
+        ));
   }
 
   @override
