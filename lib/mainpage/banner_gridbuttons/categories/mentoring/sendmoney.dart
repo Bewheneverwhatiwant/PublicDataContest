@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
-
-// bottom sheet의 Modal에서 넘겨받은 classId를 /mentoring_detail API 에게로 전달하여 정보를 받아 띄움
-// 멘토이름, 멘토링 명, 가격
-
-// 수수료 5%를 계산하여 소수점 1자리까지 화면에 띄우기, 총 결제금액 계산해서 띄우기
-// 만액 결제 금액이 42500원이면, '항해pay에서 50000원이 자동 결제됩니다.' 이렇게 n만원 단위로 안내 띄우기
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class SendMoneyPage extends StatefulWidget {
   const SendMoneyPage({Key? key}) : super(key: key);
@@ -14,40 +12,154 @@ class SendMoneyPage extends StatefulWidget {
 }
 
 class _SendMoneyPageState extends State<SendMoneyPage> {
-  int amount = 50000;
   late int conversationId;
+  late int classId;
+  String mentorName = '';
+  String mentoringName = '';
+  int mentoringPrice = 0;
+  int amount = 0;
+  double fee = 0.0;
+  int totalAmount = 0;
+  int autoRechargeAmount = 0;
+  int count = 1;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     final arguments =
         ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
-    if (arguments != null && arguments.containsKey('conversationId')) {
+    if (arguments != null) {
       setState(() {
         conversationId = arguments['conversationId'];
+        classId = arguments['classId'];
       });
+      _setMentoringDetails();
     }
   }
 
-  void _sendMoney() {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('결제 완료'),
-        content: const Text('송금이 완료되었습니다!'),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-              Navigator.pop(context);
-              Navigator.pushReplacementNamed(context, '/classchat',
-                  arguments: {'conversationId': conversationId});
-            },
-            child: const Text('확인'),
-          ),
-        ],
-      ),
+  void _setMentoringDetails() {
+    switch (classId) {
+      case 7:
+        mentorName = '김철수';
+        mentoringName = '한글 멘토링';
+        mentoringPrice = 70000;
+        break;
+      case 8:
+        mentorName = '홍길동';
+        mentoringName = '의적 멘토링';
+        mentoringPrice = 40000;
+        break;
+      case 9:
+        mentorName = '나영잉';
+        mentoringName = '마라탕이론';
+        mentoringPrice = 55000;
+        break;
+      default:
+        mentorName = 'Unknown';
+        mentoringName = 'Unknown';
+        mentoringPrice = 0;
+        break;
+    }
+
+    setState(() {
+      amount = mentoringPrice;
+      fee = double.parse((amount * 0.05).toStringAsFixed(1));
+      totalAmount = amount + fee.toInt();
+      autoRechargeAmount = ((totalAmount / 10000).ceil() * 10000).toInt();
+      if (totalAmount < 10000) {
+        autoRechargeAmount = 10000;
+      }
+    });
+  }
+
+  Future<void> _sendMoney() async {
+    final apiServer = dotenv.env['API_SERVER'];
+    final updatePaymentStatusUrl =
+        Uri.parse('$apiServer/api/chat/update_payment_status');
+    final postPaymentHistoryUrl =
+        Uri.parse('$apiServer/api/payment_history/post_payment_history');
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    final accessToken = prefs.getString('accessToken');
+    if (accessToken == null) return;
+
+    final response1 = await http.put(
+      updatePaymentStatusUrl,
+      headers: {
+        'Authorization': 'Bearer $accessToken',
+        'Content-Type': 'application/json',
+      },
+      body: json.encode({
+        'conversationId': conversationId,
+        'paymentStatus': 'PAYMENT_COMPLETED',
+      }),
     );
+
+    if (response1.statusCode == 200) {
+      final response2 = await http.post(
+        postPaymentHistoryUrl,
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Content-Type': 'application/json',
+        },
+        body: json.encode({
+          'classId': classId,
+          'count': count,
+        }),
+      );
+
+      if (response2.statusCode == 200) {
+        showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Text('결제 완료'),
+            content: const Text('송금이 완료되었습니다!'),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                  Navigator.pop(context);
+                  Navigator.pushReplacementNamed(context, '/classchat',
+                      arguments: {'conversationId': conversationId});
+                },
+                child: const Text('확인'),
+              ),
+            ],
+          ),
+        );
+      } else {
+        // Handle error
+      }
+    } else {
+      // Handle error
+    }
+  }
+
+  void _increaseAmount() {
+    setState(() {
+      amount += mentoringPrice;
+      count += 1;
+      fee = double.parse((amount * 0.05).toStringAsFixed(1));
+      totalAmount = amount + fee.toInt();
+      autoRechargeAmount = ((totalAmount / 10000).ceil() * 10000).toInt();
+      if (totalAmount < 10000) {
+        autoRechargeAmount = 10000;
+      }
+    });
+  }
+
+  void _decreaseAmount() {
+    if (amount > mentoringPrice) {
+      setState(() {
+        amount -= mentoringPrice;
+        count -= 1;
+        fee = double.parse((amount * 0.05).toStringAsFixed(1));
+        totalAmount = amount + fee.toInt();
+        autoRechargeAmount = ((totalAmount / 10000).ceil() * 10000).toInt();
+        if (totalAmount < 10000) {
+          autoRechargeAmount = 10000;
+        }
+      });
+    }
   }
 
   @override
@@ -71,13 +183,15 @@ class _SendMoneyPageState extends State<SendMoneyPage> {
           children: [
             Column(
               children: [
-                const Text(
-                  '000멘토',
-                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                Text(
+                  '$mentorName 멘토',
+                  style: const TextStyle(
+                      fontSize: 24, fontWeight: FontWeight.bold),
                 ),
-                const Text(
-                  '000멘토링',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                Text(
+                  '$mentoringName 멘토링',
+                  style: const TextStyle(
+                      fontSize: 18, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 20),
                 const Text(
@@ -90,11 +204,7 @@ class _SendMoneyPageState extends State<SendMoneyPage> {
                   children: [
                     IconButton(
                       icon: const Icon(Icons.remove),
-                      onPressed: () {
-                        setState(() {
-                          if (amount > 0) amount -= 10000;
-                        });
-                      },
+                      onPressed: _decreaseAmount,
                     ),
                     Text(
                       '${amount.toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]},')}원',
@@ -103,29 +213,32 @@ class _SendMoneyPageState extends State<SendMoneyPage> {
                     ),
                     IconButton(
                       icon: const Icon(Icons.add),
-                      onPressed: () {
-                        setState(() {
-                          amount += 10000;
-                        });
-                      },
+                      onPressed: _increaseAmount,
                     ),
                   ],
                 ),
-                const Text('1회분 결제', style: TextStyle(fontSize: 16)),
+                Text('$count회분 한번에 결제', style: TextStyle(fontSize: 16)),
                 const SizedBox(height: 20),
-                const Text('멘토링 금액 50,000원', style: TextStyle(fontSize: 16)),
-                const Text('항해 Pay 수수료 2,500원', style: TextStyle(fontSize: 16)),
+                Text(
+                    '멘토링 금액 ${mentoringPrice.toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]},')}원',
+                    style: const TextStyle(fontSize: 16)),
+                Text(
+                    '항해 Pay 수수료 ${fee.toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]},')}원',
+                    style: const TextStyle(fontSize: 16)),
                 const SizedBox(height: 10),
-                const Text(
-                  '총 결제 금액 52,500원',
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                Text(
+                  '총 결제 금액 ${totalAmount.toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]},')}원',
+                  style: const TextStyle(
+                      fontSize: 20, fontWeight: FontWeight.bold),
                 ),
               ],
             ),
             Column(
               children: [
-                const Text('항해pay잔액: 10,000원 | 60,000원이 자동 충전되어요',
-                    style: TextStyle(fontSize: 16)),
+                Text(
+                  '항해pay잔액: 10,000원 | ${autoRechargeAmount.toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]},')}원이 자동 충전되어요',
+                  style: const TextStyle(fontSize: 16),
+                ),
                 const SizedBox(height: 10),
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(
