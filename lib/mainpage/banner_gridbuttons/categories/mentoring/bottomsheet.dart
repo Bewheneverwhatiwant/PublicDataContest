@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 void showCustomBottomSheet(BuildContext context, int conversationId) {
   showModalBottomSheet(
@@ -53,6 +57,8 @@ void showMentoringSelectionDialog(BuildContext context, int conversationId) {
     context: context,
     builder: (BuildContext context) {
       String selectedMentoring = '멘토링1';
+      int classId = 7; // 초기값은 멘토링1의 classId
+
       return AlertDialog(
         title: const Text(
           '이 멘티가 결제해야 하는 멘토링을\n골라주세요.',
@@ -70,6 +76,7 @@ void showMentoringSelectionDialog(BuildContext context, int conversationId) {
                   onChanged: (value) {
                     setState(() {
                       selectedMentoring = value.toString();
+                      classId = 7;
                     });
                   },
                 ),
@@ -80,6 +87,7 @@ void showMentoringSelectionDialog(BuildContext context, int conversationId) {
                   onChanged: (value) {
                     setState(() {
                       selectedMentoring = value.toString();
+                      classId = 8;
                     });
                   },
                 ),
@@ -90,6 +98,7 @@ void showMentoringSelectionDialog(BuildContext context, int conversationId) {
                   onChanged: (value) {
                     setState(() {
                       selectedMentoring = value.toString();
+                      classId = 9;
                     });
                   },
                 ),
@@ -100,13 +109,31 @@ void showMentoringSelectionDialog(BuildContext context, int conversationId) {
         actions: <Widget>[
           TextButton(
             child: const Text('확인'),
-            onPressed: () {
-              Navigator.pop(context);
-              Navigator.pushNamed(
-                context,
-                '/sendmoney',
-                arguments: {'conversationId': conversationId},
+            onPressed: () async {
+              SharedPreferences prefs = await SharedPreferences.getInstance();
+              final accessToken = prefs.getString('accessToken');
+              if (accessToken == null) return;
+
+              final apiServer = dotenv.env['API_SERVER'];
+              final url =
+                  Uri.parse('$apiServer/api/chat/update_payment_status');
+              final response = await http.put(
+                url,
+                headers: {
+                  'Authorization': 'Bearer $accessToken',
+                  'Content-Type': 'application/json',
+                },
+                body: json.encode({
+                  'conversationId': conversationId,
+                  'paymentStatus': 'PAYMENT_REQUESTED',
+                }),
               );
+
+              if (response.statusCode == 200) {
+                Navigator.pop(context);
+              } else {
+                const AlertDialog(title: Text('오류가 발생했습니다.'));
+              }
             },
           ),
         ],

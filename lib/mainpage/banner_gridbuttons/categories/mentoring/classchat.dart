@@ -3,8 +3,10 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'dart:async';
 import 'bottomsheet.dart';
 import 'bottomsheet/after_pay_mentoring.dart';
+import 'bottomsheet/pay_mentoring.dart';
 
 class ClassChatPage extends StatefulWidget {
   const ClassChatPage({Key? key}) : super(key: key);
@@ -24,6 +26,7 @@ class _ClassChatPageState extends State<ClassChatPage> {
   String? _senderName;
   final TextEditingController _controller = TextEditingController();
   bool _showBottomButtons = false;
+  Timer? _timer;
 
   @override
   void initState() {
@@ -41,6 +44,19 @@ class _ClassChatPageState extends State<ClassChatPage> {
           _saveClassId(_classId!);
         }
       }
+      _loadConversationIdAndClassIdAndFetchMessages();
+    });
+    _startPolling();
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
+
+  void _startPolling() {
+    _timer = Timer.periodic(Duration(seconds: 2), (timer) {
       _loadConversationIdAndClassIdAndFetchMessages();
     });
   }
@@ -162,12 +178,23 @@ class _ClassChatPageState extends State<ClassChatPage> {
     );
   }
 
-  Widget pay(bool isMe, String timestamp) {
+  Widget pay(
+      bool isMe, String paymentStatus, String timestamp, int conversationId) {
+    Widget paymentWidget;
+    if (paymentStatus == 'PAYMENT_REQUESTED') {
+      paymentWidget = PayMentoringPage(
+          timestamp: timestamp, conversationId: conversationId);
+    } else if (paymentStatus == 'PAYMENT_COMPLETED') {
+      paymentWidget = AfterPayMentoringPage(timestamp: timestamp);
+    } else {
+      return SizedBox.shrink();
+    }
+
     return Align(
       alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
-        child: AfterPayMentoringPage(timestamp: timestamp),
+        child: paymentWidget,
       ),
     );
   }
@@ -213,7 +240,8 @@ class _ClassChatPageState extends State<ClassChatPage> {
                                 return chat(isMe, message['content']);
                               } else if (message.containsKey('paymentStatus')) {
                                 final isMe = (_role == message['sender']);
-                                return pay(isMe, message['timestamp']);
+                                return pay(isMe, message['paymentStatus'],
+                                    message['timestamp'], _conversationId!);
                               } else {
                                 return SizedBox.shrink();
                               }
