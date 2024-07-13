@@ -17,6 +17,7 @@ class _ClassChatPageState extends State<ClassChatPage> {
   bool _hasError = false;
   String? _role;
   int? _conversationId;
+  int? _classId;
   String? _senderType;
   String? _senderName;
   final TextEditingController _controller = TextEditingController();
@@ -28,11 +29,17 @@ class _ClassChatPageState extends State<ClassChatPage> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final arguments =
           ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
-      if (arguments != null && arguments.containsKey('conversationId')) {
-        _conversationId = arguments['conversationId'];
-        _saveConversationId(_conversationId!);
+      if (arguments != null) {
+        if (arguments.containsKey('conversationId')) {
+          _conversationId = arguments['conversationId'];
+          _saveConversationId(_conversationId!);
+        }
+        if (arguments.containsKey('classId')) {
+          _classId = arguments['classId'];
+          _saveClassId(_classId!);
+        }
       }
-      _loadConversationIdAndFetchMessages();
+      _loadConversationIdAndClassIdAndFetchMessages();
     });
   }
 
@@ -41,9 +48,15 @@ class _ClassChatPageState extends State<ClassChatPage> {
     await prefs.setInt('conversationId', conversationId);
   }
 
-  Future<void> _loadConversationIdAndFetchMessages() async {
+  Future<void> _saveClassId(int classId) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setInt('classId', classId);
+  }
+
+  Future<void> _loadConversationIdAndClassIdAndFetchMessages() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     _conversationId ??= prefs.getInt('conversationId');
+    _classId ??= prefs.getInt('classId');
     _role = prefs.getString('role');
     final accessToken = prefs.getString('accessToken');
     if (_conversationId != null && accessToken != null) {
@@ -148,27 +161,11 @@ class _ClassChatPageState extends State<ClassChatPage> {
                 },
               ),
               ListTile(
-                leading: const Icon(Icons.check),
-                title: const Text('멘토링 성사하기'),
-                onTap: () {
-                  Navigator.pop(context);
-                  // handle action
-                },
-              ),
-              ListTile(
-                leading: const Icon(Icons.cancel),
-                title: const Text('최종 멘토링 종료 요청하기'),
-                onTap: () {
-                  Navigator.pop(context);
-                  // handle action
-                },
-              ),
-              ListTile(
                 leading: const Icon(Icons.play_arrow),
                 title: const Text('일일 멘토링 시작 요청하기'),
                 onTap: () {
                   Navigator.pop(context);
-                  // handle action
+                  // update_mentoring API 연동하고, 200이면 daily_mentoring_start 컴포넌트 띄우기
                 },
               ),
               ListTile(
@@ -176,7 +173,15 @@ class _ClassChatPageState extends State<ClassChatPage> {
                 title: const Text('일일 멘토링 종료 요청하기'),
                 onTap: () {
                   Navigator.pop(context);
-                  // handle action
+                  // API 없이 daily_mentoring_finish 컴포넌트만 띄우기
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.cancel),
+                title: const Text('최종 멘토링 종료 요청하기'),
+                onTap: () {
+                  Navigator.pop(context);
+                  // final_finish_mentoring API 요청하기
                 },
               ),
             ],
