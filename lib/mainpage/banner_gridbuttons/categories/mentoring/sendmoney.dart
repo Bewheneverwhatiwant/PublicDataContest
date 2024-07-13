@@ -4,8 +4,7 @@ import 'package:flutter/material.dart';
 // 멘토이름, 멘토링 명, 가격
 
 // 수수료 5%를 계산하여 소수점 1자리까지 화면에 띄우기, 총 결제금액 계산해서 띄우기
-// 항해pay 등록 화면에서 '충전' 버튼도 만들고, 충전할 금액 입력 -> 서버 저장 -> 여기서 충전된 금액 확인 ->
-// 만약 결제 금액보다 충전된 금액이 적으면, 'nnnn원이 자동 충전됩니다.' 띄우기
+// 만액 결제 금액이 42500원이면, '항해pay에서 50000원이 자동 결제됩니다.' 이렇게 n만원 단위로 안내 띄우기
 
 class SendMoneyPage extends StatefulWidget {
   const SendMoneyPage({Key? key}) : super(key: key);
