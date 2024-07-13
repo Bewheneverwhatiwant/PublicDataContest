@@ -141,10 +141,17 @@ class _MentoringDetailPageState extends State<MentoringDetailPage> {
           ),
         );
 
-        Navigator.pushNamed(context, '/classchat',
-            arguments: {'conversationId': conversationId});
-        print('넘겨진 conversationId: ${conversationId}');
-        print('넘겨진 멘토 id: ${mentorId}');
+        Navigator.pushNamed(
+          context,
+          '/classchat',
+          arguments: {
+            'conversationId': conversationId,
+            'classId': _classId,
+          },
+        );
+        print('넘겨진 conversationId: $conversationId');
+        print('넘겨진 멘토 id: $mentorId');
+        print('넘겨진 classId: $_classId');
       } else {
         print('채팅방 생성 실패');
         print(mentorId);
@@ -312,7 +319,7 @@ class _MentoringDetailPageState extends State<MentoringDetailPage> {
               onPressed: () async {
                 bool isLoggedIn = await _checkIfLoggedIn();
                 if (isLoggedIn) {
-                  // 좋아요 버튼 클릭 시 동작 추가
+                  // 좋아요 버튼 클릭 시
                 } else {
                   _showLoginAlert(context);
                 }
@@ -328,7 +335,6 @@ class _MentoringDetailPageState extends State<MentoringDetailPage> {
               if (_mentorId != null) {
                 await createChatRoom(_mentorId!);
               }
-              //Navigator.pushNamed(context, '/classchat');
             } else {
               _showLoginAlert(context);
             }
