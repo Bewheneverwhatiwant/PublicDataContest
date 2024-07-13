@@ -66,11 +66,18 @@ class _ClassChatPageState extends State<ClassChatPage> {
       });
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
+        final chatResponses = data['chatResponse'] as List<dynamic>;
+        final paymentStatuses = data['paymentStatus'] as List<dynamic>;
+
+        final combined = [...chatResponses, ...paymentStatuses];
+        combined.sort((a, b) => DateTime.parse(a['timestamp'])
+            .compareTo(DateTime.parse(b['timestamp'])));
+
         setState(() {
-          messages = data['chatResponse'] as List<dynamic>;
-          if (messages.isNotEmpty) {
-            _senderType = messages[0]['senderType'].toString();
-            _senderName = messages[0]['senderName'].toString();
+          messages = combined;
+          if (chatResponses.isNotEmpty) {
+            _senderType = chatResponses[0]['senderType'].toString();
+            _senderName = chatResponses[0]['senderName'].toString();
           }
           _isLoading = false;
           _hasError = false;
@@ -197,6 +204,24 @@ class _ClassChatPageState extends State<ClassChatPage> {
     );
   }
 
+  Widget pay(bool isMe, String timestamp) {
+    return Align(
+      alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
+      child: Container(
+        margin: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+        padding: const EdgeInsets.all(12.0),
+        decoration: BoxDecoration(
+          color: Colors.grey[300],
+          borderRadius: BorderRadius.circular(12.0),
+        ),
+        child: Text(
+          '결제가 완료되었습니다!\n결제시각: $timestamp',
+          style: const TextStyle(fontSize: 16),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -234,7 +259,13 @@ class _ClassChatPageState extends State<ClassChatPage> {
                             itemBuilder: (context, index) {
                               final message = messages[index];
                               final isMe = (_role == message['senderType']);
-                              return chat(isMe, message['content']);
+                              if (message.containsKey('content')) {
+                                return chat(isMe, message['content']);
+                              } else if (message.containsKey('paymentStatus')) {
+                                return pay(isMe, message['timestamp']);
+                              } else {
+                                return SizedBox.shrink();
+                              }
                             },
                           ),
           ),
