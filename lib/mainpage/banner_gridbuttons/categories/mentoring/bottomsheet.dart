@@ -23,18 +23,10 @@ void showCustomBottomSheet(BuildContext context, int conversationId) {
             ),
             ListTile(
               leading: const Icon(Icons.play_arrow),
-              title: const Text('일일 멘토링 시작 요청하기'),
+              title: const Text('일일 멘토링 횟수 기록하기'),
               onTap: () {
                 Navigator.pop(context);
                 // update_mentoring API 연동하고, 200이면 daily_mentoring_start 컴포넌트 띄우기
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.stop),
-              title: const Text('일일 멘토링 종료 요청하기'),
-              onTap: () {
-                Navigator.pop(context);
-                // API 없이 daily_mentoring_finish 컴포넌트만 띄우기
               },
             ),
             ListTile(
@@ -125,16 +117,12 @@ void showMentoringSelectionDialog(BuildContext context, int conversationId) {
                 },
                 body: json.encode({
                   'conversationId': conversationId,
-                  'paymentStatus': 'PAYMENT_REREQUESTED',
+                  'paymentStatus': 'PAYMENT_REQUESTED',
                 }),
               );
 
               if (response.statusCode == 200) {
                 Navigator.pop(context);
-                Navigator.pushNamed(context, '/sendmoney', arguments: {
-                  'conversationId': conversationId,
-                  'classId': classId
-                });
               } else {
                 const AlertDialog(title: Text('오류가 발생했습니다.'));
               }
