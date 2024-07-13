@@ -178,12 +178,15 @@ class _ClassChatPageState extends State<ClassChatPage> {
     );
   }
 
-  Widget pay(
-      bool isMe, String paymentStatus, String timestamp, int conversationId) {
+  Widget pay(bool isMe, String paymentStatus, String timestamp,
+      int conversationId, int? classId) {
     Widget paymentWidget;
     if (paymentStatus == 'PAYMENT_REQUESTED') {
       paymentWidget = PayMentoringPage(
-          timestamp: timestamp, conversationId: conversationId);
+        timestamp: timestamp,
+        conversationId: conversationId,
+        classId: _classId ?? 7,
+      );
     } else if (paymentStatus == 'PAYMENT_COMPLETED') {
       paymentWidget = AfterPayMentoringPage(timestamp: timestamp);
     } else {
@@ -240,8 +243,12 @@ class _ClassChatPageState extends State<ClassChatPage> {
                                 return chat(isMe, message['content']);
                               } else if (message.containsKey('paymentStatus')) {
                                 final isMe = (_role == message['sender']);
-                                return pay(isMe, message['paymentStatus'],
-                                    message['timestamp'], _conversationId!);
+                                return pay(
+                                    isMe,
+                                    message['paymentStatus'],
+                                    message['timestamp'],
+                                    _conversationId!,
+                                    _classId);
                               } else {
                                 return SizedBox.shrink();
                               }

@@ -125,12 +125,16 @@ void showMentoringSelectionDialog(BuildContext context, int conversationId) {
                 },
                 body: json.encode({
                   'conversationId': conversationId,
-                  'paymentStatus': 'PAYMENT_REQUESTED',
+                  'paymentStatus': 'PAYMENT_REREQUESTED',
                 }),
               );
 
               if (response.statusCode == 200) {
                 Navigator.pop(context);
+                Navigator.pushNamed(context, '/sendmoney', arguments: {
+                  'conversationId': conversationId,
+                  'classId': classId
+                });
               } else {
                 const AlertDialog(title: Text('오류가 발생했습니다.'));
               }

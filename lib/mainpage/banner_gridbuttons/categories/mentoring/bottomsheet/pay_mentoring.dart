@@ -4,10 +4,14 @@ import 'package:shared_preferences/shared_preferences.dart';
 class PayMentoringPage extends StatelessWidget {
   final String timestamp;
   final int conversationId;
+  final int classId;
 
-  const PayMentoringPage(
-      {Key? key, required this.timestamp, required this.conversationId})
-      : super(key: key);
+  const PayMentoringPage({
+    Key? key,
+    required this.timestamp,
+    required this.conversationId,
+    required this.classId,
+  }) : super(key: key);
 
   Future<void> _handleButtonPress(BuildContext context) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -33,9 +37,11 @@ class PayMentoringPage extends StatelessWidget {
         },
       );
     } else if (role == 'mentee') {
+      print('conversationId는 $conversationId');
+      print('classId는 $classId');
       // 멘티인 경우 /sendmoney로 이동
       Navigator.pushNamed(context, '/sendmoney',
-          arguments: {'conversationId': conversationId});
+          arguments: {'conversationId': conversationId, 'classId': classId});
     }
   }
 
