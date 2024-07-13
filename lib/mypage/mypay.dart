@@ -14,6 +14,44 @@ class MyPaySection extends StatefulWidget {
 
 class _MyPaySectionState extends State<MyPaySection> {
   final TextEditingController _controller = TextEditingController();
+  String? payment;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchPaymentInfo();
+  }
+
+  Future<void> _fetchPaymentInfo() async {
+    final String apiServer = dotenv.env['API_SERVER'] ?? '';
+    final String? accessToken = await _getAccessToken();
+
+    if (accessToken == null) {
+      print('AccessToken not found');
+      return;
+    }
+
+    final response = await http.get(
+      Uri.parse('$apiServer/api/auth/getInfo'),
+      headers: {
+        'Authorization': 'Bearer $accessToken',
+      },
+    );
+
+    if (response.statusCode == 200) {
+      final data = json.decode(response.body);
+      setState(() {
+        payment = data['mentor']['payment'];
+      });
+    } else {
+      print('Failed to fetch payment info');
+    }
+  }
+
+  Future<String?> _getAccessToken() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString('accessToken');
+  }
 
   void _showInputModal(BuildContext context) {
     showDialog(
@@ -72,16 +110,14 @@ class _MyPaySectionState extends State<MyPaySection> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('계좌가 등록되었습니다: $payment')),
       );
+      setState(() {
+        this.payment = payment;
+      });
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('계좌 등록에 실패했습니다: $payment')),
       );
     }
-  }
-
-  Future<String?> _getAccessToken() async {
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getString('accessToken');
   }
 
   @override
@@ -100,52 +136,69 @@ class _MyPaySectionState extends State<MyPaySection> {
             ),
           ),
           const SizedBox(height: 12),
-          GestureDetector(
-            onTap: () => _showInputModal(context),
-            child: Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(8),
-                color: Colors.grey[200],
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.grey.withOpacity(0.5),
-                    spreadRadius: 1,
-                    blurRadius: 3,
-                    offset: const Offset(0, 2), // changes position of shadow
-                  ),
-                ],
-              ),
-              child: Row(
-                children: [
-                  Icon(Icons.add, color: GlobalColors.mainColor),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          '계좌번호를 등록해주세요',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                          ),
+          payment == null || payment!.isEmpty
+              ? GestureDetector(
+                  onTap: () => _showInputModal(context),
+                  child: Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(8),
+                      color: Colors.grey[200],
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.grey.withOpacity(0.5),
+                          spreadRadius: 1,
+                          blurRadius: 3,
+                          offset: const Offset(0, 2),
                         ),
-                        const SizedBox(height: 8),
-                        Text(
-                          '등록된 계좌번호가 없습니다.',
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: GlobalColors.lightgray,
+                      ],
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(Icons.add, color: GlobalColors.mainColor),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text(
+                                '계좌번호를 등록해주세요',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                '등록된 계좌번호가 없습니다.',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: GlobalColors.lightgray,
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                       ],
                     ),
                   ),
-                ],
-              ),
-            ),
-          ),
+                )
+              : Row(
+                  children: [
+                    Text(
+                      '등록된 계좌번호: $payment',
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    ElevatedButton(
+                      onPressed: () => _showInputModal(context),
+                      child: const Text('계좌 변경'),
+                    ),
+                  ],
+                ),
         ],
       ),
     );
