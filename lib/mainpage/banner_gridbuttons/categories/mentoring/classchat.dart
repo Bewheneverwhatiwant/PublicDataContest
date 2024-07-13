@@ -273,12 +273,13 @@ class _ClassChatPageState extends State<ClassChatPage> {
             padding: const EdgeInsets.all(8.0),
             child: Row(
               children: [
-                IconButton(
-                  icon: const Icon(Icons.add, color: Color(0xFF6F79F7)),
-                  onPressed: () {
-                    _showBottomSheet(context);
-                  },
-                ),
+                if (_role == 'mentor')
+                  IconButton(
+                    icon: const Icon(Icons.add, color: Color(0xFF6F79F7)),
+                    onPressed: () {
+                      _showBottomSheet(context);
+                    },
+                  ),
                 Expanded(
                   child: TextField(
                     controller: _controller,
