@@ -19,12 +19,14 @@ class _MyPageMenteeState extends State<MyPageMentee>
   late TabController _tabController;
   List<String> _selectedCategories = [];
   Map<String, dynamic> _menteeInfo = {};
+  List<dynamic> _mentoringHistory = [];
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
     _fetchAndDisplayUserInfo();
+    _fetchMentoringHistory();
   }
 
   @override
@@ -38,7 +40,7 @@ class _MyPageMenteeState extends State<MyPageMentee>
       context: context,
       builder: (BuildContext context) {
         return SimpleDialog(
-          title: Text('카테고리 선택'),
+          title: const Text('카테고리 선택'),
           children: <Widget>[
             ListTile(
               title: Text('IT'),
@@ -100,6 +102,35 @@ class _MyPageMenteeState extends State<MyPageMentee>
   Future<String?> _getAccessToken() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getString('accessToken');
+  }
+
+  Future<void> _fetchMentoringHistory() async {
+    final String apiServer = dotenv.env['API_SERVER'] ?? '';
+    final String? accessToken = await _getAccessToken();
+
+    if (accessToken == null) {
+      print('AccessToken not found');
+      return;
+    }
+
+    final response = await http.get(
+      Uri.parse('$apiServer/api/payment_history/get_payment_history'),
+      headers: {
+        'Authorization': 'Bearer $accessToken',
+        'Content-Type': 'application/json',
+      },
+    );
+
+    if (response.statusCode == 200) {
+      final responseData = json.decode(response.body);
+      setState(() {
+        _mentoringHistory = responseData;
+      });
+      print('mentoring history API call success');
+      print(responseData);
+    } else {
+      print('Failed to fetch mentoring history');
+    }
   }
 
   @override
@@ -304,35 +335,14 @@ class _MyPageMenteeState extends State<MyPageMentee>
   }
 
   Widget _buildRecentMentorings() {
-    const List<Map<String, String>> mentoringHistory = [
-      {
-        'title': '000멘토링',
-        'date': '2023.05.10',
-        'mentoringTime': '00:00 ~ 00:00',
-        'mentoringType': '멘토링 타입',
-      },
-      {
-        'title': '000멘토링',
-        'date': '2023.05.10',
-        'mentoringTime': '00:00 ~ 00:00',
-        'mentoringType': '멘토링 타입',
-      },
-      {
-        'title': '000멘토링',
-        'date': '2023.05.10',
-        'mentoringTime': '00:00 ~ 00:00',
-        'mentoringType': '멘토링 타입',
-      },
-    ];
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
-      children: mentoringHistory.map((mentoring) {
+      children: _mentoringHistory.map((mentoring) {
         return _buildHistoryItem(
-          mentoring['title']!,
-          mentoring['date']!,
-          mentoring['mentoringTime']!,
-          mentoring['mentoringType']!,
+          mentoring['className'] ?? '',
+          mentoring['usedCount'].toString(),
+          mentoring['timestamp'] ?? '',
+          mentoring['price'].toString(),
         );
       }).toList(),
     );
