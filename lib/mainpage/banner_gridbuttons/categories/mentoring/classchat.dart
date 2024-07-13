@@ -3,6 +3,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'bottomsheet.dart';
 
 class ClassChatPage extends StatefulWidget {
   const ClassChatPage({Key? key}) : super(key: key);
@@ -142,55 +143,6 @@ class _ClassChatPageState extends State<ClassChatPage> {
     }
   }
 
-  void _showBottomSheet(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      builder: (BuildContext context) {
-        return Container(
-          color: Colors.grey[300],
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              ListTile(
-                leading: const Icon(Icons.attach_money),
-                title: const Text('입금 요청하기'),
-                onTap: () {
-                  Navigator.pop(context);
-                  Navigator.pushNamed(context, '/sendmoney',
-                      arguments: {'conversationId': _conversationId});
-                },
-              ),
-              ListTile(
-                leading: const Icon(Icons.play_arrow),
-                title: const Text('일일 멘토링 시작 요청하기'),
-                onTap: () {
-                  Navigator.pop(context);
-                  // update_mentoring API 연동하고, 200이면 daily_mentoring_start 컴포넌트 띄우기
-                },
-              ),
-              ListTile(
-                leading: const Icon(Icons.stop),
-                title: const Text('일일 멘토링 종료 요청하기'),
-                onTap: () {
-                  Navigator.pop(context);
-                  // API 없이 daily_mentoring_finish 컴포넌트만 띄우기
-                },
-              ),
-              ListTile(
-                leading: const Icon(Icons.cancel),
-                title: const Text('최종 멘토링 종료 요청하기'),
-                onTap: () {
-                  Navigator.pop(context);
-                  // final_finish_mentoring API 요청하기
-                },
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
-
   Widget chat(bool isMe, String message) {
     return Align(
       alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
@@ -282,7 +234,10 @@ class _ClassChatPageState extends State<ClassChatPage> {
                   IconButton(
                     icon: const Icon(Icons.add, color: Color(0xFF6F79F7)),
                     onPressed: () {
-                      _showBottomSheet(context);
+                      if (_conversationId != null && _classId != null) {
+                        showCustomBottomSheet(
+                            context, _conversationId!, _classId!);
+                      }
                     },
                   ),
                 Expanded(
