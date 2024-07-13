@@ -164,11 +164,12 @@ class _ClassChatPageState extends State<ClassChatPage> {
 
   Widget pay(bool isMe, String timestamp) {
     return Align(
-        alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
-          child: AfterPayMentoringPage(timestamp: timestamp),
-        ));
+      alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+        child: AfterPayMentoringPage(timestamp: timestamp),
+      ),
+    );
   }
 
   @override
@@ -207,10 +208,11 @@ class _ClassChatPageState extends State<ClassChatPage> {
                             itemCount: messages.length,
                             itemBuilder: (context, index) {
                               final message = messages[index];
-                              final isMe = (_role == message['senderType']);
                               if (message.containsKey('content')) {
+                                final isMe = (_role == message['senderType']);
                                 return chat(isMe, message['content']);
                               } else if (message.containsKey('paymentStatus')) {
+                                final isMe = (_role == message['sender']);
                                 return pay(isMe, message['timestamp']);
                               } else {
                                 return SizedBox.shrink();
@@ -226,9 +228,6 @@ class _ClassChatPageState extends State<ClassChatPage> {
                   IconButton(
                     icon: const Icon(Icons.add, color: Color(0xFF6F79F7)),
                     onPressed: () {
-                      print(_conversationId);
-                      print(
-                          _classId); // bottomNavi의 채팅에서 채팅방 입장 시 classId가 null 일 수 있음
                       if (_conversationId != null) {
                         showCustomBottomSheet(context, _conversationId!);
                       }
