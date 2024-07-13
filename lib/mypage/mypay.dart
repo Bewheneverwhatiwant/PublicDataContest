@@ -186,9 +186,9 @@ class _MyPaySectionState extends State<MyPaySection> {
               : Row(
                   children: [
                     Text(
-                      '등록된 계좌번호: $payment',
+                      '등록된 계좌: $payment',
                       style: const TextStyle(
-                        fontSize: 16,
+                        fontSize: 15,
                         fontWeight: FontWeight.bold,
                       ),
                     ),

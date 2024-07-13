@@ -67,7 +67,7 @@ class _ClassChatPageState extends State<ClassChatPage> {
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         setState(() {
-          messages = data['chatResponse'];
+          messages = data['chatResponse'] as List<dynamic>;
           if (messages.isNotEmpty) {
             _senderType = messages[0]['senderType'].toString();
             _senderName = messages[0]['senderName'].toString();
