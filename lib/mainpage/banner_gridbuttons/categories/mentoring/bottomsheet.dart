@@ -26,7 +26,8 @@ void showCustomBottomSheet(BuildContext context, int conversationId) {
               title: const Text('일일 멘토링 횟수 기록하기'),
               onTap: () {
                 Navigator.pop(context);
-                // update_mentoring API 연동하고, 200이면 daily_mentoring_start 컴포넌트 띄우기
+                // update payment status로 요청보내기(paymentStatus 값 알고나서)
+                // 그 후 일일멘토링 기록체크 컴포넌트 클릭 시 /update_mentoring 호출하기
               },
             ),
             ListTile(
@@ -34,7 +35,8 @@ void showCustomBottomSheet(BuildContext context, int conversationId) {
               title: const Text('최종 멘토링 종료 요청하기'),
               onTap: () {
                 Navigator.pop(context);
-                // final_finish_mentoring API 요청하기
+                // update payment status로 요청보내기(paymentStatus 값 알고나서)
+                // 그 후 최종멘토링 종료 컴포넌트 클릭 시 /final_finish_mentoring 호출하기
               },
             ),
           ],
