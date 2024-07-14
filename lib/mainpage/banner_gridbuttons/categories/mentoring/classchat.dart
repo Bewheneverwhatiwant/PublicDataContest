@@ -35,6 +35,7 @@ class _ClassChatPageState extends State<ClassChatPage> {
   bool _showBottomButtons = false;
   Timer? _timer;
   final ScrollController _scrollController = ScrollController();
+  bool _initialScrollCompleted = false;
 
   @override
   void initState() {
@@ -80,11 +81,15 @@ class _ClassChatPageState extends State<ClassChatPage> {
   }
 
   void _scrollToBottom() {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (_scrollController.hasClients) {
-        _scrollController.jumpTo(_scrollController.position.maxScrollExtent);
-      }
-    });
+    if (!_initialScrollCompleted) {
+      // 최초 스크롤만 수행
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (_scrollController.hasClients) {
+          _scrollController.jumpTo(_scrollController.position.maxScrollExtent);
+          _initialScrollCompleted = true;
+        }
+      });
+    }
   }
 
   Future<void> _loadConversationIdAndClassIdAndFetchMessages() async {
