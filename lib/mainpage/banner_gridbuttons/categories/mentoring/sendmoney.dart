@@ -14,6 +14,7 @@ class SendMoneyPage extends StatefulWidget {
 class _SendMoneyPageState extends State<SendMoneyPage> {
   late int conversationId;
   late int classId;
+  String titlename = '';
   String mentorName = '';
   String mentoringName = '';
   int mentoringPrice = 0;
@@ -28,13 +29,20 @@ class _SendMoneyPageState extends State<SendMoneyPage> {
     super.didChangeDependencies();
     final arguments =
         ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
+
     if (arguments != null) {
       setState(() {
         conversationId = arguments['conversationId'];
         classId = arguments['classId'];
+        titlename = arguments['titlename'];
       });
-      _setMentoringDetails();
+    } else {
+      // 기본값 설정
+      conversationId = 0;
+      classId = 0;
+      titlename = 'Unknown';
     }
+    _setMentoringDetails();
   }
 
   void _setMentoringDetails() {
@@ -119,7 +127,11 @@ class _SendMoneyPageState extends State<SendMoneyPage> {
                   Navigator.pop(context);
                   Navigator.pop(context);
                   Navigator.pushReplacementNamed(context, '/classchat',
-                      arguments: {'conversationId': conversationId});
+                      arguments: {
+                        'conversationId': conversationId,
+                        'classId': classId,
+                        'titlename': titlename,
+                      });
                 },
                 child: const Text('확인'),
               ),

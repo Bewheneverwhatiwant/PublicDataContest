@@ -77,13 +77,6 @@ class AfterPayMentoringPage extends StatelessWidget {
                           ),
                         ),
                         const SizedBox(height: 4),
-                        const Text(
-                          '50,000원',
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
                         const SizedBox(height: 4),
                         Text(
                           '결제시각: $timestamp',

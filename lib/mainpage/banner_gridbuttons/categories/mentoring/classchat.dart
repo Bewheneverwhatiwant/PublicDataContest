@@ -213,6 +213,7 @@ class _ClassChatPageState extends State<ClassChatPage> {
         timestamp: timestamp,
         conversationId: conversationId,
         classId: _classId ?? 7,
+        titlename: widget.titlename,
       );
     } else if (paymentStatus == 'PAYMENT_COMPLETED') {
       paymentWidget = AfterPayMentoringPage(timestamp: timestamp);
