@@ -12,7 +12,9 @@ import 'bottomsheet/daily_mentoring_finish.dart';
 import 'bottomsheet/final_mentoring_finish.dart';
 
 class ClassChatPage extends StatefulWidget {
-  const ClassChatPage({Key? key}) : super(key: key);
+  final String titlename;
+
+  const ClassChatPage({Key? key, required this.titlename}) : super(key: key);
 
   @override
   _ClassChatPageState createState() => _ClassChatPageState();
@@ -233,20 +235,20 @@ class _ClassChatPageState extends State<ClassChatPage> {
 
   @override
   Widget build(BuildContext context) {
-    String? chatTitle;
+    String chatTitle;
     if (_role == 'mentor') {
-      chatTitle =
-          _menteeName != null ? '$_menteeName 멘티와의 채팅방입니다.' : '멘티와의 채팅방입니다.';
+      chatTitle = '${widget.titlename} 멘티와의 채팅방입니다.';
     } else if (_role == 'mentee') {
-      chatTitle =
-          _mentorName != null ? '$_mentorName 멘토와의 채팅방입니다.' : '멘토와의 채팅방입니다.';
+      chatTitle = '${widget.titlename} 멘토와의 채팅방입니다.';
+    } else {
+      chatTitle = '채팅방';
     }
 
     return Scaffold(
       appBar: AppBar(
         scrolledUnderElevation: 0,
         backgroundColor: Colors.white,
-        title: Text(chatTitle ?? '채팅방', style: const TextStyle(fontSize: 20)),
+        title: Text(chatTitle, style: TextStyle(fontSize: 20)),
       ),
       body: Column(
         children: [

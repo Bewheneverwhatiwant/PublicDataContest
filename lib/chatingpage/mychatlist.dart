@@ -4,6 +4,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:intl/intl.dart';
+import '../mainpage/banner_gridbuttons/categories/mentoring/classchat.dart';
 
 class MyChatList extends StatefulWidget {
   const MyChatList({super.key});
@@ -114,14 +115,21 @@ class _MyChatListState extends State<MyChatList> {
           final chat = chatList[index];
           final formattedDate = DateFormat('yyyy년 MM월 dd일 HH시 mm분')
               .format(DateTime.parse(chat['startDate']));
+          final chatPartnerName =
+              _role == 'mentee' ? chat['mentorName'] : chat['menteeName'];
 
           return GestureDetector(
             onTap: () {
               print('conversationId는: ${chat['conversationId']}');
-              Navigator.pushNamed(
+              Navigator.push(
                 context,
-                '/classchat',
-                arguments: {'conversationId': chat['conversationId']},
+                MaterialPageRoute(
+                  builder: (context) => ClassChatPage(
+                    titlename: chatPartnerName,
+                  ),
+                  settings: RouteSettings(
+                      arguments: {'conversationId': chat['conversationId']}),
+                ),
               );
             },
             child: Container(

@@ -132,12 +132,13 @@ class _MentoringDetailPageState extends State<MentoringDetailPage> {
         final responseData = json.decode(response.body);
         final conversationId = responseData['conversationId'];
         final isAlready = responseData['isAlready'];
+        final mentorName = mentoringDetail['mentorName'] ?? '멘토 이름 없음';
 
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content:
                 Text(isAlready ? '이미 이 멘토와의 채팅방이 존재합니다.' : '이 멘토와 채팅을 시작합니다!'),
-            duration: Duration(seconds: 1),
+            duration: const Duration(seconds: 1),
           ),
         );
 
@@ -147,6 +148,7 @@ class _MentoringDetailPageState extends State<MentoringDetailPage> {
           arguments: {
             'conversationId': conversationId,
             'classId': _classId,
+            'titlename': mentorName,
           },
         );
         print('넘겨진 conversationId: $conversationId');

@@ -100,7 +100,12 @@ class _MyAppState extends State<MyApp> {
         '/hireinterndetail': (context) => const HireInternDetailPage(),
         '/login': (context) => const LoginPage(),
         '/signup': (context) => const SignupPage(),
-        '/classchat': (context) => const ClassChatPage(),
+        //'/classchat': (context) => const ClassChatPage(),
+        '/classchat': (context) {
+          final args = ModalRoute.of(context)!.settings.arguments
+              as Map<String, dynamic>;
+          return ClassChatPage(titlename: args['titlename']);
+        },
         '/gisul_changup_center': (context) => GisulChangupCenterPage(),
         '/searchclass': (context) => const SearchClassPage(),
         '/sendmoney': (context) => const SendMoneyPage(),
