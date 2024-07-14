@@ -30,6 +30,7 @@ class _ClassChatPageState extends State<ClassChatPage> {
   final TextEditingController _controller = TextEditingController();
   bool _showBottomButtons = false;
   Timer? _timer;
+  final ScrollController _scrollController = ScrollController();
 
   @override
   void initState() {
@@ -74,6 +75,14 @@ class _ClassChatPageState extends State<ClassChatPage> {
     await prefs.setInt('classId', classId);
   }
 
+  void _scrollToBottom() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_scrollController.hasClients) {
+        _scrollController.jumpTo(_scrollController.position.maxScrollExtent);
+      }
+    });
+  }
+
   Future<void> _loadConversationIdAndClassIdAndFetchMessages() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     _conversationId ??= prefs.getInt('conversationId');
@@ -116,6 +125,9 @@ class _ClassChatPageState extends State<ClassChatPage> {
           _isLoading = false;
           _hasError = false;
         });
+
+        // 메시지를 불러온 후 가장 아래로 스크롤
+        _scrollToBottom();
       } else {
         setState(() {
           _isLoading = false;
@@ -199,7 +211,7 @@ class _ClassChatPageState extends State<ClassChatPage> {
       paymentWidget = DailyMentoringFinishPage(
           timestamp: timestamp, conversationId: conversationId);
     } else if (paymentStatus == 'FINAL_MENTORING_ENDED') {
-      paymentWidget = DailyMentoringFinishPage(
+      paymentWidget = FinalMentoringFinishPage(
           timestamp: timestamp, conversationId: conversationId);
     } else {
       return SizedBox.shrink();
@@ -216,13 +228,22 @@ class _ClassChatPageState extends State<ClassChatPage> {
 
   @override
   Widget build(BuildContext context) {
+    String? chatTitle;
+    if (_role == 'mentor') {
+      chatTitle = messages.isNotEmpty && _senderType == 'mentee'
+          ? '${messages.firstWhere((msg) => msg['senderType'] == 'mentee')['senderName']} 멘티와의 채팅방입니다.'
+          : '멘티와의 채팅방입니다.';
+    } else if (_role == 'mentee') {
+      chatTitle = messages.isNotEmpty && _senderType == 'mentor'
+          ? '${messages.firstWhere((msg) => msg['senderType'] == 'mentor')['senderName']} 멘토와의 채팅방입니다.'
+          : '멘토와의 채팅방입니다.';
+    }
+
     return Scaffold(
       appBar: AppBar(
         scrolledUnderElevation: 0,
         backgroundColor: Colors.white,
-        title: Text(_senderName != null && _senderType != null
-            ? '$_senderName $_senderType와의 채팅'
-            : '멘토와의 채팅방입니다.'),
+        title: Text(chatTitle ?? '채팅방', style: TextStyle(fontSize: 20)),
       ),
       body: Column(
         children: [
@@ -247,6 +268,7 @@ class _ClassChatPageState extends State<ClassChatPage> {
                             ),
                           )
                         : ListView.builder(
+                            controller: _scrollController,
                             itemCount: messages.length,
                             itemBuilder: (context, index) {
                               final message = messages[index];
