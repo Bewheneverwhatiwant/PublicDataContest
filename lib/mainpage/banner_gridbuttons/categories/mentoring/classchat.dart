@@ -25,6 +25,8 @@ class _ClassChatPageState extends State<ClassChatPage> {
   String? _role;
   int? _conversationId;
   int? _classId;
+  String? _menteeName;
+  String? _mentorName;
   String? _senderType;
   String? _senderName;
   final TextEditingController _controller = TextEditingController();
@@ -118,10 +120,13 @@ class _ClassChatPageState extends State<ClassChatPage> {
 
         setState(() {
           messages = combined;
-          if (chatResponses.isNotEmpty) {
-            _senderType = chatResponses[0]['senderType'].toString();
-            _senderName = chatResponses[0]['senderName'].toString();
-          }
+          _menteeName = chatResponses.firstWhere(
+              (msg) => msg['senderType'] == 'mentee',
+              orElse: () => null)?['senderName'];
+          _mentorName = chatResponses.firstWhere(
+              (msg) => msg['senderType'] == 'mentor',
+              orElse: () => null)?['senderName'];
+
           _isLoading = false;
           _hasError = false;
         });
@@ -230,20 +235,18 @@ class _ClassChatPageState extends State<ClassChatPage> {
   Widget build(BuildContext context) {
     String? chatTitle;
     if (_role == 'mentor') {
-      chatTitle = messages.isNotEmpty && _senderType == 'mentee'
-          ? '${messages.firstWhere((msg) => msg['senderType'] == 'mentee')['senderName']} 멘티와의 채팅방입니다.'
-          : '멘티와의 채팅방입니다.';
+      chatTitle =
+          _menteeName != null ? '$_menteeName 멘티와의 채팅방입니다.' : '멘티와의 채팅방입니다.';
     } else if (_role == 'mentee') {
-      chatTitle = messages.isNotEmpty && _senderType == 'mentor'
-          ? '${messages.firstWhere((msg) => msg['senderType'] == 'mentor')['senderName']} 멘토와의 채팅방입니다.'
-          : '멘토와의 채팅방입니다.';
+      chatTitle =
+          _mentorName != null ? '$_mentorName 멘토와의 채팅방입니다.' : '멘토와의 채팅방입니다.';
     }
 
     return Scaffold(
       appBar: AppBar(
         scrolledUnderElevation: 0,
         backgroundColor: Colors.white,
-        title: Text(chatTitle ?? '채팅방', style: TextStyle(fontSize: 20)),
+        title: Text(chatTitle ?? '채팅방', style: const TextStyle(fontSize: 20)),
       ),
       body: Column(
         children: [
