@@ -3,6 +3,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:intl/intl.dart';
 
 class MyChatList extends StatefulWidget {
   const MyChatList({super.key});
@@ -17,6 +18,7 @@ class _MyChatListState extends State<MyChatList> {
   bool _isLoading = true;
   bool _hasError = false;
   String? _role;
+  int? conversationId;
 
   @override
   void initState() {
@@ -50,6 +52,10 @@ class _MyChatListState extends State<MyChatList> {
           chatList = data;
           _isLoading = false;
         });
+
+        // for (var chat in data) {
+        //   print('conversationId: ${chat['conversationId']}');
+        // }
       } else {
         setState(() {
           _isLoading = false;
@@ -106,8 +112,12 @@ class _MyChatListState extends State<MyChatList> {
         itemCount: chatList.length,
         itemBuilder: (context, index) {
           final chat = chatList[index];
+          final formattedDate = DateFormat('yyyy년 MM월 dd일 HH시 mm분')
+              .format(DateTime.parse(chat['startDate']));
+
           return GestureDetector(
             onTap: () {
+              print('conversationId는: ${chat['conversationId']}');
               Navigator.pushNamed(
                 context,
                 '/classchat',
@@ -118,7 +128,7 @@ class _MyChatListState extends State<MyChatList> {
               margin: const EdgeInsets.symmetric(vertical: 8.0),
               padding: const EdgeInsets.all(16.0),
               decoration: BoxDecoration(
-                color: const Color(0xFFD9D9D9),
+                color: const Color(0xFFA0A7FF),
                 borderRadius: BorderRadius.circular(8.0),
               ),
               child: Column(
@@ -133,9 +143,9 @@ class _MyChatListState extends State<MyChatList> {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    '생성일: ${chat['startDate']}',
+                    '채팅방 생성일: $formattedDate',
                     style: const TextStyle(
-                      fontSize: 16,
+                      fontSize: 13,
                     ),
                   ),
                 ],
