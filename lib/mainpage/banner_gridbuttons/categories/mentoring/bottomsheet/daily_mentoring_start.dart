@@ -1,76 +1,101 @@
 import 'package:flutter/material.dart';
-
-// 채팅방 bottom sheet에서 일일 멘토링 시작하기 클릭 시 보내질 네모 UI
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class DailyMentoringStartPage extends StatelessWidget {
+  final String timestamp;
+  final int conversationId;
+
+  const DailyMentoringStartPage({
+    Key? key,
+    required this.timestamp,
+    required this.conversationId,
+  }) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Center(
-        child: Container(
-          width: 600,
-          height: 300,
-          decoration: BoxDecoration(
-            color: Colors.grey[200],
-            borderRadius: BorderRadius.circular(10),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
+    final double screenWidth = MediaQuery.of(context).size.width;
+
+    return Container(
+      width: screenWidth / 1.5,
+      height: 200,
+      padding: const EdgeInsets.all(10.0),
+      decoration: BoxDecoration(
+        color: Colors.grey[200],
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Flexible(
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
-                  '오늘의 멘토링, 준비됐나요?',
-                  style: TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 16),
-                const Text(
-                  '멘토링을 시작했다면, 멘티가 아래의 ‘시작하기’ 버튼을 눌러주세요. 멘티만 누를 수 있습니다.\n'
-                  '시작하기 전까지 환불이 가능합니다.',
-                  style: TextStyle(
-                    fontSize: 16,
-                    height: 1.5,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-                const Spacer(),
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  mainAxisAlignment: MainAxisAlignment.end,
                   children: [
-                    ElevatedButton(
-                      onPressed: () {
-                        // 시작하기 버튼 클릭 시
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.white,
-                        foregroundColor: Colors.black,
-                        minimumSize: const Size(120, 50),
-                        textStyle: const TextStyle(fontSize: 18),
+                    Padding(
+                      padding: const EdgeInsets.all(1.0),
+                      child: Image.asset(
+                        'images/logo.png',
+                        width: 60,
+                        height: 40,
                       ),
-                      child: const Text('시작하기'),
-                    ),
-                    ElevatedButton(
-                      onPressed: () {
-                        // 환불 버튼 클릭 시
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.red[100],
-                        foregroundColor: Colors.black,
-                        minimumSize: const Size(120, 50),
-                        textStyle: const TextStyle(fontSize: 18),
-                      ),
-                      child: const Text('환불 신청'),
                     ),
                   ],
                 ),
-                const SizedBox(height: 16),
+                const Text(
+                  '오늘의 멘토링이 시작되었습니다.',
+                  style: TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 10),
+                Expanded(
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Colors.grey[300],
+                      borderRadius: const BorderRadius.vertical(
+                        bottom: Radius.circular(10),
+                      ),
+                    ),
+                    padding: const EdgeInsets.all(8.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          '오늘도 알찬 하루 보내세요.',
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        const SizedBox(height: 4),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: [
+                            Text(
+                              'Hang Hae',
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Colors.grey[700],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
               ],
             ),
           ),
-        ),
+        ],
       ),
     );
   }

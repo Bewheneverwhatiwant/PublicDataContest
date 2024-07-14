@@ -5,6 +5,8 @@ import 'dart:convert';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 void showCustomBottomSheet(BuildContext context, int conversationId) {
+  int? selectedClassId;
+
   showModalBottomSheet(
     context: context,
     builder: (BuildContext context) {
@@ -23,20 +25,43 @@ void showCustomBottomSheet(BuildContext context, int conversationId) {
             ),
             ListTile(
               leading: const Icon(Icons.play_arrow),
-              title: const Text('일일 멘토링 횟수 기록하기'),
-              onTap: () {
+              title: const Text('일일 멘토링 시작하기'),
+              onTap: () async {
                 Navigator.pop(context);
-                // update payment status로 요청보내기(paymentStatus 값 알고나서)
-                // 그 후 일일멘토링 기록체크 컴포넌트 클릭 시 /update_mentoring 호출하기
+                // if (selectedClassId == null) {
+                //   _showAlertDialog(context, '입금 요청을 먼저 해야합니다.');
+                //   return;
+                // }
+                _updatePaymentStatus(
+                    context, conversationId, 'DAILY_MENTORING_STARTED');
+                await _updateMentoring(context, selectedClassId!);
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.play_arrow),
+              title: const Text('일일 멘토링 종료하기'),
+              onTap: () async {
+                Navigator.pop(context);
+                // if (selectedClassId == null) {
+                //   _showAlertDialog(context, '입금 요청을 먼저 해야합니다.');
+                //   return;
+                // }
+                _updatePaymentStatus(
+                    context, conversationId, 'DAILY_MENTORING_ENDED');
               },
             ),
             ListTile(
               leading: const Icon(Icons.cancel),
               title: const Text('최종 멘토링 종료 요청하기'),
-              onTap: () {
+              onTap: () async {
                 Navigator.pop(context);
-                // update payment status로 요청보내기(paymentStatus 값 알고나서)
-                // 그 후 최종멘토링 종료 컴포넌트 클릭 시 /final_finish_mentoring 호출하기
+                // if (selectedClassId == null) {
+                //   _showAlertDialog(context, '입금 요청을 먼저 해야합니다.');
+                //   return;
+                // }
+                _updatePaymentStatus(
+                    context, conversationId, 'FINAL_MENTORING_ENDED');
+                await _finalFinishMentoring(context, selectedClassId!);
               },
             ),
           ],
@@ -126,8 +151,106 @@ void showMentoringSelectionDialog(BuildContext context, int conversationId) {
               if (response.statusCode == 200) {
                 Navigator.pop(context);
               } else {
-                const AlertDialog(title: Text('오류가 발생했습니다.'));
+                _showAlertDialog(context, '오류가 발생했습니다.');
               }
+            },
+          ),
+        ],
+      );
+    },
+  );
+}
+
+// 여기서 상태 조절
+Future<void> _updatePaymentStatus(
+    BuildContext context, int conversationId, String status) async {
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  final accessToken = prefs.getString('accessToken');
+  if (accessToken == null) return;
+
+  final apiServer = dotenv.env['API_SERVER'];
+  final url = Uri.parse('$apiServer/api/chat/update_payment_status');
+  final response = await http.put(
+    url,
+    headers: {
+      'Authorization': 'Bearer $accessToken',
+      'Content-Type': 'application/json',
+    },
+    body: json.encode({
+      'conversationId': conversationId,
+      'paymentStatus': status,
+    }),
+  );
+
+  if (response.statusCode != 200) {
+    _showAlertDialog(context, '오류가 발생했습니다.');
+    print(conversationId);
+    print(status);
+    print('update payment status의 응답값: ${response.body}');
+  }
+}
+
+Future<void> _updateMentoring(BuildContext context, int classId) async {
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  final accessToken = prefs.getString('accessToken');
+  if (accessToken == null) return;
+
+  final apiServer = dotenv.env['API_SERVER'];
+  final url =
+      Uri.parse('$apiServer/api/mentoring/update_mentoring?classId=$classId');
+  final response = await http.put(
+    url,
+    headers: {
+      'Authorization': 'Bearer $accessToken',
+      'Content-Type': 'application/json',
+    },
+  );
+
+  if (response.statusCode != 200) {
+    _showAlertDialog(context, 'update mentoring에서 오류가 발생했습니다.');
+
+    print('update mentoring의 응답값: ${response.body}');
+  } else {
+    const AlertDialog(title: Text('오늘의 멘토링을 시작합니다!'));
+  }
+}
+
+Future<void> _finalFinishMentoring(BuildContext context, int classId) async {
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  final accessToken = prefs.getString('accessToken');
+  if (accessToken == null) return;
+
+  final apiServer = dotenv.env['API_SERVER'];
+  final url = Uri.parse(
+      '$apiServer/api/mentoring/final_finish_mentoring?classId=$classId');
+  final response = await http.put(
+    url,
+    headers: {
+      'Authorization': 'Bearer $accessToken',
+      'Content-Type': 'application/json',
+    },
+  );
+
+  if (response.statusCode != 200) {
+    _showAlertDialog(context, '오류가 발생했습니다.');
+    print('final finish 멘토링의 응답값: ${response.body}');
+  } else {
+    const AlertDialog(title: Text('모든 멘토링이 종료되었습니다!'));
+  }
+}
+
+void _showAlertDialog(BuildContext context, String message) {
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        title: const Text('알림'),
+        content: Text(message),
+        actions: <Widget>[
+          TextButton(
+            child: const Text('확인'),
+            onPressed: () {
+              Navigator.of(context).pop();
             },
           ),
         ],

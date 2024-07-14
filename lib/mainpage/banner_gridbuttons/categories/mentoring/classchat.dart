@@ -7,6 +7,9 @@ import 'dart:async';
 import 'bottomsheet.dart';
 import 'bottomsheet/after_pay_mentoring.dart';
 import 'bottomsheet/pay_mentoring.dart';
+import 'bottomsheet/daily_mentoring_start.dart';
+import 'bottomsheet/daily_mentoring_finish.dart';
+import 'bottomsheet/final_mentoring_finish.dart';
 
 class ClassChatPage extends StatefulWidget {
   const ClassChatPage({Key? key}) : super(key: key);
@@ -189,6 +192,15 @@ class _ClassChatPageState extends State<ClassChatPage> {
       );
     } else if (paymentStatus == 'PAYMENT_COMPLETED') {
       paymentWidget = AfterPayMentoringPage(timestamp: timestamp);
+    } else if (paymentStatus == 'DAILY_MENTORING_STARTED') {
+      paymentWidget = DailyMentoringStartPage(
+          timestamp: timestamp, conversationId: conversationId);
+    } else if (paymentStatus == 'DAILY_MENTORING_ENDED') {
+      paymentWidget = DailyMentoringFinishPage(
+          timestamp: timestamp, conversationId: conversationId);
+    } else if (paymentStatus == 'FINAL_MENTORING_ENDED') {
+      paymentWidget = DailyMentoringFinishPage(
+          timestamp: timestamp, conversationId: conversationId);
     } else {
       return SizedBox.shrink();
     }
