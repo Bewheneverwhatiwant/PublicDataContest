@@ -11,6 +11,7 @@ import '../mypay.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import './myfield.dart';
+import '../changepassword.dart';
 
 class MyPageMento extends StatefulWidget {
   const MyPageMento({Key? key}) : super(key: key);
@@ -376,6 +377,11 @@ class _MyPageMentoState extends State<MyPageMento>
             Text('가입한 날짜: $createdAt'),
             Text('현재 재취업 의사: $reemploymentIdea'),
             Text('멘토 활동 상태: $active'),
+            ChangePasswordButton(
+              onClose: () {
+                Navigator.of(context).pop(); // 모달 닫음
+              },
+            ),
           ],
         ),
       ],

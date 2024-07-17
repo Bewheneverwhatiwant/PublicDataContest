@@ -8,6 +8,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import '../mypay.dart';
 import './myfield_mentee.dart';
+import '../changepassword.dart';
 
 class MyPageMentee extends StatefulWidget {
   @override
@@ -244,6 +245,11 @@ class _MyPageMenteeState extends State<MyPageMentee>
             Text('주소: ${_menteeInfo['mentee']?['address'] ?? ''}'),
             Text(
                 '가입한 날짜: ${_menteeInfo['mentee']?['createdAt']?.substring(0, 10) ?? ''}'),
+            ChangePasswordButton(
+              onClose: () {
+                Navigator.of(context).pop(); // 모달 닫음
+              },
+            ),
           ],
         ),
       ],
