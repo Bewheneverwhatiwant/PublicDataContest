@@ -137,7 +137,7 @@ class _MyPageMenteeState extends State<MyPageMentee>
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('멘티님의 마이페이지'),
+        title: const Text('멘티님의 마이페이지'),
         scrolledUnderElevation: 0,
         backgroundColor: Colors.white,
       ),

@@ -3,6 +3,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:publicdatacontest/common/theme/colors/color_palette.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class SignupStep2 extends StatefulWidget {
   final String name;
@@ -213,6 +214,31 @@ class _SignupStep2State extends State<SignupStep2> {
     }
   }
 
+// 아이디 중복검사 api 연동
+  Future<bool> _checkUserIdDuplicate(String userId) async {
+    final accessToken = await _getAccessToken();
+    final apiUrl = dotenv.env['API_SERVER'];
+
+    final response = await http.get(
+      Uri.parse('$apiUrl/api/auth/id_duplicate?userId=$userId'),
+      headers: {
+        'Authorization': 'Bearer $accessToken',
+        'Accept': 'application/json',
+      },
+    );
+
+    if (response.statusCode == 200) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  Future<String> _getAccessToken() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    return prefs.getString('accessToken') ?? '';
+  }
+
   @override
   void dispose() {
     _usernameFocusNode.dispose();
@@ -277,10 +303,14 @@ class _SignupStep2State extends State<SignupStep2> {
                     focusNode: _usernameFocusNode,
                     decoration: _inputDecoration('사용하실 아이디를 입력해주세요.').copyWith(
                       suffixIcon: TextButton(
-                        onPressed: () {
+                        onPressed: () async {
                           if (_validateUsername(_usernameController.text)) {
-                            setState(() {
-                              _isUsernameChecked = true;
+                            final isSuccess = await _checkUserIdDuplicate(
+                                _usernameController.text);
+                            if (isSuccess) {
+                              setState(() {
+                                _isUsernameChecked = true;
+                              });
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(
                                   content: Text('사용 가능한 아이디입니다!'),
@@ -288,7 +318,18 @@ class _SignupStep2State extends State<SignupStep2> {
                                   duration: Duration(seconds: 1),
                                 ),
                               );
-                            });
+                            } else {
+                              setState(() {
+                                _isUsernameChecked = false;
+                              });
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text('이미 사용 중인 아이디입니다.'),
+                                  backgroundColor: Colors.red,
+                                  duration: Duration(seconds: 1),
+                                ),
+                              );
+                            }
                           } else {
                             setState(() {
                               _isUsernameChecked = false;

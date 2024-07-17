@@ -2,6 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:publicdatacontest/common/theme/colors/color_palette.dart';
 import 'signup2.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:http/http.dart' as http;
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'dart:async';
 
 class SignupPage extends StatefulWidget {
   const SignupPage({super.key});
@@ -156,6 +160,31 @@ class _SignupPageState extends State<SignupPage> {
       _isRoleValid = _role != null;
       _isGenderValid = _gender != null;
     });
+  }
+
+// 이메일 중복검사 api 연동
+  Future<bool> _checkEmailDuplicate(String email) async {
+    final accessToken = await _getAccessToken();
+    final apiUrl = dotenv.env['API_SERVER'];
+
+    final response = await http.get(
+      Uri.parse('$apiUrl/api/auth/email_duplicate?email=$email'),
+      headers: {
+        'Authorization': 'Bearer $accessToken',
+        'Accept': 'application/json',
+      },
+    );
+
+    if (response.statusCode == 200) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  Future<String> _getAccessToken() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    return prefs.getString('accessToken') ?? '';
   }
 
   @override
@@ -405,11 +434,15 @@ class _SignupPageState extends State<SignupPage> {
                     style: TextStyle(fontSize: 13),
                     decoration: _inputDecoration('사용하실 이메일을 입력해주세요.').copyWith(
                       suffixIcon: TextButton(
-                        onPressed: () {
+                        onPressed: () async {
                           if (_validateEmail(_emailController.text)) {
-                            setState(() {
-                              _isEmailChecked = true;
-                              _isEmailValid = true;
+                            final isSuccess = await _checkEmailDuplicate(
+                                _emailController.text);
+                            if (isSuccess) {
+                              setState(() {
+                                _isEmailChecked = true;
+                                _isEmailValid = true;
+                              });
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(
                                   content: Text('사용 가능한 이메일입니다!'),
@@ -417,7 +450,19 @@ class _SignupPageState extends State<SignupPage> {
                                   duration: Duration(seconds: 1),
                                 ),
                               );
-                            });
+                            } else {
+                              setState(() {
+                                _isEmailChecked = false;
+                                _isEmailValid = false;
+                              });
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text('이미 사용 중인 이메일입니다.'),
+                                  backgroundColor: Colors.red,
+                                  duration: Duration(seconds: 1),
+                                ),
+                              );
+                            }
                           } else {
                             setState(() {
                               _isEmailChecked = false;
