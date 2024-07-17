@@ -94,6 +94,41 @@ class _MyPageMentoState extends State<MyPageMento>
     return false;
   }
 
+// 증명서 업로드 API 호출 함수
+// 현재 CORS 발생 중
+  Future<void> _uploadCertificate(Uint8List fileBytes) async {
+    final prefs = await SharedPreferences.getInstance();
+    final accessToken = prefs.getString('accessToken') ?? '';
+    final url = '${dotenv.env['API_SERVER']}/api/certificates/upload';
+
+    var request = http.MultipartRequest('POST', Uri.parse(url))
+      ..headers['Authorization'] = 'Bearer $accessToken'
+      ..files.add(
+        http.MultipartFile.fromBytes(
+          'file',
+          fileBytes,
+        ),
+      );
+
+    var response = await request.send();
+
+    if (response.statusCode == 200) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('인증서가 성공적으로 업로드되었습니다!'),
+          backgroundColor: Colors.green,
+        ),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('인증서 업로드에 실패했습니다.'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
   void _selectFiles() async {
     setState(() {
       _isLoading = true; // 파일 선택 중 로딩 상태로 변경
@@ -114,7 +149,7 @@ class _MyPageMentoState extends State<MyPageMento>
           fileBytes = await file.readAsBytes();
         }
 
-        print(fileBytes);
+        //print(fileBytes);
         String? fileName = platformFile.name; // 파일 이름 가져오기
         print('파일 이름: $fileName'); // 파일 이름 출력
         print('파일이 null이 아님!');
@@ -160,6 +195,7 @@ class _MyPageMentoState extends State<MyPageMento>
             TextButton(
               onPressed: () {
                 Navigator.of(context).pop();
+                _uploadCertificate(file); // 인증서 등록 API 호출
                 setState(() {
                   _selectedFilesNotifier.value = [file]; // 파일 선택
                   // _isLoading = false; // 다이얼로그 닫힐 때 로딩 상태 해제
