@@ -71,7 +71,6 @@ class FinalMentoringFinishPage extends StatelessWidget {
                           ),
                         ),
                         const SizedBox(height: 4),
-                        const SizedBox(height: 4),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.end,
                           children: [
@@ -80,6 +79,32 @@ class FinalMentoringFinishPage extends StatelessWidget {
                               style: TextStyle(
                                 fontSize: 12,
                                 color: Colors.grey[700],
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 4),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: [
+                            Expanded(
+                              child: SizedBox(
+                                height: 25,
+                                child: ElevatedButton(
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Colors.red,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(5),
+                                    ),
+                                  ),
+                                  onPressed: () {
+                                    _showReportModal(context);
+                                  },
+                                  child: const Text(
+                                    '사용자 신고',
+                                    style: TextStyle(color: Colors.white),
+                                  ),
+                                ),
                               ),
                             ),
                           ],
@@ -93,6 +118,44 @@ class FinalMentoringFinishPage extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+
+  void _showReportModal(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        TextEditingController reportController = TextEditingController();
+        return AlertDialog(
+          title: const Text('사용자 신고'),
+          content: TextField(
+            controller: reportController,
+            maxLines: 10,
+            decoration: const InputDecoration(
+              hintText: '신고 사유를 작성해주세요. 구체적일 수록 좋아요. 3일 내 관리자가 확인하여 조치될 예정입니다.',
+              hintStyle: TextStyle(fontSize: 12),
+              border: OutlineInputBorder(
+                borderSide: BorderSide(color: Colors.grey, width: 1),
+              ),
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('사용자 신고가 완료되었습니다!'),
+                    backgroundColor: Colors.green,
+                    duration: Duration(seconds: 1),
+                  ),
+                );
+              },
+              child: const Text('확인'),
+            ),
+          ],
+        );
+      },
     );
   }
 }
