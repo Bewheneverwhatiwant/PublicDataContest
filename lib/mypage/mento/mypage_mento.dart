@@ -12,6 +12,7 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import './myfield.dart';
 import '../changepassword.dart';
+import 'package:http_parser/http_parser.dart';
 
 class MyPageMento extends StatefulWidget {
   const MyPageMento({Key? key}) : super(key: key);
@@ -94,8 +95,6 @@ class _MyPageMentoState extends State<MyPageMento>
     return false;
   }
 
-// 증명서 업로드 API 호출 함수
-// 현재 CORS 발생 중
   Future<void> _uploadCertificate(Uint8List fileBytes) async {
     final prefs = await SharedPreferences.getInstance();
     final accessToken = prefs.getString('accessToken') ?? '';
@@ -103,10 +102,13 @@ class _MyPageMentoState extends State<MyPageMento>
 
     var request = http.MultipartRequest('POST', Uri.parse(url))
       ..headers['Authorization'] = 'Bearer $accessToken'
+      ..headers['Content-Type'] = 'multipart/form-data'
       ..files.add(
         http.MultipartFile.fromBytes(
           'file',
           fileBytes,
+          filename: 'certificate.jpg', // 400오류 해결!
+          contentType: MediaType('image', 'jpeg'),
         ),
       );
 
@@ -120,6 +122,11 @@ class _MyPageMentoState extends State<MyPageMento>
         ),
       );
     } else {
+      // print(response);
+      final responseBody = await response.stream.bytesToString();
+      print('Response status: ${response.statusCode}');
+      print('Response body: $responseBody');
+
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('인증서 업로드에 실패했습니다.'),
