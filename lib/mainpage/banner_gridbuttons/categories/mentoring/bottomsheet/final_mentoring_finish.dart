@@ -1,13 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class FinalMentoringFinishPage extends StatelessWidget {
   final String timestamp;
   final int conversationId;
+  final int receiverId;
 
   const FinalMentoringFinishPage({
     Key? key,
     required this.timestamp,
     required this.conversationId,
+    required this.receiverId,
   }) : super(key: key);
 
   @override
@@ -97,8 +103,23 @@ class FinalMentoringFinishPage extends StatelessWidget {
                                       borderRadius: BorderRadius.circular(5),
                                     ),
                                   ),
-                                  onPressed: () {
-                                    _showReportModal(context);
+                                  onPressed: () async {
+                                    SharedPreferences prefs =
+                                        await SharedPreferences.getInstance();
+                                    String? role = prefs.getString('role');
+
+                                    if (role == 'mentee') {
+                                      _showReportModal(context, receiverId);
+                                    } else {
+                                      ScaffoldMessenger.of(context)
+                                          .showSnackBar(
+                                        const SnackBar(
+                                          content: Text('멘티만 이용할 수 있는 기능입니다!'),
+                                          backgroundColor: Colors.red,
+                                          duration: Duration(seconds: 1),
+                                        ),
+                                      );
+                                    }
                                   },
                                   child: const Text(
                                     '사용자 신고',
@@ -121,7 +142,7 @@ class FinalMentoringFinishPage extends StatelessWidget {
     );
   }
 
-  void _showReportModal(BuildContext context) {
+  void _showReportModal(BuildContext context, int receiverId) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -141,13 +162,38 @@ class FinalMentoringFinishPage extends StatelessWidget {
           ),
           actions: [
             TextButton(
-              onPressed: () {
+              onPressed: () async {
+                final reportContent = reportController.text;
+                final prefs = await SharedPreferences.getInstance();
+                final accessToken = prefs.getString('accessToken') ?? '';
+                final apiServer = dotenv.env['API_SERVER'] ?? '';
+                final url = '$apiServer/api/auth/report_user';
+
+                final response = await http.post(
+                  Uri.parse(url),
+                  headers: {
+                    'Authorization': 'Bearer $accessToken',
+                    'Content-Type': 'application/json',
+                  },
+                  body: json.encode({
+                    'reportContent': reportContent,
+                    'reportedUserId': receiverId,
+                  }),
+                );
+
                 Navigator.of(context).pop();
+                if (response.statusCode != 200) {
+                  print(response);
+                  print('전달된 receiverId는 ${receiverId}');
+                }
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('사용자 신고가 완료되었습니다!'),
-                    backgroundColor: Colors.green,
-                    duration: Duration(seconds: 1),
+                  SnackBar(
+                    content: response.statusCode == 200
+                        ? const Text('사용자 신고가 완료되었습니다!')
+                        : const Text('사용자 신고에 실패했습니다.'),
+                    backgroundColor:
+                        response.statusCode == 200 ? Colors.green : Colors.red,
+                    duration: const Duration(seconds: 1),
                   ),
                 );
               },

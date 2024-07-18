@@ -224,10 +224,21 @@ class _ClassChatPageState extends State<ClassChatPage> {
       paymentWidget = DailyMentoringFinishPage(
           timestamp: timestamp, conversationId: conversationId);
     } else if (paymentStatus == 'FINAL_MENTORING_ENDED') {
+      // chatResponse에서 receiverType이 mentor인 메시지를 찾아 receiverId를 가져옴
+      final chatMessage = messages.firstWhere(
+        (msg) =>
+            msg.containsKey('receiverType') && msg['receiverType'] == 'mentor',
+        orElse: () => {'receiverId': -1}, // 기본값
+      );
+
+      final receiverId = chatMessage['receiverId'] ?? -1;
       paymentWidget = FinalMentoringFinishPage(
-          timestamp: timestamp, conversationId: conversationId);
+        timestamp: timestamp,
+        conversationId: conversationId,
+        receiverId: receiverId,
+      );
     } else {
-      return SizedBox.shrink();
+      paymentWidget = const SizedBox.shrink();
     }
 
     return Align(

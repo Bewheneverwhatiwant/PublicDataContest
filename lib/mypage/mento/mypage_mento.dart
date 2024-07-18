@@ -137,7 +137,7 @@ class _MyPageMentoState extends State<MyPageMento>
 
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('인증서 업로드에 실패했습니다.'),
+          content: Text('5MB 이하인 파일만 업로드할 수 있습니다.'),
           backgroundColor: Colors.red,
         ),
       );
