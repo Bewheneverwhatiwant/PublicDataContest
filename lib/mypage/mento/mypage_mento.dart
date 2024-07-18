@@ -13,6 +13,7 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 import './myfield.dart';
 import '../changepassword.dart';
 import 'package:http_parser/http_parser.dart';
+import './mento_certificate.dart';
 
 class MyPageMento extends StatefulWidget {
   const MyPageMento({Key? key}) : super(key: key);
@@ -41,6 +42,7 @@ class _MyPageMentoState extends State<MyPageMento>
   int mentoringCount = 0;
   String reemploymentIdea = '';
   String active = '';
+  bool hasCertificates = false;
 
   bool _isLoading = false;
 
@@ -64,6 +66,12 @@ class _MyPageMentoState extends State<MyPageMento>
     if (state == AppLifecycleState.resumed) {
       setState(() {}); // 앱이 다시 포커스를 얻었을 때 화면 갱신
     }
+  }
+
+  void _handleCertificatesFetched(bool hasCerts) {
+    setState(() {
+      hasCertificates = hasCerts;
+    });
   }
 
   void _pickFile() async {
@@ -523,6 +531,7 @@ class _MyPageMentoState extends State<MyPageMento>
                         color: GlobalColors.lightgray,
                       ),
                     ),
+                    MentoCertificate(),
                   ],
                 );
               }
