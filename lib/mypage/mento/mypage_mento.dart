@@ -518,16 +518,16 @@ class _MyPageMentoState extends State<MyPageMento>
                 return Column(
                   children: [
                     Text(
-                      '아직 등록한 인증서가 없어요.',
+                      '인증서를 등록하시면 멘티가 열람할 수 있습니다.',
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
                         color: GlobalColors.lightgray,
                       ),
                     ),
                     Text(
-                      '인증서를 등록해야 멘토링을 시작할 수 있어요.',
+                      '등록하신 인증서는 아래에 표시되며, 추가하실 수 있습니다.',
                       style: TextStyle(
-                        fontWeight: FontWeight.bold,
+                        fontWeight: FontWeight.normal,
                         color: GlobalColors.lightgray,
                       ),
                     ),

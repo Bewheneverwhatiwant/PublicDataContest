@@ -190,7 +190,7 @@ class FinalMentoringFinishPage extends StatelessWidget {
                   SnackBar(
                     content: response.statusCode == 200
                         ? const Text('사용자 신고가 완료되었습니다!')
-                        : const Text('사용자 신고에 실패했습니다.'),
+                        : const Text('신고는 한번만 가능합니다.'),
                     backgroundColor:
                         response.statusCode == 200 ? Colors.green : Colors.red,
                     duration: const Duration(seconds: 1),
