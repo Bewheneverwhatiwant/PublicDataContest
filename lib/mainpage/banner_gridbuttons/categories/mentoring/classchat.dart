@@ -236,6 +236,7 @@ class _ClassChatPageState extends State<ClassChatPage> {
         timestamp: timestamp,
         conversationId: conversationId,
         receiverId: receiverId,
+        classId: _classId, // 멘티 리뷰 작성을 위해 classId 전달
       );
     } else {
       paymentWidget = const SizedBox.shrink();

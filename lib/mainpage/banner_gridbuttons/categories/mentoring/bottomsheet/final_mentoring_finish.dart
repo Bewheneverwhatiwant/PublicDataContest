@@ -8,12 +8,14 @@ class FinalMentoringFinishPage extends StatelessWidget {
   final String timestamp;
   final int conversationId;
   final int receiverId;
+  final int? classId;
 
   const FinalMentoringFinishPage({
     Key? key,
     required this.timestamp,
     required this.conversationId,
     required this.receiverId,
+    this.classId,
   }) : super(key: key);
 
   @override
