@@ -103,7 +103,7 @@ class _ProfileMentoPageState extends State<ProfileMentoPage>
                     tabs: const [Tab(text: '멘토 정보'), Tab(text: '명예의 전당')],
                   ),
                   SizedBox(
-                    height: 400,
+                    height: 600, // TabBar 아래 공간은 여기 조정!
                     child: TabBarView(
                       controller: _tabController,
                       children: [
@@ -185,10 +185,9 @@ class _ProfileMentoPageState extends State<ProfileMentoPage>
           ),
         ),
         SizedBox(height: 8),
-        Expanded(
+        SizedBox(
+          height: 550, // 그리고 여기
           child: ListView.builder(
-            shrinkWrap: true,
-            physics: const AlwaysScrollableScrollPhysics(),
             itemCount: categories.length,
             itemBuilder: (context, index) {
               var category = categories[index];
