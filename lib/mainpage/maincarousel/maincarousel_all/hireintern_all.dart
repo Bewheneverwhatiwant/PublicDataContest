@@ -226,14 +226,6 @@ class _HireInternAllState extends State<HireInternAll> {
                                             borderRadius:
                                                 BorderRadius.circular(15.0),
                                           ),
-                                          child: const Text(
-                                            'D - n',
-                                            style: TextStyle(
-                                                fontSize: 10,
-                                                color: Color.fromARGB(
-                                                    255, 239, 99, 24),
-                                                fontWeight: FontWeight.bold),
-                                          ),
                                         ),
                                       ],
                                     ),
