@@ -9,6 +9,8 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import '../mypay.dart';
 import './myfield_mentee.dart';
 import '../changepassword.dart';
+import 'package:http_parser/http_parser.dart';
+import 'dart:io';
 
 class MyPageMentee extends StatefulWidget {
   @override
@@ -21,6 +23,8 @@ class _MyPageMenteeState extends State<MyPageMentee>
   List<String> _selectedCategories = [];
   Map<String, dynamic> _menteeInfo = {};
   List<dynamic> _mentoringHistory = [];
+  Uint8List? _profileImage; // 프로필 이미지 데이터
+  bool _isLoading = false;
 
   @override
   void initState() {
@@ -134,6 +138,118 @@ class _MyPageMenteeState extends State<MyPageMentee>
     }
   }
 
+  Future<void> _uploadProfileImage(Uint8List fileBytes) async {
+    final prefs = await SharedPreferences.getInstance();
+    final accessToken = prefs.getString('accessToken') ?? '';
+    final url = '${dotenv.env['API_SERVER']}/api/auth/upload_profile_image';
+
+    var request = http.MultipartRequest('PUT', Uri.parse(url))
+      ..headers['Authorization'] = 'Bearer $accessToken'
+      ..files.add(
+        http.MultipartFile.fromBytes(
+          'file',
+          fileBytes,
+          filename: 'profile_image.png',
+          contentType: MediaType('image', 'png'),
+        ),
+      );
+
+    var response = await request.send();
+
+    if (response.statusCode == 200) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('프로필 이미지가 성공적으로 업로드되었습니다!'),
+          backgroundColor: Colors.green,
+        ),
+      );
+      setState(() {
+        _profileImage = fileBytes;
+      });
+    } else {
+      final responseBody = await response.stream.bytesToString();
+      print('Response status: ${response.statusCode}');
+      print('Response body: $responseBody');
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('프로필 이미지 업로드에 실패했습니다.'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
+  void _selectProfileImage() async {
+    setState(() {
+      _isLoading = true;
+    });
+    try {
+      FilePickerResult? result = await FilePicker.platform
+          .pickFiles(type: FileType.image, allowMultiple: false);
+      if (result != null && result.files.isNotEmpty) {
+        PlatformFile platformFile = result.files.first;
+        Uint8List? fileBytes;
+
+        if (platformFile.bytes != null) {
+          fileBytes = platformFile.bytes;
+        } else {
+          File file = File(platformFile.path!);
+          fileBytes = await file.readAsBytes();
+        }
+
+        if (fileBytes != null) {
+          setState(() {
+            _isLoading = false;
+          });
+          _showProfileImageConfirmationDialog(fileBytes);
+        }
+      } else {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
+  void _showProfileImageConfirmationDialog(Uint8List file) {
+    if (!mounted) {
+      return;
+    }
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('이미지 선택'),
+          content: const Text('이 이미지를 프로필 사진으로 선택하시겠습니까?'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text('취소'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                _uploadProfileImage(file);
+                setState(() {
+                  _profileImage = file;
+                });
+              },
+              child: const Text('확인'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -227,10 +343,16 @@ class _MyPageMenteeState extends State<MyPageMentee>
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Container(
-          width: 100,
-          height: 100,
-          color: Colors.grey[300],
+        GestureDetector(
+          onTap: _selectProfileImage,
+          child: Container(
+            width: 100,
+            height: 100,
+            color: Colors.grey[300],
+            child: _profileImage != null
+                ? Image.memory(_profileImage!, fit: BoxFit.cover)
+                : Icon(Icons.add_a_photo, color: Colors.grey),
+          ),
         ),
         const SizedBox(width: 16),
         Column(
