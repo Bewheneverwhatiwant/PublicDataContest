@@ -26,7 +26,7 @@ class FinalMentoringFinishPage extends StatelessWidget {
 
     return Container(
       width: screenWidth / 1.5,
-      height: 200,
+      height: 250,
       padding: const EdgeInsets.all(10.0),
       decoration: BoxDecoration(
         color: Colors.grey[200],
@@ -127,6 +127,55 @@ class FinalMentoringFinishPage extends StatelessWidget {
                                   },
                                   child: const Text(
                                     '사용자 신고',
+                                    style: TextStyle(color: Colors.white),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        SizedBox(height: 10),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: [
+                            Expanded(
+                              child: SizedBox(
+                                height: 25,
+                                child: ElevatedButton(
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Color(0xFF6F79F7),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(5),
+                                    ),
+                                  ),
+                                  onPressed: () async {
+                                    SharedPreferences prefs =
+                                        await SharedPreferences.getInstance();
+                                    String? role = prefs.getString('role');
+
+                                    if (role == 'mentee') {
+                                      Navigator.pushNamed(
+                                        // 리뷰 작성 화면으로 이동
+                                        context,
+                                        '/postreview',
+                                        arguments: {
+                                          'classId': classId,
+                                          'id': id,
+                                        },
+                                      );
+                                    } else {
+                                      ScaffoldMessenger.of(context)
+                                          .showSnackBar(
+                                        const SnackBar(
+                                          content: Text('멘티만 이용할 수 있는 기능입니다!'),
+                                          backgroundColor: Colors.red,
+                                          duration: Duration(seconds: 1),
+                                        ),
+                                      );
+                                    }
+                                  },
+                                  child: const Text(
+                                    '리뷰 쓰기',
                                     style: TextStyle(color: Colors.white),
                                   ),
                                 ),

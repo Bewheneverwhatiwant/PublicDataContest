@@ -26,6 +26,7 @@ import 'splash.dart';
 import 'mainpage/maincarousel/maincarousel_all/gisul_changup_center.dart';
 import 'mainpage/search/searchclass.dart';
 import 'mainpage/banner_gridbuttons/categories/mentoring/sendmoney.dart';
+import 'mainpage/banner_gridbuttons/categories/mentoring/postreview.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -109,6 +110,7 @@ class _MyAppState extends State<MyApp> {
         '/gisul_changup_center': (context) => GisulChangupCenterPage(),
         '/searchclass': (context) => const SearchClassPage(),
         '/sendmoney': (context) => const SendMoneyPage(),
+        '/postreview': (context) => const PostReviewPage(),
       },
       onGenerateRoute: (settings) {
         if (settings.name == '/') {
