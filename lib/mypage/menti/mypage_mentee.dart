@@ -250,6 +250,42 @@ class _MyPageMenteeState extends State<MyPageMentee>
     );
   }
 
+  Future<void> _deleteProfileImage() async {
+    final prefs = await SharedPreferences.getInstance();
+    final accessToken = prefs.getString('accessToken') ?? '';
+    final url = '${dotenv.env['API_SERVER']}/api/auth/delete_profile_image';
+
+    final response = await http.delete(
+      Uri.parse(url),
+      headers: {
+        'Authorization': 'Bearer $accessToken',
+      },
+    );
+
+    if (response.statusCode == 200) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('프로필 이미지가 성공적으로 삭제되었습니다!'),
+          backgroundColor: Colors.green,
+        ),
+      );
+      setState(() {
+        _profileImage = null;
+      });
+    } else {
+      final responseBody = json.decode(response.body);
+      print('Response status: ${response.statusCode}');
+      print('Response body: $responseBody');
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('프로필 이미지 삭제에 실패했습니다.'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -343,16 +379,39 @@ class _MyPageMenteeState extends State<MyPageMentee>
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        GestureDetector(
-          onTap: _selectProfileImage,
-          child: Container(
-            width: 100,
-            height: 100,
-            color: Colors.grey[300],
-            child: _profileImage != null
-                ? Image.memory(_profileImage!, fit: BoxFit.cover)
-                : Icon(Icons.add_a_photo, color: Colors.grey),
-          ),
+        Stack(
+          children: [
+            GestureDetector(
+              onTap: _selectProfileImage,
+              child: Container(
+                width: 100,
+                height: 100,
+                color: Colors.grey[300],
+                child: _profileImage != null
+                    ? Image.memory(_profileImage!, fit: BoxFit.cover)
+                    : Icon(Icons.add_a_photo, color: Colors.grey),
+              ),
+            ),
+            if (_profileImage != null)
+              Positioned(
+                right: 0,
+                top: 0,
+                child: GestureDetector(
+                  onTap: _deleteProfileImage,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: Colors.red,
+                    ),
+                    child: Icon(
+                      Icons.close,
+                      color: Colors.white,
+                      size: 20,
+                    ),
+                  ),
+                ),
+              ),
+          ],
         ),
         const SizedBox(width: 16),
         Column(
