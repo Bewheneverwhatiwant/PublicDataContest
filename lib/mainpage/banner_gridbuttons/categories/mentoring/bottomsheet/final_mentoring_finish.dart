@@ -9,6 +9,7 @@ class FinalMentoringFinishPage extends StatelessWidget {
   final int conversationId;
   final int receiverId;
   final int? classId;
+  final int? id;
 
   const FinalMentoringFinishPage({
     Key? key,
@@ -16,6 +17,7 @@ class FinalMentoringFinishPage extends StatelessWidget {
     required this.conversationId,
     required this.receiverId,
     this.classId,
+    this.id,
   }) : super(key: key);
 
   @override

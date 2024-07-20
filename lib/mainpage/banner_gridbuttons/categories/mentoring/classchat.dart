@@ -31,6 +31,7 @@ class _ClassChatPageState extends State<ClassChatPage> {
   String? _mentorName;
   String? _senderType;
   String? _senderName;
+  int? id;
   final TextEditingController _controller = TextEditingController();
   bool _showBottomButtons = false;
   Timer? _timer;
@@ -237,6 +238,7 @@ class _ClassChatPageState extends State<ClassChatPage> {
         conversationId: conversationId,
         receiverId: receiverId,
         classId: _classId, // 멘티 리뷰 작성을 위해 classId 전달
+        id: id, // 멘티 리뷰 작성을 위해 payment status의 id 전달
       );
     } else {
       paymentWidget = const SizedBox.shrink();
