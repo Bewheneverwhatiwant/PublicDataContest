@@ -98,15 +98,18 @@ class _ProfileMentoPageState extends State<ProfileMentoPage>
                     indicatorColor: GlobalColors.mainColor,
                     labelColor: GlobalColors.mainColor,
                     unselectedLabelColor: GlobalColors.lightgray,
-                    labelStyle:
-                        TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                    labelStyle: const TextStyle(
+                        fontWeight: FontWeight.bold, fontSize: 14),
                     tabs: const [Tab(text: '멘토 정보'), Tab(text: '명예의 전당')],
                   ),
                   SizedBox(
                     height: 400,
                     child: TabBarView(
                       controller: _tabController,
-                      children: [_buildMentorInfo(), _buildMentorHonor()],
+                      children: [
+                        _buildMentorInfo(),
+                        _buildMentorHonor(),
+                      ],
                     ),
                   ),
                 ],
@@ -134,33 +137,35 @@ class _ProfileMentoPageState extends State<ProfileMentoPage>
           ),
         ),
         const SizedBox(width: 16),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Icon(Icons.account_circle, size: 20, color: Colors.grey[600]),
-                SizedBox(width: 8),
-                Text('아이디: ${_mentorInfo?['userId']}'),
-              ],
-            ),
-            SizedBox(height: 8),
-            Row(
-              children: [
-                Icon(Icons.email, size: 20, color: Colors.grey[600]),
-                SizedBox(width: 8),
-                Text('이메일: ${_mentorInfo?['email']}'),
-              ],
-            ),
-            SizedBox(height: 8),
-            Row(
-              children: [
-                Icon(Icons.person, size: 20, color: Colors.grey[600]),
-                SizedBox(width: 8),
-                Text('이름: ${_mentorInfo?['mentorName']}'),
-              ],
-            ),
-          ],
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Icon(Icons.account_circle, size: 20, color: Colors.grey[600]),
+                  const SizedBox(width: 8),
+                  Text('아이디: ${_mentorInfo?['userId']}'),
+                ],
+              ),
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  Icon(Icons.email, size: 20, color: Colors.grey[600]),
+                  const SizedBox(width: 8),
+                  Text('이메일: ${_mentorInfo?['email']}'),
+                ],
+              ),
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  Icon(Icons.person, size: 20, color: Colors.grey[600]),
+                  const SizedBox(width: 8),
+                  Text('이름: ${_mentorInfo?['mentorName']}'),
+                ],
+              ),
+            ],
+          ),
         ),
       ],
     );
@@ -180,42 +185,46 @@ class _ProfileMentoPageState extends State<ProfileMentoPage>
           ),
         ),
         SizedBox(height: 8),
-        ListView.builder(
-          shrinkWrap: true,
-          physics: NeverScrollableScrollPhysics(),
-          itemCount: categories.length,
-          itemBuilder: (context, index) {
-            var category = categories[index];
-            return Column(
-              children: [
-                Container(
-                  margin: EdgeInsets.symmetric(vertical: 8),
-                  padding: EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: Colors.grey[200],
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Row(
-                    children: [
-                      Container(
-                        width: 40,
-                        height: 40,
-                        color: Colors.grey[300],
-                      ),
-                      SizedBox(width: 16),
-                      Text(
-                        '${category['categoryName']} / ${category['subCategoryName']}',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16,
+        Expanded(
+          child: ListView.builder(
+            shrinkWrap: true,
+            physics: const AlwaysScrollableScrollPhysics(),
+            itemCount: categories.length,
+            itemBuilder: (context, index) {
+              var category = categories[index];
+              return Column(
+                children: [
+                  Container(
+                    margin: const EdgeInsets.symmetric(vertical: 8),
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: Colors.grey[200],
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Row(
+                      children: [
+                        Container(
+                          width: 40,
+                          height: 40,
+                          color: Colors.grey[300],
                         ),
-                      ),
-                    ],
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: Text(
+                            '${category['categoryName']} / ${category['subCategoryName']}',
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-              ],
-            );
-          },
+                ],
+              );
+            },
+          ),
         ),
       ],
     );
@@ -298,19 +307,19 @@ class _ProfileMentoPageState extends State<ProfileMentoPage>
               children: [
                 Row(
                   children: [
-                    Icon(Icons.star, color: Colors.amber),
+                    const Icon(Icons.star, color: Colors.amber),
                     SizedBox(width: 8),
-                    Text('멘토링 별점 : '),
+                    const Text('멘토링 별점 : '),
                     Text(mentoringRating,
-                        style: TextStyle(fontWeight: FontWeight.bold)),
+                        style: const TextStyle(fontWeight: FontWeight.bold)),
                   ],
                 ),
                 SizedBox(height: 8),
                 Row(
                   children: [
                     Icon(Icons.people, color: GlobalColors.mainColor),
-                    SizedBox(width: 8),
-                    Text('누적 멘티 수: '),
+                    const SizedBox(width: 8),
+                    const Text('누적 멘티 수: '),
                     Text(accumulatedMenteeCount,
                         style: TextStyle(fontWeight: FontWeight.bold)),
                   ],
@@ -318,10 +327,10 @@ class _ProfileMentoPageState extends State<ProfileMentoPage>
                 Row(
                   children: [
                     Icon(Icons.people, color: GlobalColors.mainColor),
-                    SizedBox(width: 8),
-                    Text('누적 멘토링 수: '),
+                    const SizedBox(width: 8),
+                    const Text('누적 멘토링 수: '),
                     Text(accumulatedMentoringCount,
-                        style: TextStyle(fontWeight: FontWeight.bold)),
+                        style: const TextStyle(fontWeight: FontWeight.bold)),
                   ],
                 ),
               ],

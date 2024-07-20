@@ -23,7 +23,7 @@ class _MentoCertificateState extends State<MentoCertificate> {
     final prefs = await SharedPreferences.getInstance();
     final accessToken = prefs.getString('accessToken') ?? '';
     final apiServer = dotenv.env['API_SERVER'] ?? '';
-    final url = '$apiServer/api/auth/getInfo';
+    final url = '$apiServer/api/auth/getMyInfo';
 
     final response = await http.get(
       Uri.parse(url),

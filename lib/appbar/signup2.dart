@@ -252,6 +252,7 @@ class _SignupStep2State extends State<SignupStep2> {
     return Scaffold(
       backgroundColor: GlobalColors.whiteColor,
       appBar: AppBar(
+        scrolledUnderElevation: 0,
         backgroundColor: GlobalColors.whiteColor,
         title: const Text('회원가입'),
         leading: IconButton(

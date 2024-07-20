@@ -202,6 +202,7 @@ class _SignupPageState extends State<SignupPage> {
       backgroundColor: GlobalColors.whiteColor,
       appBar: AppBar(
         backgroundColor: GlobalColors.whiteColor,
+        scrolledUnderElevation: 0,
         title: const Text('회원가입'),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
