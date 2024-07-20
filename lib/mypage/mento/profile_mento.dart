@@ -3,6 +3,7 @@ import 'package:publicdatacontest/common/theme/colors/color_palette.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 class ProfileMentoPage extends StatefulWidget {
   const ProfileMentoPage({Key? key}) : super(key: key);
@@ -15,19 +16,36 @@ class _ProfileMentoPageState extends State<ProfileMentoPage>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
   int? _mentorId;
+  Map<String, dynamic>? _mentorInfo;
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
+    _loadMentorId();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final arguments =
           ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
       if (arguments != null && arguments.containsKey('mentorId')) {
         _mentorId = arguments['mentorId'];
+        _saveMentorId(_mentorId!);
+        _fetchMentorInfo(_mentorId!);
+      } else if (_mentorId != null) {
         _fetchMentorInfo(_mentorId!);
       }
     });
+  }
+
+  Future<void> _loadMentorId() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _mentorId = prefs.getInt('mentorId');
+    });
+  }
+
+  Future<void> _saveMentorId(int mentorId) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt('mentorId', mentorId);
   }
 
   @override
@@ -36,12 +54,11 @@ class _ProfileMentoPageState extends State<ProfileMentoPage>
     super.dispose();
   }
 
-// 여기서 프로필 불러오기 API 호출하기
   Future<void> _fetchMentorInfo(int mentorId) async {
     final prefs = await SharedPreferences.getInstance();
     final accessToken = prefs.getString('accessToken') ?? '';
     final url =
-        '${dotenv.env['API_SERVER']}/api/mentor/info?mentorId=$mentorId';
+        '${dotenv.env['API_SERVER']}/api/auth/getInfo?user_id=$mentorId';
 
     final response = await http.get(
       Uri.parse(url),
@@ -52,7 +69,7 @@ class _ProfileMentoPageState extends State<ProfileMentoPage>
 
     if (response.statusCode == 200) {
       setState(() {
-        // 받은 데이터로 프로필 화면 업데이트 로직
+        _mentorInfo = jsonDecode(response.body)['mentor'];
       });
     } else {
       print('Failed to fetch mentor info');
@@ -63,50 +80,58 @@ class _ProfileMentoPageState extends State<ProfileMentoPage>
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('멘토 프로필'),
+        title: const Text('멘토 프로필'),
+        scrolledUnderElevation: 0,
+        backgroundColor: Colors.white,
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildProfileSection(),
-            const SizedBox(height: 16),
-            TabBar(
-              controller: _tabController,
-              indicatorColor: GlobalColors.mainColor,
-              labelColor: GlobalColors.mainColor,
-              unselectedLabelColor: GlobalColors.lightgray,
-              labelStyle: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
-              tabs: const [Tab(text: '멘토 정보'), Tab(text: '명예의 전당')],
-            ),
-            SizedBox(
-              height: 400,
-              child: TabBarView(
-                controller: _tabController,
-                children: [_buildMentorInfo(), _buildMentorHonor()],
+      body: _mentorInfo == null
+          ? Center(child: CircularProgressIndicator())
+          : SingleChildScrollView(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildProfileSection(),
+                  const SizedBox(height: 16),
+                  TabBar(
+                    controller: _tabController,
+                    indicatorColor: GlobalColors.mainColor,
+                    labelColor: GlobalColors.mainColor,
+                    unselectedLabelColor: GlobalColors.lightgray,
+                    labelStyle:
+                        TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                    tabs: const [Tab(text: '멘토 정보'), Tab(text: '명예의 전당')],
+                  ),
+                  SizedBox(
+                    height: 400,
+                    child: TabBarView(
+                      controller: _tabController,
+                      children: [_buildMentorInfo(), _buildMentorHonor()],
+                    ),
+                  ),
+                ],
               ),
             ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildSection(Widget child) {
-    return SizedBox(
-      child: child,
     );
   }
 
   Widget _buildProfileSection() {
+    String base64Image = _mentorInfo?['image'] ?? '';
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Container(
           width: 100,
           height: 100,
-          color: Colors.grey[300],
+          decoration: BoxDecoration(
+            color: Colors.grey[300],
+            image: base64Image.isNotEmpty
+                ? DecorationImage(
+                    image: MemoryImage(base64Decode(base64Image)),
+                    fit: BoxFit.cover,
+                  )
+                : null,
+          ),
         ),
         const SizedBox(width: 16),
         Column(
@@ -116,7 +141,7 @@ class _ProfileMentoPageState extends State<ProfileMentoPage>
               children: [
                 Icon(Icons.account_circle, size: 20, color: Colors.grey[600]),
                 SizedBox(width: 8),
-                Text('아이디: happyUser2024'),
+                Text('아이디: ${_mentorInfo?['userId']}'),
               ],
             ),
             SizedBox(height: 8),
@@ -124,7 +149,15 @@ class _ProfileMentoPageState extends State<ProfileMentoPage>
               children: [
                 Icon(Icons.email, size: 20, color: Colors.grey[600]),
                 SizedBox(width: 8),
-                Text('이메일: user123@example.com'),
+                Text('이메일: ${_mentorInfo?['email']}'),
+              ],
+            ),
+            SizedBox(height: 8),
+            Row(
+              children: [
+                Icon(Icons.person, size: 20, color: Colors.grey[600]),
+                SizedBox(width: 8),
+                Text('이름: ${_mentorInfo?['mentorName']}'),
               ],
             ),
           ],
@@ -134,8 +167,7 @@ class _ProfileMentoPageState extends State<ProfileMentoPage>
   }
 
   Widget _buildMentorInfo() {
-    List<String> subcategories = ['IT', '경영', '마케팅'];
-
+    List<dynamic> categories = _mentorInfo?['mentorCategoryNames'] ?? [];
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -151,8 +183,9 @@ class _ProfileMentoPageState extends State<ProfileMentoPage>
         ListView.builder(
           shrinkWrap: true,
           physics: NeverScrollableScrollPhysics(),
-          itemCount: subcategories.length,
+          itemCount: categories.length,
           itemBuilder: (context, index) {
+            var category = categories[index];
             return Column(
               children: [
                 Container(
@@ -171,7 +204,7 @@ class _ProfileMentoPageState extends State<ProfileMentoPage>
                       ),
                       SizedBox(width: 16),
                       Text(
-                        '소분류${index + 1}',
+                        '${category['categoryName']} / ${category['subCategoryName']}',
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 16,
