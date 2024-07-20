@@ -43,7 +43,7 @@ class _MyFieldState extends State<MyField> {
 
     try {
       final response = await http.get(
-        Uri.parse('$apiServer/api/auth/getInfo'),
+        Uri.parse('$apiServer/api/auth/getMyInfo'),
         headers: {
           'Authorization': 'Bearer $accessToken',
         },

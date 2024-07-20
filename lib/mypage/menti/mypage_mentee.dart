@@ -86,7 +86,7 @@ class _MyPageMenteeState extends State<MyPageMentee>
     }
 
     final response = await http.get(
-      Uri.parse('$apiServer/api/auth/getInfo'),
+      Uri.parse('$apiServer/api/auth/getMyInfo'),
       headers: {
         'Authorization': 'Bearer $accessToken',
         'Content-Type': 'application/json',
