@@ -46,6 +46,10 @@ class _MyPageMentoState extends State<MyPageMento>
 
   bool _isLoading = false;
 
+  Uint8List? _profileImage; // 프로필 이미지 데이터
+  ValueNotifier<List<Uint8List>> _selectedCertificatesNotifier =
+      ValueNotifier<List<Uint8List>>([]);
+
   @override
   void initState() {
     super.initState();
@@ -186,6 +190,189 @@ class _MyPageMentoState extends State<MyPageMento>
         _isLoading = false; // 에러 발생 시 로딩 상태 해제
       });
     }
+  }
+
+  void _selectCertificateFiles() async {
+    setState(() {
+      _isLoading = true;
+    });
+    try {
+      FilePickerResult? result = await FilePicker.platform
+          .pickFiles(type: FileType.image, allowMultiple: false);
+      if (result != null && result.files.isNotEmpty) {
+        PlatformFile platformFile = result.files.first;
+        Uint8List? fileBytes;
+
+        if (platformFile.bytes != null) {
+          fileBytes = platformFile.bytes;
+        } else {
+          File file = File(platformFile.path!);
+          fileBytes = await file.readAsBytes();
+        }
+
+        if (fileBytes != null) {
+          setState(() {
+            _isLoading = false;
+          });
+          _showCertificateConfirmationDialog(fileBytes);
+        }
+      } else {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
+  void _showCertificateConfirmationDialog(Uint8List file) {
+    if (!mounted) {
+      return;
+    }
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('이미지 선택'),
+          content: Text('이 이미지를 인증서로 선택하시겠습니까?'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text('취소'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                _uploadCertificate(file);
+                setState(() {
+                  _selectedCertificatesNotifier.value = [file];
+                });
+              },
+              child: Text('확인'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+// 프로필사진 업로드 함수
+  Future<void> _uploadProfileImage(Uint8List fileBytes) async {
+    final prefs = await SharedPreferences.getInstance();
+    final accessToken = prefs.getString('accessToken') ?? '';
+    final url = '${dotenv.env['API_SERVER']}/api/auth/upload_profile_image';
+
+    var request = http.MultipartRequest('PUT', Uri.parse(url))
+      ..headers['Authorization'] = 'Bearer $accessToken'
+      ..files.add(
+        http.MultipartFile.fromBytes(
+          'file',
+          fileBytes,
+          filename: 'profile_image.png',
+          contentType: MediaType('image', 'png'),
+        ),
+      );
+
+    var response = await request.send();
+
+    if (response.statusCode == 200) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('프로필 이미지가 성공적으로 업로드되었습니다!'),
+          backgroundColor: Colors.green,
+        ),
+      );
+      setState(() {
+        _profileImage = fileBytes;
+      });
+    } else {
+      final responseBody = await response.stream.bytesToString();
+      print('Response status: ${response.statusCode}');
+      print('Response body: $responseBody');
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('프로필 이미지 업로드에 실패했습니다.'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
+  void _selectProfileImage() async {
+    setState(() {
+      _isLoading = true;
+    });
+    try {
+      FilePickerResult? result = await FilePicker.platform
+          .pickFiles(type: FileType.image, allowMultiple: false);
+      if (result != null && result.files.isNotEmpty) {
+        PlatformFile platformFile = result.files.first;
+        Uint8List? fileBytes;
+
+        if (platformFile.bytes != null) {
+          fileBytes = platformFile.bytes;
+        } else {
+          File file = File(platformFile.path!);
+          fileBytes = await file.readAsBytes();
+        }
+
+        if (fileBytes != null) {
+          setState(() {
+            _isLoading = false;
+          });
+          _showProfileImageConfirmationDialog(fileBytes);
+        }
+      } else {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
+  void _showProfileImageConfirmationDialog(Uint8List file) {
+    if (!mounted) {
+      return;
+    }
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('이미지 선택'),
+          content: Text('이 이미지를 프로필 사진으로 선택하시겠습니까?'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text('취소'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                _uploadProfileImage(file);
+                setState(() {
+                  _selectedFilesNotifier.value = [file];
+                });
+              },
+              child: Text('확인'),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   void _showConfirmationDialog(Uint8List file) {
@@ -409,10 +596,16 @@ class _MyPageMentoState extends State<MyPageMento>
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Container(
-          width: 100,
-          height: 100,
-          color: Colors.grey[300],
+        GestureDetector(
+          onTap: _selectProfileImage,
+          child: Container(
+            width: 100,
+            height: 100,
+            color: Colors.grey[300],
+            child: _profileImage != null
+                ? Image.memory(_profileImage!, fit: BoxFit.cover)
+                : Icon(Icons.add_a_photo, color: Colors.grey),
+          ),
         ),
         const SizedBox(width: 16),
         Column(
@@ -471,7 +664,7 @@ class _MyPageMentoState extends State<MyPageMento>
             child: Row(
               children: [
                 GestureDetector(
-                  onTap: _pickFile,
+                  onTap: _selectCertificateFiles,
                   child: Container(
                     width: 100,
                     height: 150,
@@ -484,7 +677,7 @@ class _MyPageMentoState extends State<MyPageMento>
                 ),
                 const SizedBox(width: 15),
                 ValueListenableBuilder<List<Uint8List>>(
-                  valueListenable: _selectedFilesNotifier,
+                  valueListenable: _selectedCertificatesNotifier,
                   builder: (context, selectedFiles, child) {
                     return Row(
                       children: selectedFiles.map((file) {
@@ -512,7 +705,7 @@ class _MyPageMentoState extends State<MyPageMento>
           ),
           const SizedBox(height: 15),
           ValueListenableBuilder<List<Uint8List>>(
-            valueListenable: _selectedFilesNotifier,
+            valueListenable: _selectedCertificatesNotifier,
             builder: (context, selectedFiles, child) {
               if (selectedFiles.isEmpty) {
                 return Column(
