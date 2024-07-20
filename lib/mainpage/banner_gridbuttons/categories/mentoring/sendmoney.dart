@@ -30,10 +30,14 @@ class _SendMoneyPageState extends State<SendMoneyPage> {
     final arguments =
         ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
 
+// 나중에 '결제요청'에 requestedClassId 필드 추가하고,
+// 멘토가 결제요청을 보낼 때 이 값을 실제 classId로 변경하는 API도 함께 호출한다
+// 그래서 멘티가 클릭 시 실제 멘토링의 이름, 가격 등 정보를 받을 수 있게 할 것 !!
     if (arguments != null) {
       setState(() {
         conversationId = arguments['conversationId'];
-        classId = arguments['classId'];
+        // classId = arguments['classId'];
+        classId = 2;
         titlename = arguments['titlename'];
       });
     } else {
@@ -47,17 +51,17 @@ class _SendMoneyPageState extends State<SendMoneyPage> {
 
   void _setMentoringDetails() {
     switch (classId) {
-      case 7:
+      case 2:
         mentorName = '김철수';
         mentoringName = '한글 멘토링';
         mentoringPrice = 70000;
         break;
-      case 8:
+      case 3:
         mentorName = '홍길동';
         mentoringName = '의적 멘토링';
         mentoringPrice = 40000;
         break;
-      case 9:
+      case 4:
         mentorName = '나영잉';
         mentoringName = '마라탕이론';
         mentoringPrice = 55000;
@@ -139,7 +143,9 @@ class _SendMoneyPageState extends State<SendMoneyPage> {
           ),
         );
       } else {
-        // Handle error
+        print('Failed to post payment history');
+        print('classId: $classId');
+        print('count: $count');
       }
     } else {
       // Handle error

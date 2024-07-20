@@ -118,6 +118,7 @@ void showMentoringSelectionDialog(BuildContext context, int conversationId) {
                           setState(() {
                             selectedMentoring = value.toString();
                             classId = mentoring['classId'];
+                            print('Selected classId: $classId');
                           });
                         },
                       );
