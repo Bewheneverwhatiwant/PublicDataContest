@@ -55,6 +55,7 @@ class _MyPageMentoState extends State<MyPageMento>
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
     _fetchAndDisplayUserInfo();
+    _fetchProfileImage();
     WidgetsBinding.instance.addObserver(this);
   }
 
@@ -447,6 +448,27 @@ class _MyPageMentoState extends State<MyPageMento>
     }
   }
 
+  Future<void> _fetchProfileImage() async {
+    final prefs = await SharedPreferences.getInstance();
+    final accessToken = prefs.getString('accessToken') ?? '';
+    final url = '${dotenv.env['API_SERVER']}/api/auth/get_profile_image';
+
+    final response = await http.get(
+      Uri.parse(url),
+      headers: {
+        'Authorization': 'Bearer $accessToken',
+      },
+    );
+
+    if (response.statusCode == 200) {
+      setState(() {
+        _profileImage = response.bodyBytes;
+      });
+    } else {
+      print('Failed to fetch profile image');
+    }
+  }
+
   void _showCategoryDialog() {
     showDialog(
       context: context,
@@ -652,11 +674,11 @@ class _MyPageMentoState extends State<MyPageMento>
                 child: GestureDetector(
                   onTap: _deleteProfileImage,
                   child: Container(
-                    decoration: BoxDecoration(
+                    decoration: const BoxDecoration(
                       shape: BoxShape.circle,
                       color: Colors.red,
                     ),
-                    child: Icon(
+                    child: const Icon(
                       Icons.close,
                       color: Colors.white,
                       size: 20,
