@@ -30,6 +30,7 @@ class _MyPageMenteeState extends State<MyPageMentee>
   void initState() {
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
+    _fetchProfileImage();
     _fetchAndDisplayUserInfo();
     _fetchMentoringHistory();
   }
@@ -283,6 +284,27 @@ class _MyPageMenteeState extends State<MyPageMentee>
           backgroundColor: Colors.red,
         ),
       );
+    }
+  }
+
+  Future<void> _fetchProfileImage() async {
+    final prefs = await SharedPreferences.getInstance();
+    final accessToken = prefs.getString('accessToken') ?? '';
+    final url = '${dotenv.env['API_SERVER']}/api/auth/get_profile_image';
+
+    final response = await http.get(
+      Uri.parse(url),
+      headers: {
+        'Authorization': 'Bearer $accessToken',
+      },
+    );
+
+    if (response.statusCode == 200) {
+      setState(() {
+        _profileImage = response.bodyBytes;
+      });
+    } else {
+      print('Failed to fetch profile image');
     }
   }
 
