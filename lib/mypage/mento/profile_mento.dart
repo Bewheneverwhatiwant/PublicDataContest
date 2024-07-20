@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:publicdatacontest/common/theme/colors/color_palette.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:http/http.dart' as http;
 
 class ProfileMentoPage extends StatefulWidget {
   const ProfileMentoPage({Key? key}) : super(key: key);
@@ -11,17 +14,49 @@ class ProfileMentoPage extends StatefulWidget {
 class _ProfileMentoPageState extends State<ProfileMentoPage>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
+  int? _mentorId;
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final arguments =
+          ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
+      if (arguments != null && arguments.containsKey('mentorId')) {
+        _mentorId = arguments['mentorId'];
+        _fetchMentorInfo(_mentorId!);
+      }
+    });
   }
 
   @override
   void dispose() {
     _tabController.dispose();
     super.dispose();
+  }
+
+// 여기서 프로필 불러오기 API 호출하기
+  Future<void> _fetchMentorInfo(int mentorId) async {
+    final prefs = await SharedPreferences.getInstance();
+    final accessToken = prefs.getString('accessToken') ?? '';
+    final url =
+        '${dotenv.env['API_SERVER']}/api/mentor/info?mentorId=$mentorId';
+
+    final response = await http.get(
+      Uri.parse(url),
+      headers: {
+        'Authorization': 'Bearer $accessToken',
+      },
+    );
+
+    if (response.statusCode == 200) {
+      setState(() {
+        // 받은 데이터로 프로필 화면 업데이트 로직
+      });
+    } else {
+      print('Failed to fetch mentor info');
+    }
   }
 
   @override

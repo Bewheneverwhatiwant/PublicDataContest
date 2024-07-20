@@ -252,7 +252,11 @@ class _MentoringDetailPageState extends State<MentoringDetailPage> {
             children: [
               ElevatedButton.icon(
                 onPressed: () {
-                  Navigator.pushNamed(context, '/profilemento');
+                  Navigator.pushNamed(
+                    context,
+                    '/profilemento',
+                    arguments: {'mentorId': _mentorId}, // 프로필 페이지로 mentorId 전달
+                  );
                 },
                 icon: const Icon(Icons.person, color: Colors.yellow),
                 label: Text(mentoringDetail['mentorName'] ?? '멘토 이름 없음'),
