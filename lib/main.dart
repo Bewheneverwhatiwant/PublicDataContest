@@ -111,6 +111,7 @@ class _MyAppState extends State<MyApp> {
         '/searchclass': (context) => const SearchClassPage(),
         '/sendmoney': (context) => const SendMoneyPage(),
         '/postreview': (context) => const PostReviewPage(),
+        '/classreview': (context) => const ReviewListTemplatePage(),
       },
       onGenerateRoute: (settings) {
         if (settings.name == '/') {
