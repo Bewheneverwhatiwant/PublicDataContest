@@ -17,6 +17,7 @@ class _ProfileMentoPageState extends State<ProfileMentoPage>
   late TabController _tabController;
   int? _mentorId;
   Map<String, dynamic>? _mentorInfo;
+  bool _isLoading = true;
 
   @override
   void initState() {
@@ -32,6 +33,10 @@ class _ProfileMentoPageState extends State<ProfileMentoPage>
         _fetchMentorInfo(_mentorId!);
       } else if (_mentorId != null) {
         _fetchMentorInfo(_mentorId!);
+      } else {
+        setState(() {
+          _isLoading = false; // 로딩 상태 업데이트
+        });
       }
     });
   }
@@ -60,19 +65,30 @@ class _ProfileMentoPageState extends State<ProfileMentoPage>
     final url =
         '${dotenv.env['API_SERVER']}/api/auth/getInfo?user_id=$mentorId';
 
-    final response = await http.get(
-      Uri.parse(url),
-      headers: {
-        'Authorization': 'Bearer $accessToken',
-      },
-    );
+    try {
+      final response = await http.get(
+        Uri.parse(url),
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+        },
+      );
 
-    if (response.statusCode == 200) {
+      if (response.statusCode == 200) {
+        setState(() {
+          _mentorInfo = jsonDecode(response.body)['mentor'];
+          _isLoading = false; // 로딩 상태 업데이트
+        });
+      } else {
+        setState(() {
+          _isLoading = false; // 로딩 상태 업데이트
+        });
+        print('Failed to fetch mentor info: ${response.statusCode}');
+      }
+    } catch (e) {
       setState(() {
-        _mentorInfo = jsonDecode(response.body)['mentor'];
+        _isLoading = false; // 로딩 상태 업데이트
       });
-    } else {
-      print('Failed to fetch mentor info');
+      print('Error fetching mentor info: $e');
     }
   }
 
@@ -84,37 +100,39 @@ class _ProfileMentoPageState extends State<ProfileMentoPage>
         scrolledUnderElevation: 0,
         backgroundColor: Colors.white,
       ),
-      body: _mentorInfo == null
+      body: _isLoading
           ? Center(child: CircularProgressIndicator())
-          : SingleChildScrollView(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _buildProfileSection(),
-                  const SizedBox(height: 16),
-                  TabBar(
-                    controller: _tabController,
-                    indicatorColor: GlobalColors.mainColor,
-                    labelColor: GlobalColors.mainColor,
-                    unselectedLabelColor: GlobalColors.lightgray,
-                    labelStyle: const TextStyle(
-                        fontWeight: FontWeight.bold, fontSize: 14),
-                    tabs: const [Tab(text: '멘토 정보'), Tab(text: '명예의 전당')],
+          : _mentorInfo == null
+              ? Center(child: Text('멘토 정보를 불러올 수 없습니다.'))
+              : SingleChildScrollView(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _buildProfileSection(),
+                      const SizedBox(height: 16),
+                      TabBar(
+                        controller: _tabController,
+                        indicatorColor: GlobalColors.mainColor,
+                        labelColor: GlobalColors.mainColor,
+                        unselectedLabelColor: GlobalColors.lightgray,
+                        labelStyle: const TextStyle(
+                            fontWeight: FontWeight.bold, fontSize: 14),
+                        tabs: const [Tab(text: '멘토 정보'), Tab(text: '명예의 전당')],
+                      ),
+                      SizedBox(
+                        height: 600, // TabBar 아래 공간은 여기 조정!
+                        child: TabBarView(
+                          controller: _tabController,
+                          children: [
+                            _buildMentorInfo(),
+                            _buildMentorHonor(),
+                          ],
+                        ),
+                      ),
+                    ],
                   ),
-                  SizedBox(
-                    height: 600, // TabBar 아래 공간은 여기 조정!
-                    child: TabBarView(
-                      controller: _tabController,
-                      children: [
-                        _buildMentorInfo(),
-                        _buildMentorHonor(),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
+                ),
     );
   }
 

@@ -43,6 +43,7 @@ class _MyPageMentoState extends State<MyPageMento>
   String reemploymentIdea = '';
   String active = '';
   bool hasCertificates = false;
+  int? mentorId;
 
   bool _isLoading = false;
 
@@ -541,6 +542,7 @@ class _MyPageMentoState extends State<MyPageMento>
       email = mentor['email'];
       phoneNumber = mentor['phoneNumber'];
       address = mentor['address'];
+      mentorId = mentor['mentorId'];
       // 날짜 형식 변환
       DateTime createdAtDate = DateTime.parse(mentor['createdAt']);
       createdAt =
@@ -579,7 +581,13 @@ class _MyPageMentoState extends State<MyPageMento>
                   children: [
                     ElevatedButton(
                       onPressed: () {
-                        Navigator.pushNamed(context, '/profilemento');
+                        print(
+                            '프로필로 넘어간 mentorId는 $mentorId'); // 요기 수정 !! (mentor profile 무한로딩 에러)
+                        Navigator.pushNamed(
+                          context,
+                          '/profilemento',
+                          arguments: {'mentorId': mentorId},
+                        );
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: GlobalColors.mainColor,
