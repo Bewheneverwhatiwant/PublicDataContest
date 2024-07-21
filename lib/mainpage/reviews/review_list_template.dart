@@ -36,7 +36,10 @@ class _ReviewListTemplatePageState extends State<ReviewListTemplatePage> {
       final int reviewlistkind = arguments?['reviewlistkind'] ?? 1;
       _classId = arguments?['classId'];
       print('전달받은 classId: $_classId');
-      if (_classId != null) {
+
+      if (reviewlistkind == 1) {
+        _fetchAllReviews();
+      } else if (reviewlistkind == 2 && _classId != null) {
         _saveClassId(_classId!);
         _fetchReviews(_classId!);
       } else {
@@ -60,6 +63,34 @@ class _ReviewListTemplatePageState extends State<ReviewListTemplatePage> {
         // classId가 null일 경우 처리
         print('Error: classId is null');
       });
+    }
+  }
+
+  Future<void> _fetchAllReviews() async {
+    final prefs = await SharedPreferences.getInstance();
+    final accessToken = prefs.getString('accessToken') ?? '';
+
+    try {
+      final response = await http.get(
+        Uri.parse('${dotenv.env['API_SERVER']}/api/review'),
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final responseData = json.decode(response.body) as List;
+        setState(() {
+          _reviewData =
+              responseData.map((item) => item as Map<String, dynamic>).toList();
+        });
+      } else {
+        // Error handling
+        print('Failed to load reviews: ${response.statusCode}');
+      }
+    } catch (e) {
+      // Error handling
+      print('Error fetching reviews: $e');
     }
   }
 
@@ -144,11 +175,16 @@ class _ReviewListTemplatePageState extends State<ReviewListTemplatePage> {
                   final String className = review['className'] ?? '없음';
                   final String comment = review['comment'] ?? '코멘트 없음';
                   final int stars = review['rating'] ?? 0;
+                  final int reviewId = review['reviewId'] ?? 0;
                   return Padding(
                     padding: const EdgeInsets.symmetric(vertical: 8.0),
                     child: GestureDetector(
                       onTap: () {
-                        Navigator.pushNamed(context, '/reviewdetail');
+                        Navigator.pushNamed(
+                          context,
+                          '/reviewdetail',
+                          arguments: {'reviewId': reviewId},
+                        );
                       },
                       child: Container(
                         padding: const EdgeInsets.all(16.0),
