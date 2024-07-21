@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:publicdatacontest/common/theme/colors/color_palette.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 class ProfileMenteePage extends StatefulWidget {
   const ProfileMenteePage({Key? key}) : super(key: key);
@@ -11,17 +15,67 @@ class ProfileMenteePage extends StatefulWidget {
 class _ProfileMenteePageState extends State<ProfileMenteePage>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
+  int? _menteeId;
+  Map<String, dynamic>? _menteeInfo;
+  bool _isLoading = true;
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final arguments =
+          ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
+      if (arguments != null && arguments.containsKey('menteeId')) {
+        _menteeId = arguments['menteeId'];
+        print('받은 menteeId는 $_menteeId');
+        _fetchMenteeInfo(_menteeId!);
+      } else {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    });
   }
 
   @override
   void dispose() {
     _tabController.dispose();
     super.dispose();
+  }
+
+  Future<void> _fetchMenteeInfo(int menteeId) async {
+    final prefs = await SharedPreferences.getInstance();
+    final accessToken = prefs.getString('accessToken') ?? '';
+    final url =
+        '${dotenv.env['API_SERVER']}/api/auth/getInfo?user_id=$menteeId';
+
+    try {
+      final response = await http.get(
+        Uri.parse(url),
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        setState(() {
+          _menteeInfo = jsonDecode(response.body)['mentee'];
+          _isLoading = false;
+        });
+        print('받은 menteeInfo는 $_menteeInfo');
+      } else {
+        setState(() {
+          _isLoading = false;
+        });
+        print('Failed to fetch mentee info: ${response.statusCode}');
+      }
+    } catch (e) {
+      setState(() {
+        _isLoading = false;
+      });
+      print('Error fetching mentee info: $e');
+    }
   }
 
   @override
@@ -32,42 +86,56 @@ class _ProfileMenteePageState extends State<ProfileMenteePage>
         backgroundColor: Colors.white,
         title: Text('멘티 프로필'),
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildProfileSection(),
-            const SizedBox(height: 16),
-            TabBar(
-              controller: _tabController,
-              indicatorColor: GlobalColors.mainColor,
-              labelColor: GlobalColors.mainColor,
-              unselectedLabelColor: GlobalColors.lightgray,
-              labelStyle: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
-              tabs: const [Tab(text: '멘티 정보'), Tab(text: '명예의 전당')],
-            ),
-            SizedBox(
-              height: 400,
-              child: TabBarView(
-                controller: _tabController,
-                children: [_buildMenteeInfo(), _buildMenteeHonor()],
-              ),
-            ),
-          ],
-        ),
-      ),
+      body: _isLoading
+          ? Center(child: CircularProgressIndicator())
+          : _menteeInfo == null
+              ? Center(child: Text('멘티 정보를 불러올 수 없습니다.'))
+              : SingleChildScrollView(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _buildProfileSection(),
+                      const SizedBox(height: 16),
+                      TabBar(
+                        controller: _tabController,
+                        indicatorColor: GlobalColors.mainColor,
+                        labelColor: GlobalColors.mainColor,
+                        unselectedLabelColor: GlobalColors.lightgray,
+                        labelStyle: TextStyle(
+                            fontWeight: FontWeight.bold, fontSize: 14),
+                        tabs: const [Tab(text: '멘티 정보'), Tab(text: '명예의 전당')],
+                      ),
+                      SizedBox(
+                        height: 400,
+                        child: TabBarView(
+                          controller: _tabController,
+                          children: [_buildMenteeInfo(), _buildMenteeHonor()],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
     );
   }
 
   Widget _buildProfileSection() {
+    String base64Image = _menteeInfo?['image'] ?? '';
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Container(
           width: 100,
           height: 100,
-          color: Colors.grey[300],
+          decoration: BoxDecoration(
+            color: Colors.grey[300],
+            image: base64Image.isNotEmpty
+                ? DecorationImage(
+                    image: MemoryImage(base64Decode(base64Image)),
+                    fit: BoxFit.cover,
+                  )
+                : null,
+          ),
         ),
         const SizedBox(width: 16),
         Column(
@@ -76,16 +144,16 @@ class _ProfileMenteePageState extends State<ProfileMenteePage>
             Row(
               children: [
                 Icon(Icons.account_circle, size: 20, color: Colors.grey[600]),
-                SizedBox(width: 8),
-                Text('아이디: happyUser2024'),
+                const SizedBox(width: 8),
+                Text('아이디: ${_menteeInfo?['userId']}'),
               ],
             ),
-            SizedBox(height: 8),
+            const SizedBox(height: 8),
             Row(
               children: [
                 Icon(Icons.email, size: 20, color: Colors.grey[600]),
-                SizedBox(width: 8),
-                Text('이메일: user123@example.com'),
+                const SizedBox(width: 8),
+                Text('이메일: ${_menteeInfo?['email']}'),
               ],
             ),
           ],
@@ -122,7 +190,7 @@ class _ProfileMenteePageState extends State<ProfileMenteePage>
             ),
           ),
         ),
-        SizedBox(height: 16),
+        const SizedBox(height: 16),
         Padding(
           padding: const EdgeInsets.symmetric(vertical: 8.0),
           child: Text(

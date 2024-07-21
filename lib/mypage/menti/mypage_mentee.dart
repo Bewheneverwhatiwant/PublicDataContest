@@ -26,6 +26,7 @@ class _MyPageMenteeState extends State<MyPageMentee>
   Uint8List? _profileImage; // 프로필 이미지 데이터
   bool _isLoading = false;
   List<Map<String, dynamic>> _menteeReviews = [];
+  int? menteeId;
 
   @override
   void initState() {
@@ -363,7 +364,12 @@ class _MyPageMenteeState extends State<MyPageMentee>
                   children: [
                     ElevatedButton(
                       onPressed: () {
-                        Navigator.pushNamed(context, '/profilementee');
+                        menteeId = _menteeInfo['mentee']['menteeId'];
+                        print('프로필로 넘어간 menteeId는 $menteeId');
+                        Navigator.pushNamed(context, '/profilementee',
+                            arguments: {
+                              'menteeId': menteeId,
+                            });
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: GlobalColors.mainColor,
