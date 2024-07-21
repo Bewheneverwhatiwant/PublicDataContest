@@ -154,6 +154,8 @@ class FinalMentoringFinishPage extends StatelessWidget {
                                     String? role = prefs.getString('role');
 
                                     if (role == 'mentee') {
+                                      print('리뷰 화면으로 넘어간 classId는 $classId');
+                                      print('리뷰 화면으로 넘어간 id는 $id');
                                       Navigator.pushNamed(
                                         // 리뷰 작성 화면으로 이동
                                         context,

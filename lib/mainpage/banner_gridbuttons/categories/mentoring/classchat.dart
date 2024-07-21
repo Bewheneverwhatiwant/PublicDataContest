@@ -37,6 +37,7 @@ class _ClassChatPageState extends State<ClassChatPage> {
   Timer? _timer;
   final ScrollController _scrollController = ScrollController();
   bool _initialScrollCompleted = false;
+  int? finalMentoringEndedId;
 
   @override
   void initState() {
@@ -125,6 +126,13 @@ class _ClassChatPageState extends State<ClassChatPage> {
         final combined = [...chatResponses, ...paymentStatuses];
         combined.sort((a, b) => DateTime.parse(a['timestamp'])
             .compareTo(DateTime.parse(b['timestamp'])));
+
+        for (var status in paymentStatuses) {
+          if (status['paymentStatus'] == 'FINAL_MENTORING_ENDED') {
+            finalMentoringEndedId = status['id'];
+            break;
+          }
+        }
 
         setState(() {
           messages = combined;
@@ -238,7 +246,7 @@ class _ClassChatPageState extends State<ClassChatPage> {
         conversationId: conversationId,
         receiverId: receiverId,
         classId: _classId, // 멘티 리뷰 작성을 위해 classId 전달
-        id: id, // 멘티 리뷰 작성을 위해 payment status의 id 전달
+        id: finalMentoringEndedId, // 멘티 리뷰 작성을 위해 payment status의 id 전달
       );
     } else {
       paymentWidget = const SizedBox.shrink();

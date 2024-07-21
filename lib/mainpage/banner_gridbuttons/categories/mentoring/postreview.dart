@@ -67,6 +67,10 @@ class _PostReviewPageState extends State<PostReviewPage> {
         'classId': _classId,
       });
     } else {
+      print(_rating);
+      print(_commentController.text);
+      print(_classId);
+      print(_id);
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('리뷰 등록에 실패했습니다.'),
