@@ -25,6 +25,7 @@ class _MyPageMenteeState extends State<MyPageMentee>
   List<dynamic> _mentoringHistory = [];
   Uint8List? _profileImage; // 프로필 이미지 데이터
   bool _isLoading = false;
+  List<Map<String, dynamic>> _menteeReviews = [];
 
   @override
   void initState() {
@@ -33,6 +34,7 @@ class _MyPageMenteeState extends State<MyPageMentee>
     _fetchProfileImage();
     _fetchAndDisplayUserInfo();
     _fetchMentoringHistory();
+    _fetchMenteeReviews();
   }
 
   @override
@@ -66,6 +68,37 @@ class _MyPageMenteeState extends State<MyPageMentee>
         );
       },
     );
+  }
+
+  Future<void> _fetchMenteeReviews() async {
+    final String apiServer = dotenv.env['API_SERVER'] ?? '';
+    final String? accessToken = await _getAccessToken();
+
+    if (accessToken == null) {
+      print('AccessToken not found');
+      return;
+    }
+
+    try {
+      final response = await http.get(
+        Uri.parse('$apiServer/api/review/mentee'),
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final responseData = json.decode(response.body) as List;
+        setState(() {
+          _menteeReviews =
+              responseData.map((item) => item as Map<String, dynamic>).toList();
+        });
+      } else {
+        print('Failed to fetch mentee reviews: ${response.statusCode}');
+      }
+    } catch (e) {
+      print('Error fetching mentee reviews: $e');
+    }
   }
 
   void _addCategory(String category) {
@@ -459,6 +492,85 @@ class _MyPageMenteeState extends State<MyPageMentee>
     );
   }
 
+  Widget _buildMenteeReviews() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          '내가 작성한 모든 리뷰',
+          style: TextStyle(
+            color: GlobalColors.mainColor,
+            fontWeight: FontWeight.bold,
+            fontSize: 18,
+          ),
+        ),
+        SizedBox(height: 8),
+        ..._menteeReviews.map((review) {
+          final String className = review['className'] ?? '없음';
+          final String comment = review['comment'] ?? '코멘트 없음';
+          final int stars = review['rating'] ?? 0;
+          final int reviewId = review['reviewId'] ?? 0;
+          return Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8.0),
+            child: GestureDetector(
+              onTap: () {
+                Navigator.pushNamed(
+                  context,
+                  '/reviewdetail',
+                  arguments: {'reviewId': reviewId},
+                );
+              },
+              child: Container(
+                padding: const EdgeInsets.all(16.0),
+                decoration: BoxDecoration(
+                  color: Colors.orange[50],
+                  borderRadius: BorderRadius.circular(12.0),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.grey.withOpacity(0.5),
+                      spreadRadius: 2,
+                      blurRadius: 5,
+                      offset: const Offset(0, 3),
+                    ),
+                  ],
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      '멘토링명: $className',
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      '리뷰 내용: $comment',
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Row(
+                      children: List.generate(stars, (index) {
+                        return const Icon(
+                          Icons.star,
+                          color: Colors.yellow,
+                        );
+                      }),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          );
+        }).toList(),
+      ],
+    );
+  }
+
   Widget _buildMenteeInfo(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -622,6 +734,8 @@ class _MyPageMenteeState extends State<MyPageMentee>
         ),
         SizedBox(height: 8),
         _buildRecentMentorings(),
+        const SizedBox(height: 16),
+        _buildMenteeReviews(),
       ],
     );
   }
