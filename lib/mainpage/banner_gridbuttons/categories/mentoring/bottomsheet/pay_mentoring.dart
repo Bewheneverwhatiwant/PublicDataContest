@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class PayMentoringPage extends StatelessWidget {
   final String timestamp;
@@ -16,8 +19,6 @@ class PayMentoringPage extends StatelessWidget {
     required this.titlename,
     required this.paymentRequestedId,
   }) : super(key: key);
-
-// 여기서는 /update_received_class_id 호출이 아니라, 넘겨받은 classId로 /mentoring_detail API 호출하는 것만 일어나야 한다.
 
   Future<void> _handleButtonPress(BuildContext context) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -43,16 +44,46 @@ class PayMentoringPage extends StatelessWidget {
         },
       );
     } else if (role == 'mentee') {
-      // 멘티인 경우 /sendmoney로 이동
-      Navigator.pushNamed(
-        context,
-        '/sendmoney',
-        arguments: {
-          'conversationId': conversationId,
-          'classId': classId,
-          'titlename': titlename,
+      // 멘티인 경우 /chatting_detail API 요청 후 최신 PAYMENT_REQUESTED의 classId를 추출
+      final apiServer = dotenv.env['API_SERVER'];
+      final detailUrl = Uri.parse(
+          '$apiServer/api/chat/chatting_detail?conversationId=$conversationId');
+      final detailResponse = await http.get(
+        detailUrl,
+        headers: {
+          'Authorization': 'Bearer ${prefs.getString('accessToken')}',
         },
       );
+
+      if (detailResponse.statusCode == 200) {
+        final data = json.decode(detailResponse.body);
+        final paymentStatuses = data['paymentStatus'] as List<dynamic>;
+        final latestPaymentRequested = paymentStatuses
+            .where((status) => status['paymentStatus'] == 'PAYMENT_REQUESTED')
+            .reduce((a, b) {
+          return DateTime.parse(a['timestamp'])
+                  .isAfter(DateTime.parse(b['timestamp']))
+              ? a
+              : b;
+        });
+
+        final latestClassId = latestPaymentRequested['requestedClassId'];
+
+        // /sendmoney로 이동
+        Navigator.pushNamed(
+          context,
+          '/sendmoney',
+          arguments: {
+            'conversationId': conversationId,
+            'classId': latestClassId,
+            'titlename': titlename,
+            'paymentRequestedId': paymentRequestedId,
+          },
+        );
+      } else {
+        // 오류 처리
+        print('chatting_detail API 요청 실패');
+      }
     }
   }
 
