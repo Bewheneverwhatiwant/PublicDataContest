@@ -30,58 +30,54 @@ class _SendMoneyPageState extends State<SendMoneyPage> {
     final arguments =
         ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
 
-// 나중에 '결제요청'에 requestedClassId 필드 추가하고,
-// 멘토가 결제요청을 보낼 때 이 값을 실제 classId로 변경하는 API도 함께 호출한다
-// 그래서 멘티가 클릭 시 실제 멘토링의 이름, 가격 등 정보를 받을 수 있게 할 것 !!
     if (arguments != null) {
-      setState(() {
-        conversationId = arguments['conversationId'];
-        // classId = arguments['classId'];
-        classId = 2;
-        titlename = arguments['titlename'];
-      });
+      conversationId = arguments['conversationId'];
+      // classId = arguments['classId'];
+      // 임시방편 처리. 나중에 /chatting detail에 결제요청 status 바로 반영되도록 수정되면 다시 확인할 것 !
+      classId = 5;
+      titlename = arguments['titlename'];
     } else {
       // 기본값 설정
       conversationId = 0;
       classId = 0;
       titlename = 'Unknown';
     }
-    _setMentoringDetails();
+    _fetchMentoringDetails();
   }
 
-  void _setMentoringDetails() {
-    switch (classId) {
-      case 2:
-        mentorName = '김철수';
-        mentoringName = '한글 멘토링';
-        mentoringPrice = 70000;
-        break;
-      case 3:
-        mentorName = '홍길동';
-        mentoringName = '의적 멘토링';
-        mentoringPrice = 40000;
-        break;
-      case 4:
-        mentorName = '나영잉';
-        mentoringName = '마라탕이론';
-        mentoringPrice = 55000;
-        break;
-      default:
-        mentorName = 'Unknown';
-        mentoringName = 'Unknown';
-        mentoringPrice = 0;
-        break;
-    }
+  Future<void> _fetchMentoringDetails() async {
+    final apiServer = dotenv.env['API_SERVER'];
+    final detailUrl =
+        Uri.parse('$apiServer/api/mentoring/mentoring_detail?classId=$classId');
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    final accessToken = prefs.getString('accessToken');
+    if (accessToken == null) return;
 
-    setState(() {
-      amount = mentoringPrice;
-      fee = double.parse((amount * 0.05).toStringAsFixed(1));
-      totalAmount = amount + fee.toInt();
-      autoRechargeAmount = ((totalAmount / 10000).ceil() * 10000).toInt();
-      if (totalAmount < 10000) {
-        autoRechargeAmount = 10000;
-      }
-    });
+    final detailResponse = await http.get(
+      detailUrl,
+      headers: {
+        'Authorization': 'Bearer $accessToken',
+      },
+    );
+
+    if (detailResponse.statusCode == 200) {
+      final data = json.decode(detailResponse.body);
+      setState(() {
+        mentorName = data['mentorName'];
+        mentoringName = data['name'];
+        mentoringPrice = data['price'];
+        amount = mentoringPrice;
+        fee = double.parse((amount * 0.05).toStringAsFixed(1));
+        totalAmount = amount + fee.toInt();
+        autoRechargeAmount = ((totalAmount / 10000).ceil() * 10000).toInt();
+        if (totalAmount < 10000) {
+          autoRechargeAmount = 10000;
+        }
+      });
+    } else {
+      // 오류 처리
+      print('mentoring_detail API 요청 실패');
+    }
   }
 
   Future<void> _sendMoney() async {

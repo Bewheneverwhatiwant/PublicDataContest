@@ -69,6 +69,7 @@ class PayMentoringPage extends StatelessWidget {
 
         final latestClassId = latestPaymentRequested['requestedClassId'];
 
+        print(latestClassId);
         // /sendmoney로 이동
         Navigator.pushNamed(
           context,
