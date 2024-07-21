@@ -275,7 +275,10 @@ class _MentoringDetailPageState extends State<MentoringDetailPage> {
                   Navigator.pushNamed(
                     context,
                     '/review_list_template',
-                    arguments: {'reviewlistkind': 2},
+                    arguments: {
+                      'reviewlistkind': 2,
+                      'classId': _classId, // 특정 멘토링의 모든 리뷰를 보기 위해 전달!
+                    },
                   );
                 },
                 style: ElevatedButton.styleFrom(
