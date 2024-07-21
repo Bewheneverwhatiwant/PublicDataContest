@@ -4,8 +4,12 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
-void showCustomBottomSheet(BuildContext context, int conversationId) {
+void showCustomBottomSheet(
+  BuildContext context,
+  int conversationId,
+) {
   int? selectedClassId;
+  int? paymentRequestedId;
 
   showModalBottomSheet(
     context: context,
@@ -28,10 +32,6 @@ void showCustomBottomSheet(BuildContext context, int conversationId) {
               title: const Text('일일 멘토링 시작하기'),
               onTap: () async {
                 Navigator.pop(context);
-                // if (selectedClassId == null) {
-                //   _showAlertDialog(context, '입금 요청을 먼저 해야합니다.');
-                //   return;
-                // }
                 _updatePaymentStatus(
                     context, conversationId, 'DAILY_MENTORING_STARTED');
                 await _updateMentoring(context, selectedClassId!);
@@ -42,10 +42,6 @@ void showCustomBottomSheet(BuildContext context, int conversationId) {
               title: const Text('일일 멘토링 종료하기'),
               onTap: () async {
                 Navigator.pop(context);
-                // if (selectedClassId == null) {
-                //   _showAlertDialog(context, '입금 요청을 먼저 해야합니다.');
-                //   return;
-                // }
                 _updatePaymentStatus(
                     context, conversationId, 'DAILY_MENTORING_ENDED');
               },
@@ -55,10 +51,6 @@ void showCustomBottomSheet(BuildContext context, int conversationId) {
               title: const Text('최종 멘토링 종료 요청하기'),
               onTap: () async {
                 Navigator.pop(context);
-                // if (selectedClassId == null) {
-                //   _showAlertDialog(context, '입금 요청을 먼저 해야합니다.');
-                //   return;
-                // }
                 _updatePaymentStatus(
                     context, conversationId, 'FINAL_MENTORING_ENDED');
                 await _finalFinishMentoring(context, selectedClassId!);
@@ -136,10 +128,10 @@ void showMentoringSelectionDialog(BuildContext context, int conversationId) {
                     if (accessToken == null) return;
 
                     final apiServer = dotenv.env['API_SERVER'];
-                    final url =
-                        Uri.parse('$apiServer/api/chat/update_payment_status');
-                    final response = await http.put(
-                      url,
+                    final updateUrl = Uri.parse(
+                        '$apiServer/api/chat/update_payment_status'); // /update_payment_status 먼저 호출
+                    final updateResponse = await http.put(
+                      updateUrl,
                       headers: {
                         'Authorization': 'Bearer $accessToken',
                         'Content-Type': 'application/json',
@@ -150,10 +142,76 @@ void showMentoringSelectionDialog(BuildContext context, int conversationId) {
                       }),
                     );
 
-                    if (response.statusCode == 200) {
-                      Navigator.pop(context);
+                    if (updateResponse.statusCode == 200) {
+                      print(
+                          'update_payment_status 성공: conversationId: $conversationId');
+                      final detailUrl = Uri.parse(
+                          '$apiServer/api/chat/chatting_detail?conversationId=$conversationId');
+                      final detailResponse = await http.get(
+                        detailUrl,
+                        headers: {
+                          'Authorization': 'Bearer $accessToken',
+                        },
+                      );
+
+                      if (detailResponse.statusCode == 200) {
+                        final data = json.decode(detailResponse.body);
+                        final paymentStatuses =
+                            data['paymentStatus'] as List<dynamic>;
+                        final paymentRequestedStatus =
+                            paymentStatuses.firstWhere(
+                          (status) =>
+                              status['paymentStatus'] == 'PAYMENT_REQUESTED',
+                          orElse: () => null,
+                        );
+
+                        if (paymentRequestedStatus != null) {
+                          final paymentRequestedId =
+                              paymentRequestedStatus['id'];
+                          print(
+                              'chatting_detail 성공: paymentRequestedId: $paymentRequestedId');
+
+                          final updateReceivedClassIdUrl = Uri.parse(
+                              '$apiServer/api/chat/update_received_class_id?paymentStatus_id=$paymentRequestedId&class_id=$classId');
+                          final updateReceivedClassIdResponse = await http.put(
+                            updateReceivedClassIdUrl,
+                            headers: {
+                              'Authorization': 'Bearer $accessToken',
+                              'Content-Type': 'application/json',
+                            },
+                          );
+
+                          if (updateReceivedClassIdResponse.statusCode == 200) {
+                            print(
+                                'update_received_class_id 성공: paymentStatus_id: $paymentRequestedId, class_id: $classId');
+                            Navigator.pop(context); // 모달 닫음
+                            // Navigator.pushNamed(
+                            //   context,
+                            //   '/sendmoney',
+                            //   arguments: {
+                            //     'conversationId': conversationId,
+                            //     'classId': classId,
+                            //     'titlename': '',
+                            //     'paymentRequestedId': paymentRequestedId,
+                            //   },
+                            // );
+                          } else {
+                            print(
+                                'update_received_class_id 실패: paymentStatus_id: $paymentRequestedId, class_id: $classId');
+                            print(
+                                '응답 본문: ${updateReceivedClassIdResponse.body}');
+                          }
+                        } else {
+                          print(
+                              'chatting_detail 실패: PAYMENT_REQUESTED 상태를 찾을 수 없음');
+                        }
+                      } else {
+                        print(
+                            'chatting_detail 실패: conversationId: $conversationId');
+                      }
                     } else {
-                      _showAlertDialog(context, '오류가 발생했습니다.');
+                      print(
+                          'update_payment_status 실패: conversationId: $conversationId');
                     }
                   },
                 ),

@@ -38,6 +38,7 @@ class _ClassChatPageState extends State<ClassChatPage> {
   final ScrollController _scrollController = ScrollController();
   bool _initialScrollCompleted = false;
   int? finalMentoringEndedId;
+  int? paymentRequestedId;
 
   @override
   void initState() {
@@ -127,9 +128,28 @@ class _ClassChatPageState extends State<ClassChatPage> {
         combined.sort((a, b) => DateTime.parse(a['timestamp'])
             .compareTo(DateTime.parse(b['timestamp'])));
 
+// 리뷰 작성 시 paymentStatusHistoryId를 넘겨주기 위해, id를 추출 및 FINAL 컴포넌트로 전달
         for (var status in paymentStatuses) {
           if (status['paymentStatus'] == 'FINAL_MENTORING_ENDED') {
             finalMentoringEndedId = status['id'];
+            break;
+          }
+        }
+
+        for (var status in paymentStatuses) {
+          if (status['paymentStatus'] == 'PAYMENT_REQUESTED') {
+            // paymentStatus가 결제요청인 응답값에 대해서
+            paymentRequestedId = status['id']; // paymentRequestedId를 id값으로 설정한다
+            break;
+          }
+        }
+
+// 결제요청 시 classId를 실제값으로 전달한다.
+        for (var status in paymentStatuses) {
+          if (status['paymentStatus'] == 'PAYMENT_REQUESTED') {
+            // paymentStatus가 결제요청인 응답값에 대해서
+            _classId = status[
+                'requestedClassId']; // /update_received_class_id API로 업데이트된 실제 classId를 전달한다
             break;
           }
         }
@@ -215,14 +235,16 @@ class _ClassChatPageState extends State<ClassChatPage> {
   }
 
   Widget pay(bool isMe, String paymentStatus, String timestamp,
-      int conversationId, int? classId) {
+      int conversationId, int? classId, int? paymentRequestedId) {
     Widget paymentWidget;
     if (paymentStatus == 'PAYMENT_REQUESTED') {
       paymentWidget = PayMentoringPage(
         timestamp: timestamp,
         conversationId: conversationId,
-        classId: _classId ?? 7,
+        classId: _classId ??
+            1, // 결제요청 시 여기서 classId 값이 /sendmoney로 넘어가게 된다. 즉 여기가 실제 classId값이 되어야 함
         titlename: widget.titlename,
+        paymentRequestedId: paymentRequestedId ?? 0, // null 처리함
       );
     } else if (paymentStatus == 'PAYMENT_COMPLETED') {
       paymentWidget = AfterPayMentoringPage(timestamp: timestamp);
@@ -315,7 +337,8 @@ class _ClassChatPageState extends State<ClassChatPage> {
                                     message['paymentStatus'],
                                     message['timestamp'],
                                     _conversationId!,
-                                    _classId);
+                                    _classId,
+                                    paymentRequestedId);
                               } else {
                                 return SizedBox.shrink();
                               }
@@ -331,7 +354,10 @@ class _ClassChatPageState extends State<ClassChatPage> {
                     icon: const Icon(Icons.add, color: Color(0xFF6F79F7)),
                     onPressed: () {
                       if (_conversationId != null) {
-                        showCustomBottomSheet(context, _conversationId!);
+                        showCustomBottomSheet(
+                          context,
+                          _conversationId!,
+                        ); // bottom sheet로 id 전달
                       }
                     },
                   ),

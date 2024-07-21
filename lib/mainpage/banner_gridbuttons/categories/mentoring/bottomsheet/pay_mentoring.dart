@@ -6,6 +6,7 @@ class PayMentoringPage extends StatelessWidget {
   final int conversationId;
   final int classId;
   final String titlename;
+  final int paymentRequestedId;
 
   const PayMentoringPage({
     Key? key,
@@ -13,7 +14,10 @@ class PayMentoringPage extends StatelessWidget {
     required this.conversationId,
     required this.classId,
     required this.titlename,
+    required this.paymentRequestedId,
   }) : super(key: key);
+
+// 여기서는 /update_received_class_id 호출이 아니라, 넘겨받은 classId로 /mentoring_detail API 호출하는 것만 일어나야 한다.
 
   Future<void> _handleButtonPress(BuildContext context) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
