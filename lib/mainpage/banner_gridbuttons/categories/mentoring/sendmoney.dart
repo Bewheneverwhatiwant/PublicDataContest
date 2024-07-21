@@ -32,9 +32,9 @@ class _SendMoneyPageState extends State<SendMoneyPage> {
 
     if (arguments != null) {
       conversationId = arguments['conversationId'];
-      // classId = arguments['classId'];
+      classId = arguments['classId'];
       // 임시방편 처리. 나중에 /chatting detail에 결제요청 status 바로 반영되도록 수정되면 다시 확인할 것 !
-      classId = 5;
+      //classId = 5;
       titlename = arguments['titlename'];
     } else {
       // 기본값 설정

@@ -52,7 +52,7 @@ class _PostReviewPageState extends State<PostReviewPage> {
         'rating': _rating,
         'comment': _commentController.text,
         'classId': _classId,
-        'paymentStatusHistoryID': _id,
+        'paymentStatusHistoryId': _id,
       }),
     );
 
