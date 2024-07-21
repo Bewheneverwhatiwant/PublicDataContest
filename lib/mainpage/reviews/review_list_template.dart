@@ -70,7 +70,7 @@ class _ReviewListTemplatePageState extends State<ReviewListTemplatePage> {
     try {
       final response = await http.get(
         Uri.parse(
-            '${dotenv.env['API_SERVER']}/api/review/review/class?classId=$classId'),
+            '${dotenv.env['API_SERVER']}/api/review/class?classId=$classId'),
         headers: {
           'Authorization': 'Bearer $accessToken',
         },

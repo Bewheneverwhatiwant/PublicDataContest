@@ -1,24 +1,71 @@
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-// 메인페이지 하단 모든 리뷰 출력 부분
-
-class HomeReview extends StatelessWidget {
+class HomeReview extends StatefulWidget {
   const HomeReview({super.key});
 
   @override
+  _HomeReviewState createState() => _HomeReviewState();
+}
+
+class _HomeReviewState extends State<HomeReview> {
+  List<Map<String, dynamic>> _reviewData = [];
+  bool _isLoading = true;
+  bool _hasError = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchReviews();
+  }
+
+  Future<void> _fetchReviews() async {
+    final prefs = await SharedPreferences.getInstance();
+    final accessToken = prefs.getString('accessToken') ?? '';
+
+    try {
+      final response = await http.get(
+        Uri.parse('${dotenv.env['API_SERVER']}/api/review'),
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final responseData = json.decode(response.body) as List;
+        setState(() {
+          _reviewData = responseData
+              .take(10)
+              .map((item) => item as Map<String, dynamic>)
+              .toList();
+          _isLoading = false;
+        });
+      } else {
+        setState(() {
+          _hasError = true;
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      setState(() {
+        _hasError = true;
+        _isLoading = false;
+      });
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
-    const reviewData = [
-      {'멘토이름': '어쩌구', '수업명': '어쩌구', '별수': 5, '설명': 'abcdefg'},
-      {'멘토이름': '어쩌구', '수업명': '어쩌구', '별수': 4, '설명': 'abcdefg'},
-      {'멘토이름': '어쩌구', '수업명': '어쩌구', '별수': 3, '설명': 'abcdefg'},
-      {'멘토이름': '어쩌구', '수업명': '어쩌구', '별수': 5, '설명': 'abcdefg'},
-      {'멘토이름': '어쩌구', '수업명': '어쩌구', '별수': 4, '설명': 'abcdefg'},
-      {'멘토이름': '어쩌구', '수업명': '어쩌구', '별수': 5, '설명': 'abcdefg'},
-      {'멘토이름': '어쩌구', '수업명': '어쩌구', '별수': 3, '설명': 'abcdefg'},
-      {'멘토이름': '어쩌구', '수업명': '어쩌구', '별수': 4, '설명': 'abcdefg'},
-      {'멘토이름': '어쩌구', '수업명': '어쩌구', '별수': 5, '설명': 'abcdefg'},
-      {'멘토이름': '어쩌구', '수업명': '어쩌구', '별수': 4, '설명': 'abcdefg'},
-    ];
+    if (_isLoading) {
+      return Center(child: CircularProgressIndicator());
+    }
+
+    if (_hasError) {
+      return Center(child: Text('리뷰를 불러오는 중 오류가 발생했습니다.'));
+    }
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -58,10 +105,10 @@ class HomeReview extends StatelessWidget {
           height: 180,
           child: ListView.builder(
             scrollDirection: Axis.horizontal,
-            itemCount: reviewData.length,
+            itemCount: _reviewData.length,
             itemBuilder: (context, index) {
-              final review = reviewData[index];
-              final int stars = review['별수'] as int;
+              final review = _reviewData[index];
+              final int stars = review['rating'] ?? 0;
               return GestureDetector(
                 onTap: () {
                   Navigator.pushNamed(context, '/reviewdetail');
@@ -83,41 +130,43 @@ class HomeReview extends StatelessWidget {
                         ),
                       ],
                     ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          '멘토이름: ${review['멘토이름']}',
-                          style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
+                    child: SingleChildScrollView(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            '멘토이름: ${review['menteeName'] ?? '없음'}',
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          '수업명: ${review['수업명']}',
-                          style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
+                          const SizedBox(height: 4),
+                          Text(
+                            '수업명: ${review['className'] ?? '없음'}',
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
-                        ),
-                        const SizedBox(height: 8),
-                        Row(
-                          children: List.generate(stars, (index) {
-                            return const Icon(
-                              Icons.star,
-                              color: Colors.yellow,
-                            );
-                          }),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          review['설명'] as String,
-                          style: const TextStyle(
-                            fontSize: 14,
+                          const SizedBox(height: 8),
+                          Row(
+                            children: List.generate(stars, (index) {
+                              return const Icon(
+                                Icons.star,
+                                color: Colors.yellow,
+                              );
+                            }),
                           ),
-                        ),
-                      ],
+                          const SizedBox(height: 8),
+                          Text(
+                            review['comment'] ?? '설명 없음',
+                            style: const TextStyle(
+                              fontSize: 14,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),
