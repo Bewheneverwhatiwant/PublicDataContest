@@ -1,6 +1,14 @@
 import 'package:flutter/material.dart';
 
-class GptPage extends StatelessWidget {
+class GptPage extends StatefulWidget {
+  @override
+  _GptPageState createState() => _GptPageState();
+}
+
+class _GptPageState extends State<GptPage> {
+  double opacity1 = 1.0;
+  double opacity2 = 1.0;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -18,7 +26,6 @@ class GptPage extends StatelessWidget {
         ),
       ),
       body: SingleChildScrollView(
-        //padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
             const SizedBox(height: 30),
@@ -34,44 +41,63 @@ class GptPage extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Expanded(
-                    child: GestureDetector(
-                      onTap: () {
-                        Navigator.pushNamed(context, '/makepaper');
+                    child: MouseRegion(
+                      cursor: SystemMouseCursors.click,
+                      onEnter: (_) {
+                        setState(() {
+                          opacity1 = 0.8;
+                        });
                       },
-                      child: Container(
-                        height: 300,
-                        decoration: BoxDecoration(
-                          image: const DecorationImage(
-                            image: AssetImage('assets/images/aipage_back1.png'),
-                            fit: BoxFit.cover,
-                          ),
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: const Align(
-                          alignment: Alignment.bottomLeft,
-                          child: Padding(
-                            padding: EdgeInsets.all(8.0),
-                            child: Column(
-                                mainAxisAlignment: MainAxisAlignment.end,
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    '생성형AI와 함께',
-                                    style: TextStyle(
-                                      color: Colors.black,
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 12,
+                      onExit: (_) {
+                        setState(() {
+                          opacity1 = 1.0;
+                        });
+                      },
+                      child: AnimatedOpacity(
+                        opacity: opacity1,
+                        duration: const Duration(milliseconds: 300),
+                        child: GestureDetector(
+                          onTap: () {
+                            Navigator.pushNamed(context, '/makepaper');
+                          },
+                          child: Container(
+                            height: 300,
+                            decoration: BoxDecoration(
+                              image: const DecorationImage(
+                                image: AssetImage(
+                                    'assets/images/aipage_back1.png'),
+                                fit: BoxFit.cover,
+                              ),
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: const Align(
+                              alignment: Alignment.bottomLeft,
+                              child: Padding(
+                                padding: EdgeInsets.all(8.0),
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.end,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      '생성형AI와 함께',
+                                      style: TextStyle(
+                                        color: Colors.black,
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 12,
+                                      ),
                                     ),
-                                  ),
-                                  Text(
-                                    '자기소개 작성하기',
-                                    style: TextStyle(
-                                      color: Colors.black,
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 18,
+                                    Text(
+                                      '자기소개 작성하기',
+                                      style: TextStyle(
+                                        color: Colors.black,
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 18,
+                                      ),
                                     ),
-                                  ),
-                                ]),
+                                  ],
+                                ),
+                              ),
+                            ),
                           ),
                         ),
                       ),
@@ -79,44 +105,63 @@ class GptPage extends StatelessWidget {
                   ),
                   const SizedBox(width: 16),
                   Expanded(
-                    child: GestureDetector(
-                      onTap: () {
-                        Navigator.pushNamed(context, '/meeting');
+                    child: MouseRegion(
+                      cursor: SystemMouseCursors.click,
+                      onEnter: (_) {
+                        setState(() {
+                          opacity2 = 0.8;
+                        });
                       },
-                      child: Container(
-                        height: 300,
-                        decoration: BoxDecoration(
-                          image: const DecorationImage(
-                            image: AssetImage('assets/images/aipage_back2.png'),
-                            fit: BoxFit.cover,
-                          ),
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: const Align(
-                          alignment: Alignment.bottomRight,
-                          child: Padding(
-                            padding: EdgeInsets.all(8.0),
-                            child: Column(
-                                mainAxisAlignment: MainAxisAlignment.end,
-                                crossAxisAlignment: CrossAxisAlignment.end,
-                                children: [
-                                  Text(
-                                    '생성형AI와 함께',
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 12,
+                      onExit: (_) {
+                        setState(() {
+                          opacity2 = 1.0;
+                        });
+                      },
+                      child: AnimatedOpacity(
+                        opacity: opacity2,
+                        duration: const Duration(milliseconds: 300),
+                        child: GestureDetector(
+                          onTap: () {
+                            Navigator.pushNamed(context, '/meeting');
+                          },
+                          child: Container(
+                            height: 300,
+                            decoration: BoxDecoration(
+                              image: const DecorationImage(
+                                image: AssetImage(
+                                    'assets/images/aipage_back2.png'),
+                                fit: BoxFit.cover,
+                              ),
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: const Align(
+                              alignment: Alignment.bottomRight,
+                              child: Padding(
+                                padding: EdgeInsets.all(8.0),
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.end,
+                                  crossAxisAlignment: CrossAxisAlignment.end,
+                                  children: [
+                                    Text(
+                                      '생성형AI와 함께',
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 12,
+                                      ),
                                     ),
-                                  ),
-                                  Text(
-                                    '면접 대비하기',
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 18,
+                                    Text(
+                                      '면접 대비하기',
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 18,
+                                      ),
                                     ),
-                                  ),
-                                ]),
+                                  ],
+                                ),
+                              ),
+                            ),
                           ),
                         ),
                       ),
@@ -129,7 +174,6 @@ class GptPage extends StatelessWidget {
             Container(
               decoration: const BoxDecoration(
                 color: Colors.white,
-                //borderRadius: BorderRadius.circular(10),
               ),
               padding: const EdgeInsets.only(
                   top: 10, left: 10, right: 10, bottom: 20),
@@ -165,20 +209,38 @@ class GptPage extends StatelessWidget {
                       ],
                     ),
                   ),
-                  GestureDetector(
-                    onTap: () {
-                      Navigator.pushNamed(context, '/warmai');
+                  MouseRegion(
+                    cursor: SystemMouseCursors.click,
+                    onEnter: (_) {
+                      setState(() {
+                        opacity2 = 0.8;
+                      });
                     },
-                    child: Container(
-                      height: 180,
-                      width: double.infinity,
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        image: const DecorationImage(
-                          image: AssetImage('assets/images/aipage_back3.png'),
-                          fit: BoxFit.cover,
+                    onExit: (_) {
+                      setState(() {
+                        opacity2 = 1.0;
+                      });
+                    },
+                    child: GestureDetector(
+                      onTap: () {
+                        Navigator.pushNamed(context, '/warmai');
+                      },
+                      child: AnimatedOpacity(
+                        opacity: opacity2,
+                        duration: const Duration(milliseconds: 300),
+                        child: Container(
+                          height: 180,
+                          width: double.infinity,
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            image: const DecorationImage(
+                              image:
+                                  AssetImage('assets/images/aipage_back3.png'),
+                              fit: BoxFit.cover,
+                            ),
+                            borderRadius: BorderRadius.circular(10),
+                          ),
                         ),
-                        borderRadius: BorderRadius.circular(10),
                       ),
                     ),
                   ),
