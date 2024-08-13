@@ -32,6 +32,7 @@ import 'mainpage/search/gptpage/makepaper.dart';
 import 'mainpage/search/gptpage/gptanswer.dart';
 import 'mainpage/search/gptpage/meeting.dart';
 import 'mainpage/search/gptpage/gptmeeting.dart';
+import 'mainpage/search/gptpage/feedback.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -122,6 +123,7 @@ class _MyAppState extends State<MyApp> {
         '/gptanswer': (context) => const GPTAnswerPage(),
         '/meeting': (context) => MeetingPage(),
         '/gptmeeting': (context) => GPTMeetingPage(),
+        '/feedback': (context) => const FeedbackPage(),
       },
       onGenerateRoute: (settings) {
         if (settings.name == '/') {
