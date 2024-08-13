@@ -44,6 +44,43 @@ class MainPage extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 10),
+            Padding(
+              padding: const EdgeInsets.only(left: 20.0, right: 20.0),
+              child: InkWell(
+                onTap: () {
+                  Navigator.pushNamed(context, '/searchclass');
+                },
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 100),
+                  padding: const EdgeInsets.symmetric(
+                      vertical: 15.0, horizontal: 10.0),
+                  decoration: BoxDecoration(
+                    // border: Border.all(
+                    //   width: 2.0,
+                    //   color: const Color(0xFF33CBAC),
+                    // ),
+                    gradient: const LinearGradient(
+                      colors: [Color(0xFF33CBAC), Color(0xFF1089E4)],
+                      begin: Alignment.centerLeft,
+                      end: Alignment.centerRight,
+                    ),
+                    borderRadius: BorderRadius.circular(8.0),
+                  ),
+                  child: const Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      Text(
+                        '생성형 AI가 서류와 면접을 도와드려요.',
+                        style: TextStyle(color: Colors.white, fontSize: 16),
+                      ),
+                      SizedBox(width: 10),
+                      Icon(Icons.important_devices, color: Colors.white),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 10),
             const Buttons(),
             const Padding(
               padding: EdgeInsets.only(
