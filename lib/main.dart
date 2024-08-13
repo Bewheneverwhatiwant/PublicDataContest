@@ -27,6 +27,7 @@ import 'mainpage/maincarousel/maincarousel_all/gisul_changup_center.dart';
 import 'mainpage/search/searchclass.dart';
 import 'mainpage/banner_gridbuttons/categories/mentoring/sendmoney.dart';
 import 'mainpage/banner_gridbuttons/categories/mentoring/postreview.dart';
+import 'mainpage/search/gptpage/gptpage.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -112,6 +113,7 @@ class _MyAppState extends State<MyApp> {
         '/sendmoney': (context) => const SendMoneyPage(),
         '/postreview': (context) => const PostReviewPage(),
         '/classreview': (context) => const ReviewListTemplatePage(),
+        '/gptpage': (context) => GptPage(),
       },
       onGenerateRoute: (settings) {
         if (settings.name == '/') {

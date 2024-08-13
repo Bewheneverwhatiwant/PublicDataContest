@@ -48,7 +48,7 @@ class MainPage extends StatelessWidget {
               padding: const EdgeInsets.only(left: 20.0, right: 20.0),
               child: InkWell(
                 onTap: () {
-                  Navigator.pushNamed(context, '/searchclass');
+                  Navigator.pushNamed(context, '/gptpage');
                 },
                 child: AnimatedContainer(
                   duration: const Duration(milliseconds: 100),
