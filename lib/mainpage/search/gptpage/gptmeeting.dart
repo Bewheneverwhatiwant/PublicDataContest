@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'package:flutter_dotenv/flutter_dotenv.dart'; // .env 파일에서 API 키를 가져오기 위해 추가
 
 class GPTMeetingPage extends StatefulWidget {
   @override
@@ -10,14 +14,113 @@ class _GPTMeetingPageState extends State<GPTMeetingPage> {
   final int totalQuestions = 10;
   final TextEditingController _answerController = TextEditingController();
 
-  String Ask = '기본 질문 텍스트입니다.'; // 기본값으로 초기화
+  late List<String> questions;
+  late String ask;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     final args = ModalRoute.of(context)?.settings.arguments as String?;
     if (args != null) {
-      Ask = args;
+      ask = args;
+      questions = _splitQuestions(ask);
+    } else {
+      questions =
+          List.generate(totalQuestions, (index) => '기본 질문 텍스트 ${index + 1}');
+    }
+  }
+
+  List<String> _splitQuestions(String ask) {
+    // 1번, 2번... 형식으로 되어 있는 질문을 나눕니다.
+    return ask
+        .split(RegExp(r'\d+\.\s'))
+        .where((q) => q.trim().isNotEmpty)
+        .toList();
+  }
+
+  Future<void> _saveAnswer(String question, String answer) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(question, answer);
+  }
+
+  Future<void> _getFeedback() async {
+    // 질문-답변 쌍을 GPT에게 전송하고 피드백을 요청하는 로직
+    final prefs = await SharedPreferences.getInstance();
+    Map<String, String> questionAnswerPairs = {};
+    for (String question in questions) {
+      questionAnswerPairs[question] = prefs.getString(question) ?? '';
+    }
+
+    final String message = questionAnswerPairs.entries
+        .map((entry) => '질문: ${entry.key}\n답변: ${entry.value}')
+        .join('\n\n');
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => const AlertDialog(
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            CircularProgressIndicator(),
+            SizedBox(height: 20),
+            Text('면접 피드백을 생성 중입니다...'),
+          ],
+        ),
+      ),
+    );
+
+    try {
+      String apiKey = dotenv.env['GPT_KEY'] ?? '';
+      if (apiKey.isEmpty) {
+        throw Exception('GPT_KEY is missing in .env file');
+      }
+
+      var headers = {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $apiKey',
+      };
+
+      var requestBody = jsonEncode({
+        'model': 'gpt-4-turbo',
+        'messages': [
+          {
+            'role': 'user',
+            'content': '각 질문에 대해 사용자가 답변한 내용을 검토하고, 피드백하라.\n\n$message'
+          }
+        ]
+      });
+
+      var response = await http.post(
+        Uri.parse('https://api.openai.com/v1/chat/completions'),
+        headers: headers,
+        body: requestBody,
+      );
+
+      if (response.statusCode == 200) {
+        var decodedResponse = json.decode(utf8.decode(response.bodyBytes));
+        var feedback = decodedResponse['choices'][0]['message']['content'];
+
+        Navigator.pop(context); // 로딩 모달 닫기
+
+        print(feedback); // 콘솔에 피드백 출력
+
+        Navigator.pushNamed(
+          context,
+          '/feedback',
+          arguments: feedback,
+        );
+      } else {
+        Navigator.pop(context);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Error: Failed to get response')),
+        );
+      }
+    } catch (e) {
+      Navigator.pop(context);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error: $e')),
+      );
     }
   }
 
@@ -66,7 +169,7 @@ class _GPTMeetingPageState extends State<GPTMeetingPage> {
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Text(
-                  Ask,
+                  questions[currentQuestionIndex],
                   style: const TextStyle(fontSize: 16),
                 ),
               ),
@@ -74,7 +177,7 @@ class _GPTMeetingPageState extends State<GPTMeetingPage> {
               Image.asset(
                 'assets/images/meetingImg.png',
                 fit: BoxFit.cover,
-                height: 200, // 이미지에 고정된 높이 추가
+                height: 200,
               ),
               const SizedBox(height: 20),
               const Text(
@@ -91,15 +194,20 @@ class _GPTMeetingPageState extends State<GPTMeetingPage> {
               ),
               const SizedBox(height: 20),
               ElevatedButton(
-                onPressed: () {
-                  setState(() {
-                    if (currentQuestionIndex < totalQuestions - 1) {
+                onPressed: () async {
+                  String currentQuestion = questions[currentQuestionIndex];
+                  String currentAnswer = _answerController.text;
+
+                  await _saveAnswer(currentQuestion, currentAnswer);
+
+                  if (currentQuestionIndex < totalQuestions - 1) {
+                    setState(() {
                       currentQuestionIndex++;
                       _answerController.clear();
-                    } else {
-                      // 모든 질문이 끝났을 때 처리할 로직
-                    }
-                  });
+                    });
+                  } else {
+                    await _getFeedback();
+                  }
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.blue,
@@ -108,29 +216,11 @@ class _GPTMeetingPageState extends State<GPTMeetingPage> {
                     borderRadius: BorderRadius.circular(10),
                   ),
                 ),
-                child: const Text(
-                  '다음 질문으로',
-                  style: TextStyle(color: Colors.white, fontSize: 16),
-                ),
-              ),
-              const SizedBox(height: 10),
-              ElevatedButton(
-                onPressed: () {
-                  Navigator.pushNamed(
-                    context,
-                    '/gptpage',
-                  );
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.blue,
-                  padding: const EdgeInsets.symmetric(vertical: 16.0),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                ),
-                child: const Text(
-                  '면접 종료하기',
-                  style: TextStyle(color: Colors.white, fontSize: 16),
+                child: Text(
+                  currentQuestionIndex < totalQuestions - 1
+                      ? '다음 질문으로'
+                      : '피드백 받기',
+                  style: const TextStyle(color: Colors.white, fontSize: 16),
                 ),
               ),
             ],
