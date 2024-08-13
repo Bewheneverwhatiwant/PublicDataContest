@@ -16,7 +16,7 @@ class _WarmaiPageState extends State<WarmaiPage> {
   Future<void> sendMessage(String message) async {
     setState(() {
       messages.add({"role": "user", "content": message});
-      messages.add({"role": "assistant", "content": "A!가 답변을 작성하고 있어요..."});
+      messages.add({"role": "assistant", "content": "AI가 답변을 작성하고 있어요..."});
     });
 
     try {

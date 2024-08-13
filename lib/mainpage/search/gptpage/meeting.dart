@@ -64,10 +64,16 @@ class _MeetingPageState extends State<MeetingPage> {
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (context) => const AlertDialog(
+      builder: (context) => AlertDialog(
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
+            Image.asset(
+              'assets/images/logo.png',
+              width: 100,
+              height: 100,
+            ),
+            SizedBox(height: 20),
             CircularProgressIndicator(),
             SizedBox(height: 20),
             Text('면접이 준비되고 있어요...'),

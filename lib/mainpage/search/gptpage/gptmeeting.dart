@@ -60,10 +60,16 @@ class _GPTMeetingPageState extends State<GPTMeetingPage> {
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (context) => const AlertDialog(
+      builder: (context) => AlertDialog(
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
+            Image.asset(
+              'assets/images/logo.png',
+              width: 100,
+              height: 100,
+            ),
+            SizedBox(height: 20),
             CircularProgressIndicator(),
             SizedBox(height: 20),
             Text('면접 피드백을 생성 중입니다...'),
@@ -141,6 +147,7 @@ class _GPTMeetingPageState extends State<GPTMeetingPage> {
           style: TextStyle(color: Colors.blue),
         ),
         backgroundColor: Colors.white,
+        scrolledUnderElevation: 0,
         automaticallyImplyLeading: false,
       ),
       body: SingleChildScrollView(
