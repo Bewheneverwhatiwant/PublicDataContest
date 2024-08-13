@@ -111,32 +111,41 @@ class _WarmaiPageState extends State<WarmaiPage> {
                             color: Color(0xFFECECEC),
                             borderRadius: BorderRadius.circular(8),
                           ),
-                          child: const Column(
+                          child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              SizedBox(height: 20),
-                              Text(
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.end,
+                                children: [
+                                  Image.asset(
+                                    'assets/images/logo.png',
+                                    width: 150,
+                                    height: 150,
+                                  ),
+                                ],
+                              ),
+                              const Text(
                                 '저는 이런 일을 할 수 있어요.',
                                 style: TextStyle(
                                     fontSize: 16, fontWeight: FontWeight.bold),
                               ),
-                              SizedBox(height: 10),
-                              Text(
+                              const SizedBox(height: 10),
+                              const Text(
                                 '• 오랜 구직 활동으로 지치고 우울하시다면, 알려주세요. 활기를 되찾으실 수 있도록 취미를 추천해드려요!',
                                 style: TextStyle(fontSize: 14),
                               ),
-                              SizedBox(height: 10),
-                              Text(
+                              const SizedBox(height: 10),
+                              const Text(
                                 '• 희망하시는 직군을 위해 어떤 자격증을 취득해야 하는지 모르시겠다면, 질문해주세요!',
                                 style: TextStyle(fontSize: 14),
                               ),
-                              SizedBox(height: 20),
-                              Text(
+                              const SizedBox(height: 20),
+                              const Text(
                                 '어떤 것을 도와드릴까요?',
                                 style: TextStyle(
                                     fontSize: 16, fontWeight: FontWeight.bold),
                               ),
-                              SizedBox(height: 20),
+                              const SizedBox(height: 10),
                             ],
                           ),
                         ),

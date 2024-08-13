@@ -223,6 +223,20 @@ class _GPTMeetingPageState extends State<GPTMeetingPage> {
                   style: const TextStyle(color: Colors.white, fontSize: 16),
                 ),
               ),
+              const SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.pushNamed(context, '/gptpage');
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.blue,
+                  padding: const EdgeInsets.symmetric(vertical: 16.0),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+                child: Text('면접 종료하기'),
+              ),
             ],
           ),
         ),
