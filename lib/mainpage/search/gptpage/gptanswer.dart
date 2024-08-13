@@ -132,8 +132,7 @@ class _GPTAnswerPageState extends State<GPTAnswerPage> {
     final pdf = pw.Document();
 
     // 한글 폰트 로드
-    final fontData =
-        await rootBundle.load('assets/fonts/NotoSansKR-Regular.ttf');
+    final fontData = await rootBundle.load('assets/NotoSansKR-Regular.ttf');
     final ttf = pw.Font.ttf(fontData);
 
     pdf.addPage(

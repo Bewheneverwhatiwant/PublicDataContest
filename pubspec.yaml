@@ -78,7 +78,7 @@ flutter:
     - assets/images/
     - .env
     - assets/kakao_map.html
-    - assets/fonts/NotoSansKR-Regular.ttf
+    - assets/NotoSansKR-Regular.ttf
 
   # To add assets to your application, add an assets section, like this:
   # assets:
