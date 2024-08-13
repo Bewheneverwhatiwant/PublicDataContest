@@ -19,14 +19,12 @@ class _GPTAnswerPageState extends State<GPTAnswerPage> {
   @override
   void initState() {
     super.initState();
-
-    // 페이지가 새로 로드될 때 answer를 ModalRoute로부터 가져옴
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final String? args =
           ModalRoute.of(context)?.settings.arguments as String?;
       if (args != null) {
         setState(() {
-          answer = args; // State에 answer를 저장
+          answer = args;
         });
       }
     });
@@ -37,11 +35,11 @@ class _GPTAnswerPageState extends State<GPTAnswerPage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text(
-          '항해의 생성형AI가 자기소개서를 도착했습니다!',
-          style: TextStyle(color: Colors.blue, fontSize: 15),
+          '항해의 생성형AI가 작성한 자기소개 문항이 도착했습니다!',
+          style: TextStyle(color: Colors.blue, fontSize: 14),
         ),
         backgroundColor: Colors.white,
-        automaticallyImplyLeading: false, // 뒤로가기 버튼 숨김
+        automaticallyImplyLeading: false,
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -58,7 +56,7 @@ class _GPTAnswerPageState extends State<GPTAnswerPage> {
                 height: 600,
                 child: SingleChildScrollView(
                   child: Text(
-                    answer ?? 'Loading...', // answer가 없으면 로딩 텍스트 표시
+                    answer ?? '답변을 가져오는 중...',
                     style: TextStyle(fontSize: 16),
                   ),
                 ),
@@ -89,6 +87,7 @@ class _GPTAnswerPageState extends State<GPTAnswerPage> {
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(
                           content: Text('PDF가 저장되었습니다!'),
+                          backgroundColor: Colors.green,
                         ),
                       );
                     },
@@ -105,7 +104,6 @@ class _GPTAnswerPageState extends State<GPTAnswerPage> {
                   ),
                   ElevatedButton(
                     onPressed: () {
-                      // '/gptpage'로 이동하기
                       Navigator.pushNamed(context, '/gptpage');
                     },
                     style: ElevatedButton.styleFrom(

@@ -64,7 +64,7 @@ class GptPage extends StatelessWidget {
                                     ),
                                   ),
                                   Text(
-                                    '이력서 만들기',
+                                    '자기소개 작성하기',
                                     style: TextStyle(
                                       color: Colors.black,
                                       fontWeight: FontWeight.bold,
