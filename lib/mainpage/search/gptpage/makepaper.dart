@@ -95,25 +95,36 @@ class _MakePaperPageState extends State<MakePaperPage> {
       );
 
       if (response.statusCode == 200) {
-        var responseBody =
-            utf8.decode(response.bodyBytes); // 인코딩 문제 해결을 위해 utf8로 디코딩
+        var responseBody = utf8.decode(response.bodyBytes);
         var decodedResponse = json.decode(responseBody);
-        var assistantMessage =
-            decodedResponse['choices'][0]['message']['content'];
 
-        Navigator.pop(context); // 로딩 모달 닫기
+        if (decodedResponse['choices'] != null &&
+            decodedResponse['choices'].isNotEmpty) {
+          var assistantMessage =
+              decodedResponse['choices'][0]['message']['content'];
 
-        // gptanswer.dart 화면으로 이동하면서 GPT의 답변을 arguments로 전달
-        Navigator.pushNamed(
-          context,
-          '/gptanswer',
-          arguments: assistantMessage,
-        );
+          if (assistantMessage != null) {
+            Navigator.pop(context); // 로딩 모달 닫기
+            print(assistantMessage);
+
+            Navigator.pushNamed(
+              context,
+              '/gptanswer',
+              arguments: assistantMessage,
+            );
+          } else {
+            // assistantMessage가 null일 때의 처리
+            print('Error: assistantMessage is null');
+            print(response.body);
+          }
+        } else {
+          // choices가 비어있거나 null일 때의 처리
+          print('Error: No choices returned from GPT');
+          print(response.body);
+        }
       } else {
-        Navigator.pop(context);
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Error: Failed to get response')),
-        );
+        print('gpt의 응답을 받는 중에 오류발생');
+        print(response.body);
       }
     } catch (e) {
       Navigator.pop(context);
@@ -255,23 +266,22 @@ class _MakePaperPageState extends State<MakePaperPage> {
                         padding: const EdgeInsets.all(16.0),
                         child: Column(
                           children: [
+                            const Row(
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              children: [
+                                Text(
+                                  '근무기간',
+                                  style: TextStyle(fontSize: 15),
+                                )
+                              ],
+                            ),
+                            SizedBox(height: 20),
                             Row(
                               children: [
                                 Expanded(
                                   child: TextFormField(
                                     controller:
                                         careerPeriodFromControllers[index],
-                                    decoration: const InputDecoration(
-                                      labelText: '근무기간',
-                                      border: OutlineInputBorder(),
-                                    ),
-                                  ),
-                                ),
-                                const SizedBox(width: 10),
-                                Expanded(
-                                  child: TextFormField(
-                                    controller:
-                                        careerPeriodToControllers[index],
                                     decoration: const InputDecoration(
                                       labelText: '부터',
                                       border: OutlineInputBorder(),
@@ -364,7 +374,8 @@ class _MakePaperPageState extends State<MakePaperPage> {
                             '퇴사사유: ${careerReasonControllers[index].text}.';
                       }).join("\n\n");
 
-                      String message = '내가 전달하는 정보를 바탕으로, 자기소개서를 생성하라.\n'
+                      String message =
+                          '내가 전달하는 정보를 바탕으로, 자기소개서를 생성하라.\n이때, 대괄호 등 특수문자가 포함되어서는 안된다.\n'
                           '전공: $major, 학점: $grade, 지원분야(직무): $job,\n'
                           '자격증: $certifications,\n'
                           '경력사항:\n$careers';

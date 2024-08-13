@@ -29,6 +29,7 @@ import 'mainpage/banner_gridbuttons/categories/mentoring/sendmoney.dart';
 import 'mainpage/banner_gridbuttons/categories/mentoring/postreview.dart';
 import 'mainpage/search/gptpage/gptpage.dart';
 import 'mainpage/search/gptpage/makepaper.dart';
+import 'mainpage/search/gptpage/gptanswer.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -116,6 +117,7 @@ class _MyAppState extends State<MyApp> {
         '/classreview': (context) => const ReviewListTemplatePage(),
         '/gptpage': (context) => GptPage(),
         '/makepaper': (context) => MakePaperPage(),
+        '/gptanswer': (context) => const GPTAnswerPage(),
       },
       onGenerateRoute: (settings) {
         if (settings.name == '/') {
