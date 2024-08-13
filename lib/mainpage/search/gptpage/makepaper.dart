@@ -105,7 +105,7 @@ class _MakePaperPageState extends State<MakePaperPage> {
 
           if (assistantMessage != null) {
             Navigator.pop(context); // 로딩 모달 닫기
-            print(assistantMessage);
+            //print(assistantMessage);
 
             Navigator.pushNamed(
               context,
