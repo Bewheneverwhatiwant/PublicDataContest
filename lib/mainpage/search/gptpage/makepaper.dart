@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 class MakePaperPage extends StatefulWidget {
   @override
@@ -7,6 +10,10 @@ class MakePaperPage extends StatefulWidget {
 
 class _MakePaperPageState extends State<MakePaperPage> {
   final _formKey = GlobalKey<FormState>();
+  final TextEditingController majorController = TextEditingController();
+  final TextEditingController gradeController = TextEditingController();
+  final TextEditingController jobController = TextEditingController();
+
   final List<TextEditingController> certificationControllers = [];
   final List<TextEditingController> careerPeriodFromControllers = [];
   final List<TextEditingController> careerPeriodToControllers = [];
@@ -38,7 +45,82 @@ class _MakePaperPageState extends State<MakePaperPage> {
     careerPositionControllers.forEach((controller) => controller.dispose());
     careerDutyControllers.forEach((controller) => controller.dispose());
     careerReasonControllers.forEach((controller) => controller.dispose());
+
+    majorController.dispose();
+    gradeController.dispose();
+    jobController.dispose();
     super.dispose();
+  }
+
+  Future<void> sendMessageToGPT(String message) async {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => const AlertDialog(
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            CircularProgressIndicator(),
+            SizedBox(height: 20),
+            Text('자기소개서가 만들어지고 있어요...'),
+          ],
+        ),
+      ),
+    );
+
+    try {
+      // 환경 변수 불러오기
+      String apiKey = dotenv.env['GPT_KEY'] ?? '';
+
+      if (apiKey.isEmpty) {
+        throw Exception('Missing GPT_KEY');
+      }
+
+      var headers = {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $apiKey',
+      };
+
+      var requestBody = jsonEncode({
+        'model': 'gpt-4-turbo',
+        'messages': [
+          {'role': 'user', 'content': message}
+        ]
+      });
+
+      var response = await http.post(
+        Uri.parse('https://api.openai.com/v1/chat/completions'),
+        headers: headers,
+        body: requestBody,
+      );
+
+      if (response.statusCode == 200) {
+        var responseBody =
+            utf8.decode(response.bodyBytes); // 인코딩 문제 해결을 위해 utf8로 디코딩
+        var decodedResponse = json.decode(responseBody);
+        var assistantMessage =
+            decodedResponse['choices'][0]['message']['content'];
+
+        Navigator.pop(context); // 로딩 모달 닫기
+
+        // gptanswer.dart 화면으로 이동하면서 GPT의 답변을 arguments로 전달
+        Navigator.pushNamed(
+          context,
+          '/gptanswer',
+          arguments: assistantMessage,
+        );
+      } else {
+        Navigator.pop(context);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Error: Failed to get response')),
+        );
+      }
+    } catch (e) {
+      Navigator.pop(context);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error: $e')),
+      );
+    }
   }
 
   @override
@@ -68,8 +150,9 @@ class _MakePaperPageState extends State<MakePaperPage> {
                       fontSize: 15,
                       fontWeight: FontWeight.bold),
                 ),
-                const SizedBox(height: 50),
+                const SizedBox(height: 20),
                 TextFormField(
+                  controller: majorController,
                   decoration: const InputDecoration(
                     labelText: '전공',
                     border: OutlineInputBorder(),
@@ -87,6 +170,7 @@ class _MakePaperPageState extends State<MakePaperPage> {
                   children: [
                     Expanded(
                       child: TextFormField(
+                        controller: gradeController,
                         decoration: const InputDecoration(
                           labelText: '학점',
                           border: OutlineInputBorder(),
@@ -102,13 +186,14 @@ class _MakePaperPageState extends State<MakePaperPage> {
                     ),
                     const SizedBox(width: 10),
                     const Text(
-                      '/ 4.5(4.3)',
+                      '/ 4.5',
                       style: TextStyle(fontSize: 18),
                     ),
                   ],
                 ),
                 const SizedBox(height: 20),
                 TextFormField(
+                  controller: jobController,
                   decoration: const InputDecoration(
                     labelText: '지원분야(직무)',
                     border: OutlineInputBorder(),
@@ -170,24 +255,14 @@ class _MakePaperPageState extends State<MakePaperPage> {
                         padding: const EdgeInsets.all(16.0),
                         child: Column(
                           children: [
-                            const Row(
-                              mainAxisAlignment: MainAxisAlignment.start,
-                              children: [
-                                Text(
-                                  '근무기간',
-                                  style: TextStyle(fontSize: 16),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 10),
                             Row(
                               children: [
                                 Expanded(
                                   child: TextFormField(
                                     controller:
-                                        careerPeriodToControllers[index],
+                                        careerPeriodFromControllers[index],
                                     decoration: const InputDecoration(
-                                      labelText: '00년00월00일부터',
+                                      labelText: '근무기간',
                                       border: OutlineInputBorder(),
                                     ),
                                   ),
@@ -198,7 +273,18 @@ class _MakePaperPageState extends State<MakePaperPage> {
                                     controller:
                                         careerPeriodToControllers[index],
                                     decoration: const InputDecoration(
-                                      labelText: '00년00월00일까지',
+                                      labelText: '부터',
+                                      border: OutlineInputBorder(),
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(width: 10),
+                                Expanded(
+                                  child: TextFormField(
+                                    controller:
+                                        careerPeriodToControllers[index],
+                                    decoration: const InputDecoration(
+                                      labelText: '까지',
                                       border: OutlineInputBorder(),
                                     ),
                                   ),
@@ -257,35 +343,49 @@ class _MakePaperPageState extends State<MakePaperPage> {
                   },
                 ),
                 const SizedBox(height: 20),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Container(
-                      width: 350,
-                      child: ElevatedButton(
-                        onPressed: () {
-                          if (_formKey.currentState?.validate() ?? false) {
-                            // 필수 입력 항목이 모두 채워진 경우
-                            // 자기소개서 생성 로직 실행
-                          } else {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text('전공, 학점, 직무는 반드시 입력하셔야 합니다.'),
-                              ),
-                            );
-                          }
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.blue,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
-                          ),
+                ElevatedButton(
+                  onPressed: () {
+                    if (_formKey.currentState?.validate() ?? false) {
+                      // 각 TextEditingController를 사용하여 입력된 값을 가져온다
+                      String major = majorController.text; // 전공
+                      String grade = gradeController.text; // 학점
+                      String job = jobController.text; // 직무
+
+                      String certifications = certificationControllers
+                          .map((c) => c.text)
+                          .join(", ");
+                      String careers = List.generate(
+                          careerCompanyControllers.length, (index) {
+                        return '${index + 1}.\n'
+                            '근무기간: ${careerPeriodFromControllers[index].text} 부터 ${careerPeriodToControllers[index].text}까지,\n'
+                            '회사명: ${careerCompanyControllers[index].text},\n'
+                            '직위: ${careerPositionControllers[index].text},\n'
+                            '담당업무: ${careerDutyControllers[index].text},\n'
+                            '퇴사사유: ${careerReasonControllers[index].text}.';
+                      }).join("\n\n");
+
+                      String message = '내가 전달하는 정보를 바탕으로, 자기소개서를 생성하라.\n'
+                          '전공: $major, 학점: $grade, 지원분야(직무): $job,\n'
+                          '자격증: $certifications,\n'
+                          '경력사항:\n$careers';
+
+                      sendMessageToGPT(message); // GPT에게 메시지 전송
+                    } else {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('전공, 학점, 직무는 반드시 입력하셔야 합니다.'),
                         ),
-                        child: const Text('자기소개서 생성하기',
-                            style: TextStyle(color: Colors.white)),
-                      ),
+                      );
+                    }
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.blue,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
                     ),
-                  ],
+                  ),
+                  child: const Text('자기소개서 생성하기',
+                      style: TextStyle(color: Colors.white)),
                 ),
               ],
             ),
