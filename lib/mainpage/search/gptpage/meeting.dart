@@ -112,8 +112,9 @@ class _MeetingPageState extends State<MeetingPage> {
 
           if (MeetingAsk != null) {
             Navigator.pop(context); // 로딩 모달 닫기
-            //print(assistantMessage);
+            //print(MeetingAsk);
 
+// 만들어진 10개의 질문 리스트를 argument로 전달
             Navigator.pushNamed(
               context,
               '/gptmeeting',
@@ -121,7 +122,7 @@ class _MeetingPageState extends State<MeetingPage> {
             );
           } else {
             // assistantMessage가 null일 때의 처리
-            print('Error: assistantMessage is null');
+            print('Error: MeetingAsk is null');
             print(response.body);
           }
         } else {
@@ -185,7 +186,7 @@ class _MeetingPageState extends State<MeetingPage> {
                 ),
                 const SizedBox(height: 20),
                 TextFormField(
-                  controller: companyController,
+                  controller: niceController,
                   decoration: const InputDecoration(
                     labelText: '인재상',
                     border: OutlineInputBorder(),
