@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_tts/flutter_tts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'package:flutter_dotenv/flutter_dotenv.dart'; // .env 파일에서 API 키를 가져오기 위해 추가
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class GPTMeetingPage extends StatefulWidget {
   @override
@@ -13,6 +14,7 @@ class _GPTMeetingPageState extends State<GPTMeetingPage> {
   int currentQuestionIndex = 0;
   final int totalQuestions = 10;
   final TextEditingController _answerController = TextEditingController();
+  final FlutterTts flutterTts = FlutterTts(); // TTS 객체 생성
 
   late List<String> questions;
   late String ask;
@@ -31,7 +33,7 @@ class _GPTMeetingPageState extends State<GPTMeetingPage> {
   }
 
   List<String> _splitQuestions(String ask) {
-    // 1번, 2번... 형식으로 되어 있는 질문을 나눕니다.
+    // 1번, 2번... 형식으로 되어 있는 질문을 나눔
     return ask
         .split(RegExp(r'\d+\.\s'))
         .where((q) => q.trim().isNotEmpty)
@@ -101,9 +103,9 @@ class _GPTMeetingPageState extends State<GPTMeetingPage> {
         var decodedResponse = json.decode(utf8.decode(response.bodyBytes));
         var feedback = decodedResponse['choices'][0]['message']['content'];
 
-        Navigator.pop(context); // 로딩 모달 닫기
+        Navigator.pop(context);
 
-        print(feedback); // 콘솔에 피드백 출력
+        print(feedback);
 
         Navigator.pushNamed(
           context,
@@ -122,6 +124,12 @@ class _GPTMeetingPageState extends State<GPTMeetingPage> {
         SnackBar(content: Text('Error: $e')),
       );
     }
+  }
+
+  Future<void> _speak(String text) async {
+    await flutterTts.setLanguage("ko-KR"); // 한국어 설정
+    await flutterTts.setSpeechRate(0.5); // 속도 설정
+    await flutterTts.speak(text); // TTS 시작
   }
 
   @override
@@ -157,9 +165,19 @@ class _GPTMeetingPageState extends State<GPTMeetingPage> {
                 ],
               ),
               const SizedBox(height: 20),
-              const Text(
-                '면접관의 질문',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              Row(
+                children: [
+                  const Text(
+                    '면접관의 질문',
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                  IconButton(
+                    icon: Icon(Icons.volume_up),
+                    onPressed: () {
+                      _speak(questions[currentQuestionIndex]); // 여기서 TTS
+                    },
+                  ),
+                ],
               ),
               const SizedBox(height: 10),
               Container(
@@ -235,7 +253,10 @@ class _GPTMeetingPageState extends State<GPTMeetingPage> {
                     borderRadius: BorderRadius.circular(10),
                   ),
                 ),
-                child: Text('면접 종료하기'),
+                child: const Text(
+                  '면접 종료하기',
+                  style: TextStyle(color: Colors.white, fontSize: 16),
+                ),
               ),
             ],
           ),
